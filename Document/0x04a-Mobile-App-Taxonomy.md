@@ -1,10 +1,10 @@
-# Mobile Application Taxonomy
+# Taxonomia de Aplicativos Móveis
 
-When we use the term "mobile application" or "mobile app," we are referring to a self-contained computer program designed to execute on a mobile device. At the time of publication, the Android and iOS operating systems cumulatively comprise [more than 99% of the mobile OS market share](https://www.idc.com/promo/smartphone-market-share/os) and mobile Internet usage has far surpassed desktop Internet usage. This means that mobile apps are the [most widespread types of Internet-capable apps](https://www.idc.com/promo/smartphone-market-share/os).
+Quando usamos o termo "aplicativo móvel" ou "app móvel", estamos nos referindo a um programa de computador autocontido projetado para executar em um dispositivo móvel. No momento da publicação, os sistemas operacionais Android e iOS representam juntos [mais de 99% de participação no mercado de SOs móveis](https://www.idc.com/promo/smartphone-market-share/os) e o uso da Internet em dispositivos móveis já superou bastante o uso em desktops. Isso significa que apps móveis são [o tipo mais difundido de aplicativos com acesso à Internet](https://www.idc.com/promo/smartphone-market-share/os).
 
-Also, this guide uses the term "app" as a general term which refers to any kind of application that runs on a mobile OS. Usually, apps run directly on the platform for which they're designed, run on top of a smart device's mobile browser, or they use a mix of these two methods.
+Neste guia, o termo "app" é usado de forma geral para se referir a qualquer tipo de aplicativo que roda em um SO móvel. Normalmente, os apps executam diretamente na plataforma para a qual foram projetados, rodam em um navegador móvel do dispositivo ou usam uma combinação desses dois métodos.
 
-In this chapter, will discuss the following types of apps:
+Neste capítulo, discutiremos os seguintes tipos de apps:
 
 - [Native Apps](#native-apps)
 - [Cross-platform Mobile Frameworks](#cross-platform-mobile-frameworks)
@@ -14,17 +14,17 @@ In this chapter, will discuss the following types of apps:
 
 ## Native Apps
 
-If a mobile app is developed with a Software Development Kit (SDK) for developing apps specific to a mobile OS, they are referred to as _native_ to their OS. If we are discussing a native app, we presume it was implemented in a standard programming language for that mobile operating system - Objective-C or Swift for iOS, and Java or Kotlin for Android.
+Se um app móvel é desenvolvido com um Software Development Kit (SDK) específico para um SO móvel, ele é considerado _nativo_ para aquele sistema. Ao discutirmos um app nativo, presumimos que ele foi implementado em uma linguagem de programação padrão para o sistema operacional móvel — Objective-C ou Swift para iOS, e Java ou Kotlin para Android.
 
-Because they are designed for a specific OS with the tools meant for that OS, _native apps_ have the capability to provide the fastest performance with the highest degree of reliability. They usually adhere to platform-specific design principles (e.g. the [Android Design Principles](https://developer.android.com/design "Android Design Principles")), which usually leads to a more consistent user interface (UI) compared to _hybrid_ or _web_ apps. Due to their close integration with the operating system, _native apps_ generally can directly access almost every component of the device (camera, sensors, hardware-backed key stores, etc.).
+Por serem projetados para um SO específico com as ferramentas destinadas a ele, _native apps_ têm capacidade de oferecer o desempenho mais rápido com o maior grau de confiabilidade. Eles geralmente seguem princípios de design específicos da plataforma (por exemplo, os [Android Design Principles](https://developer.android.com/design "Android Design Principles")), o que normalmente resulta em uma interface do usuário (UI) mais consistente em comparação com _hybrid_ ou _web apps_. Devido à integração estreita com o sistema operacional, _native apps_ geralmente podem acessar diretamente quase todos os componentes do dispositivo (câmera, sensores, armazenamentos de chaves baseados em hardware etc.).
 
-However, since Android provides two development kits - the Android SDK and the Android NDK, there is some ambiguity to the term _native apps_ for this platform. While the SDK (based on the Java and Kotlin programming language) is the default for developing apps, the platform's NDK (or Native Development Kit) is a C/C++ kit used for developing binary libraries that can directly access lower level APIs (such as OpenGL). These libraries can be included in regular apps built with the SDK. Therefore, we say that Android _native apps_ (i.e. built with the SDK) may have _native_ code built with the NDK.
+No entanto, como o Android fornece dois kits de desenvolvimento — o Android SDK e o Android NDK — há alguma ambiguidade no termo _native apps_ para essa plataforma. Enquanto o SDK (baseado nas linguagens Java e Kotlin) é o padrão para desenvolvimento de apps, o NDK (Native Development Kit) é um kit em C/C++ usado para desenvolver bibliotecas binárias que podem acessar APIs de baixo nível diretamente (como OpenGL). Essas bibliotecas podem ser incluídas em apps regulares construídos com o SDK. Portanto, dizemos que _native apps_ Android (isto é, construídos com o SDK) podem conter código _nativo_ desenvolvido com o NDK.
 
 ## Cross-platform Mobile Frameworks
 
-The most obvious disadvantage of _native apps_ is that they are limited to one specific platform. If developers want to build their app for both Android and iOS, one needs to maintain two independent code bases, or introduce often complex development tools to port a single code base to two platforms.
+A desvantagem mais evidente dos _native apps_ é que eles ficam limitados a uma plataforma específica. Se desenvolvedores quiserem criar o app para Android e iOS, precisam manter dois códigos independentes ou introduzir ferramentas de desenvolvimento muitas vezes complexas para portar uma única base de código para duas plataformas.
 
-Here are some cross-platform mobile frameworks that allow developers to compile a single codebase for different targets, including both Android and iOS:
+A seguir estão alguns frameworks móveis multiplataforma que permitem compilar uma única base de código para diferentes alvos, incluindo Android e iOS:
 
 - [Xamarin](https://dotnet.microsoft.com/apps/xamarin "Xamarin")
 - [MAUI](https://dotnet.microsoft.com/en-us/apps/maui ".NET MAUI")
@@ -32,23 +32,23 @@ Here are some cross-platform mobile frameworks that allow developers to compile 
 - [React Native](https://reactnative.dev/ "React Native")
 - [Unity](https://unity.com/ "Unity")
 
-If an app is developed using these frameworks, the app will use the internal APIs native to each system and offer performance equivalent to native apps. Also, these apps can make use of all device capabilities, including the GPS, accelerometer, camera, the notification system, etc. Even though an app created using one of these frameworks is functionally equivalent to a true native app, they are typically not referred to as such. The term _native app_ is used for apps created with the OS's native SDK, while apps created using one of these frameworks are typically called cross-platform apps.
+Se um app é desenvolvido usando esses frameworks, ele usará as APIs internas nativas de cada sistema e oferecerá desempenho equivalente ao de _native apps_. Além disso, esses apps podem usar todos os recursos do dispositivo, incluindo GPS, acelerômetro, câmera, sistema de notificações etc. Mesmo que um app criado com um desses frameworks seja funcionalmente equivalente a um verdadeiro app nativo, normalmente não é referido como tal. O termo _native app_ é usado para apps criados com o SDK nativo do sistema operacional, enquanto apps criados com um desses frameworks são geralmente chamados de apps multiplataforma.
 
-It's important to know when an app uses a cross-platform mobile framework, because they typically require specific tools to perform static or dynamic analysis. The actual application logic is typically located in framework-specific files inside the app, even though the app also contains the typical code that you would see in a _native app_. This native code is however usually only used to initialize the cross-platform framework, and provide bindings between the native system API and the framework SDK through so called platform-specific bindings.
+É importante saber quando um app usa um framework móvel multiplataforma, pois eles normalmente exigem ferramentas específicas para realizar análise estática ou dinâmica. A lógica real da aplicação geralmente está localizada em arquivos específicos do framework dentro do app, embora o app também contenha o código típico que você veria em um _native app_. Esse código nativo normalmente é usado apenas para inicializar o framework multiplataforma e fornecer ligações entre a API nativa do sistema e o SDK do framework por meio das chamadas platform-specific bindings.
 
-Although it is rare, apps can combine native code and cross-platform frameworks, or even multiple cross-platform frameworks, so it's important to identify all the used technologies to correctly cover the entire attack surface of the app.
+Embora seja raro, apps podem combinar código nativo e frameworks multiplataforma ou até múltiplos frameworks ao mesmo tempo, portanto é importante identificar todas as tecnologias utilizadas para cobrir corretamente toda a superfície de ataque do app.
 
 ## Web Apps
 
-Mobile web apps (or simply, _web apps_) are websites designed to look and feel like a _native app_. These apps run in the device's browser and are usually developed in HTML5, much like a modern web page. Launcher icons may be used to parallel the same feel of accessing a _native app_; however, these icons are essentially the same as a browser bookmark, simply opening the default web browser to load the referenced web page.
+Web apps móveis (ou simplesmente _web apps_) são sites projetados para parecer e se comportar como um _native app_. Esses apps rodam no navegador do dispositivo e normalmente são desenvolvidos em HTML5, como uma página web moderna. Ícones na tela inicial podem ser usados para simular a mesma sensação de acesso a um _native app_; no entanto, esses ícones são essencialmente o equivalente a um favorito do navegador, apenas abrindo o navegador padrão para carregar a página referenciada.
 
-Because they run within the confines of a browser, web apps have limited integration with the general components of the device (i.e. they are "sandboxed") and their performance is usually inferior compared to native apps. Since developers usually target multiple platforms with a web app, their UIs generally do not follow the design principles of any specific platform. However, _web apps_ are popular because developers can use a single code base to reduce development and maintenance costs and distribute updates without going through the platform-specific app stores. For example, a change to the HTML file for a _web app_ can serve as viable, cross-platform update whereas an update to a store-based app requires considerably more effort.
+Como rodam dentro dos limites de um navegador, _web apps_ têm integração limitada com os componentes gerais do dispositivo (ou seja, são "sandboxed") e seu desempenho geralmente é inferior ao de _native apps_. Como desenvolvedores normalmente miram várias plataformas com um _web app_, suas UIs geralmente não seguem os princípios de design de uma plataforma específica. No entanto, _web apps_ são populares porque desenvolvedores podem usar uma única base de código para reduzir custos de desenvolvimento e manutenção e distribuir atualizações sem passar pelas lojas específicas de cada plataforma. Por exemplo, uma alteração em um arquivo HTML de um _web app_ pode servir como uma atualização viável e multiplataforma, enquanto uma atualização em um app distribuído em loja exige muito mais esforço.
 
 ## Hybrid Apps
 
-_Hybrid apps_ are a specific type of _cross-platform app_ which try to benefit from the best aspects of _native_ and _web apps_. This type of app executes like a _native app_, but a majority of the processes rely on web technologies, meaning a portion of the app runs in an embedded web browser (commonly called "WebView"). As such, _hybrid apps_ inherit both pros and cons of _native_ and _web apps_. These apps can use a web-to-native abstraction layer to access to device capabilities that are not accessible to a pure _web app_. Depending on the framework used for development, a _hybrid app_ code base can generate multiple apps that target different platforms and take advantage of UI elements that closely resemble a device's original platform.
+_Hybrid apps_ são um tipo específico de _cross-platform app_ que busca aproveitar o melhor de _native_ e _web apps_. Esse tipo de app executa como um _native app_, mas a maior parte dos processos depende de tecnologias web, o que significa que parte do app roda em um navegador embutido (comumente chamado de "WebView"). Assim, _hybrid apps_ herdam tanto os prós quanto os contras de _native_ e _web apps_. Esses apps podem usar uma camada de abstração web-to-native para acessar recursos do dispositivo que não estão disponíveis para um _web app_ puro. Dependendo do framework usado no desenvolvimento, uma base de código _hybrid app_ pode gerar múltiplos apps que miram diferentes plataformas e aproveitar elementos de UI que se assemelham aos da plataforma original do dispositivo.
 
-Here are some popular frameworks for developing _hybrid apps_:
+Aqui estão alguns frameworks populares para desenvolver _hybrid apps_:
 
 - [Apache Cordova](https://cordova.apache.org/ "Apache Cordova")
 - [Framework 7](https://framework7.io/ "Framework 7")
@@ -59,6 +59,6 @@ Here are some popular frameworks for developing _hybrid apps_:
 
 ## Progressive Web Apps
 
-_Progressive web apps_ (PWAs) combine different open standards of the web offered by modern browsers to provide benefits of a rich mobile experience. A Web App Manifest, which is a simple JSON file, can be used to configure the behavior of the app after "installation". These apps load like regular web pages, but differ from usual web apps in several ways.
+_Progressive Web Apps_ (PWAs) combinam diferentes padrões abertos da web oferecidos por navegadores modernos para fornecer os benefícios de uma experiência móvel rica. Um Web App Manifest, que é um arquivo JSON simples, pode ser usado para configurar o comportamento do app após a "instalação". Esses apps carregam como páginas web regulares, mas diferem de _web apps_ usuais em vários aspectos.
 
-For example, it's possible to work offline and access to mobile device hardware is possible, which has been a capacity that was only available to _native apps_. PWAs are supported by both Android and iOS, but not all hardware features are yet available. For example, Push Notifications, Face ID on iPhone X, or ARKit for augmented reality is not available yet on iOS.
+Por exemplo, é possível trabalhar offline e acessar o hardware do dispositivo móvel, algo que antes estava disponível apenas para _native apps_. PWAs são suportados tanto em Android quanto em iOS, mas nem todos os recursos de hardware estão disponíveis. Por exemplo, Push Notifications, Face ID no iPhone X ou ARKit para realidade aumentada ainda não estão disponíveis no iOS.
