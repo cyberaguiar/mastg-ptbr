@@ -1,109 +1,109 @@
-# Android Security Testing
+# Teste de Segurança Android
 
-In this chapter, we'll dive into setting up a security testing environment and introduce you to some practical processes and techniques for testing the security of Android apps. These are the building blocks for the MASTG test cases.
+Neste capítulo, mergulharemos na configuração de um ambiente de teste de segurança e apresentaremos alguns processos e técnicas práticas para testar a segurança de aplicativos Android. Estes são os blocos de construção para os casos de teste do MASTG.
 
-## Android Testing Setup
+## Configuração de Teste Android
 
-You can set up a fully functioning test environment on almost any machine running Windows, Linux, or macOS.
+Você pode configurar um ambiente de teste totalmente funcional em quase qualquer máquina executando Windows, Linux ou macOS.
 
-### Host Device
+### Dispositivo Host
 
-At the very least, you'll need @MASTG-TOOL-0007 (which comes with the @MASTG-TOOL-0006) platform tools, an emulator, and an app to manage the various SDK versions and framework components. Android Studio also comes with an Android Virtual Device (AVD) Manager application for creating emulator images. Make sure that the newest [SDK tools](https://developer.android.com/studio/releases/sdk-tools) and [platform tools](https://developer.android.com/studio/releases/platform-tools) packages are installed on your system.
+No mínimo, você precisará de @MASTG-TOOL-0007 (que vem com as ferramentas de plataforma @MASTG-TOOL-0006), um emulador e um aplicativo para gerenciar as várias versões do SDK e componentes do framework. O Android Studio também vem com um aplicativo Android Virtual Device (AVD) Manager para criar imagens de emulador. Certifique-se de que os pacotes mais recentes de [ferramentas SDK](https://developer.android.com/studio/releases/sdk-tools) e [ferramentas de plataforma](https://developer.android.com/studio/releases/platform-tools) estejam instalados em seu sistema.
 
-In addition, you may want to complete your host setup by installing the @MASTG-TOOL-0005 if you're planning to work with apps containing native libraries.
+Além disso, você pode querer completar sua configuração de host instalando o @MASTG-TOOL-0005 se estiver planejando trabalhar com aplicativos contendo bibliotecas nativas.
 
-Sometimes it can be useful to display or control devices from the computer. To achieve this, you can use @MASTG-TOOL-0024.
+Às vezes pode ser útil exibir ou controlar dispositivos a partir do computador. Para alcançar isso, você pode usar @MASTG-TOOL-0024.
 
-### Testing Device
+### Dispositivo de Teste
 
-For dynamic analysis, you'll need an Android device to run the target app on. In principle, you can test without a real Android device and use only the emulator. However, apps execute quite slowly on a emulator, and simulators may not give realistic results. Testing on a real device makes for a smoother process and a more realistic environment. On the other hand, emulators allow you to easily change SDK versions or create multiple devices. A full overview of the pros and cons of each approach is listed in the table below.
+Para análise dinâmica, você precisará de um dispositivo Android para executar o aplicativo alvo. Em princípio, você pode testar sem um dispositivo Android real e usar apenas o emulador. No entanto, aplicativos executam bastante lentamente em um emulador, e simuladores podem não dar resultados realistas. Testar em um dispositivo real torna o processo mais suave e o ambiente mais realista. Por outro lado, emuladores permitem que você altere facilmente versões do SDK ou crie múltiplos dispositivos. Uma visão geral completa dos prós e contras de cada abordagem está listada na tabela abaixo.
 
-| Property | Physical | Emulator/Simulator |
+| Propriedade | Físico | Emulador/Simulador |
 |---|---|---|
-| Ability to restore | Softbricks are always possible, but new firmware can typically still be flashed. Hardbricks are very rare. | Emulators can crash or become corrupt, but a new one can be created or a snapshot can be restored. |
-| Reset | Can be restored to factory settings or reflashed. | Emulators can be deleted and recreated. |
-| Snapshots | Not possible. | Supported, great for malware analysis. |
-| Speed | Much faster than emulators. | Typically slow, but improvements are being made. |
-| Cost | Typically start at $200 for a usable device. You may require different devices, such as one with or without a biometric sensor. | Both free and commercial solutions exist. |
-| Ease of rooting | Highly dependent on the device. | Typically rooted by default. |
-| Ease of emulator detection | It's not an emulator, so emulator checks are not applicable. | Many artefacts will exist, making it easy to detect that the app is running in an emulator. |
-| Ease of root detection | Easier to hide root, as many root detection algorithms check for emulator properties. With Magisk Systemless root it's nearly impossible to detect. | Emulators will almost always trigger root detection algorithms due to the fact that they are built for testing with many artefacts that can be found. |
-| Hardware interaction | Easy interaction through Bluetooth, NFC, 4G, Wi-Fi, biometrics, camera, GPS, gyroscope, ... | Usually fairly limited, with emulated hardware input (e.g. random GPS coordinates) |
-| API level support | Depends on the device and the community. Active communities will keep distributing updated versions (e.g. LineageOS), while less popular devices may only receive a few updates. Switching between versions requires flashing the device, a tedious process. | Always supports the latest versions, including beta releases. Emulators containing specific API levels can easily be downloaded and launched. |
-| Native library support | Native libraries are usually built for ARM devices, so they will work on a physical device. | Some emulators run on x86 CPUs, so they may not be able to run packaged native libraries. |
-| Malware danger | Malware samples can infect a device, but if you can clear out the device storage and flash a clean firmware, thereby restoring it to factory settings, this should not be a problem. Be aware that there are malware samples that try to exploit the USB bridge. | Malware samples can infect an emulator, but the emulator can simply be removed and recreated. It is also possible to create snapshots and compare different snapshots to help in malware analysis. Be aware that there are malware proofs of concept which try to attack the hypervisor. |
+| Capacidade de restaurar | Softbricks são sempre possíveis, mas novo firmware normalmente ainda pode ser flashado. Hardbricks são muito raros. | Emuladores podem crashar ou se corromper, mas um novo pode ser criado ou um snapshot pode ser restaurado. |
+| Reset | Pode ser restaurado para configurações de fábrica ou reflashado. | Emuladores podem ser deletados e recriados. |
+| Snapshots | Não possível. | Suportado, ótimo para análise de malware. |
+| Velocidade | Muito mais rápido que emuladores. | Tipicamente lento, mas melhorias estão sendo feitas. |
+| Custo | Tipicamente começam em $200 para um dispositivo utilizável. Você pode exigir dispositivos diferentes, como um com ou sem sensor biométrico. | Tanto soluções gratuitas quanto comerciais existem. |
+| Facilidade de rooting | Altamente dependente do dispositivo. | Tipicamente rooted por padrão. |
+| Facilidade de detecção de emulador | Não é um emulador, então verificações de emulador não são aplicáveis. | Muitos artefatos existirão, tornando fácil detectar que o aplicativo está sendo executado em um emulador. |
+| Facilidade de detecção de root | Mais fácil esconder root, já que muitos algoritmos de detecção de root verificam propriedades de emulador. Com Magisk Systemless root é quase impossível detectar. | Emuladores quase sempre acionarão algoritmos de detecção de root devido ao fato de serem construídos para teste com muitos artefatos que podem ser encontrados. |
+| Interação de hardware | Interação fácil através de Bluetooth, NFC, 4G, Wi-Fi, biometria, câmera, GPS, giroscópio, ... | Geralmente bastante limitada, com entrada de hardware emulada (por exemplo, coordenadas GPS aleatórias) |
+| Suporte a nível de API | Depende do dispositivo e da comunidade. Comunidades ativas continuarão distribuindo versões atualizadas (por exemplo, LineageOS), enquanto dispositivos menos populares podem receber apenas algumas atualizações. Alternar entre versões requer flashar o dispositivo, um processo tedioso. | Sempre suporta as versões mais recentes, incluindo lançamentos beta. Emuladores contendo níveis de API específicos podem facilmente ser baixados e lançados. |
+| Suporte a biblioteca nativa | Bibliotecas nativas são geralmente construídas para dispositivos ARM, então funcionarão em um dispositivo físico. | Alguns emuladores executam em CPUs x86, então podem não ser capazes de executar bibliotecas nativas empacotadas. |
+| Perigo de malware | Amostras de malware podem infectar um dispositivo, mas se você puder limpar o armazenamento do dispositivo e flashar um firmware limpo, restaurando assim para configurações de fábrica, isso não deve ser um problema. Esteja ciente de que há amostras de malware que tentam explorar a ponte USB. | Amostras de malware podem infectar um emulador, mas o emulador pode simplesmente ser removido e recriado. Também é possível criar snapshots e comparar diferentes snapshots para ajudar na análise de malware. Esteja ciente de que há provas de conceito de malware que tentam atacar o hypervisor. |
 
-#### Testing on a Real Device
+#### Testando em um Dispositivo Real
 
-Almost any physical device can be used for testing, but there are a few considerations to be made. First, the device needs to be rootable. This is typically either done through an exploit, or through an unlocked bootloader. Exploits are not always available, and the bootloader may be locked permanently, or it may only be unlocked once the carrier contract has been terminated.
+Quase qualquer dispositivo físico pode ser usado para teste, mas há algumas considerações a serem feitas. Primeiro, o dispositivo precisa ser rootable. Isso é tipicamente feito através de um exploit, ou através de um bootloader desbloqueado. Exploits nem sempre estão disponíveis, e o bootloader pode estar bloqueado permanentemente, ou pode ser desbloqueado apenas uma vez que o contrato da operadora tenha sido encerrado.
 
-The best candidates are flagship Google pixel devices built for developers. These devices typically come with an unlockable bootloader, opensource firmware, kernel, radio available online and official OS source code. The developer communities prefer Google devices as the OS is closest to the android open source project. These devices generally have the longest support windows with 2 years of OS updates and 1 year of security updates after that.
+Os melhores candidatos são dispositivos flagship Google Pixel construídos para desenvolvedores. Esses dispositivos tipicamente vêm com um bootloader desbloqueável, firmware opensource, kernel, rádio disponível online e código fonte do OS oficial. As comunidades de desenvolvedores preferem dispositivos Google pois o OS é o mais próximo do projeto Android open source. Esses dispositivos geralmente têm as janelas de suporte mais longas com 2 anos de atualizações de OS e 1 ano de atualizações de segurança depois disso.
 
-Alternatively, Google's [Android One](https://www.android.com/one/ "Android One") project contains devices that will receive the same support windows (2 years of OS updates, 1 year of security updates) and have near-stock experiences. While it was originally started as a project for low-end devices, the program has evolved to include mid-range and high-end smartphones, many of which are actively supported by the modding community.
+Alternativamente, o projeto [Android One](https://www.android.com/one/ "Android One") do Google contém dispositivos que receberão as mesmas janelas de suporte (2 anos de atualizações de OS, 1 ano de atualizações de segurança) e têm experiências quase stock. Embora tenha sido originalmente iniciado como um projeto para dispositivos de baixo custo, o programa evoluiu para incluir smartphones de médio e alto alcance, muitos dos quais são ativamente suportados pela comunidade de modding.
 
-Devices that are supported by the [LineageOS](https://lineageos.org/ "LineageOS") project are also very good candidates for test devices. They have an active community, easy to follow flashing and rooting instructions and the latest Android versions are typically quickly available as a Lineage installation. LineageOS also continues support for new Android versions long after the OEM has stopped distributing updates.
+Dispositivos que são suportados pelo projeto [LineageOS](https://lineageos.org/ "LineageOS") também são muito bons candidatos para dispositivos de teste. Eles têm uma comunidade ativa, instruções de flashing e rooting fáceis de seguir e as versões mais recentes do Android são tipicamente rapidamente disponíveis como uma instalação Lineage. O LineageOS também continua o suporte para novas versões do Android muito depois que a OEM parou de distribuir atualizações.
 
-When working with an Android physical device, you'll want to enable Developer Mode and USB debugging on the device in order to use the @MASTG-TOOL-0004 debugging interface. Since Android 4.2 (API level 16), the **Developer options** sub menu in the Settings app is hidden by default. To activate it, tap the **Build number** section of the **About phone** view seven times. Note that the build number field's location varies slightly by device. For example, on LG Phones, it is under **About phone** -> **Software information**. Once you have done this, **Developer options** will be shown at bottom of the Settings menu. Once developer options are activated, you can enable debugging with the **USB debugging** switch.
+Ao trabalhar com um dispositivo físico Android, você vai querer habilitar o Modo de Desenvolvedor e a depuração USB no dispositivo para usar a interface de depuração @MASTG-TOOL-0004. Desde o Android 4.2 (API level 16), o submenu **Opções do desenvolvedor** no aplicativo Configurações está oculto por padrão. Para ativá-lo, toque na seção **Número da compilação** da visualização **Sobre o telefone** sete vezes. Observe que a localização do campo do número da compilação varia ligeiramente por dispositivo. Por exemplo, em telefones LG, está em **Sobre o telefone** -> **Informações do software**. Uma vez que você tenha feito isso, **Opções do desenvolvedor** será mostrado na parte inferior do menu Configurações. Uma vez que as opções do desenvolvedor estejam ativadas, você pode habilitar a depuração com o interruptor **Depuração USB**.
 
-#### Testing on an Emulator
+#### Testando em um Emulador
 
-Multiple emulators exist, once again with their own strengths and weaknesses:
+Múltiplos emuladores existem, mais uma vez com seus próprios pontos fortes e fracos:
 
-Free emulators:
+Emuladores gratuitos:
 
-- [Android Virtual Device (AVD)](https://developer.android.com/studio/run/managing-avds.html "Create and Manage Virtual Devices") - The official android emulator, distributed with Android Studio.
-- [Android X86](https://www.android-x86.org/ "Android X86") - An x86 port of the Android code base
+- [Android Virtual Device (AVD)](https://developer.android.com/studio/run/managing-avds.html "Criar e Gerenciar Dispositivos Virtuais") - O emulador android oficial, distribuído com o Android Studio.
+- [Android X86](https://www.android-x86.org/ "Android X86") - Uma porta x86 da base de código Android
 
-Commercial emulators:
+Emuladores comerciais:
 
-- [Genymotion](https://www.genymotion.com/download/ "Genymotion") - Mature emulator with many features, both as local and cloud-based solution. Free version available for non-commercial use.
-- [Corellium](https://corellium.com/ "Corellium") - Offers custom device virtualization through a cloud-based or on-prem solution.
+- [Genymotion](https://www.genymotion.com/download/ "Genymotion") - Emulador maduro com muitos recursos, tanto como solução local quanto baseada em nuvem. Versão gratuita disponível para uso não comercial.
+- [Corellium](https://corellium.com/ "Corellium") - Oferece virtualização de dispositivo personalizada através de uma solução baseada em nuvem ou on-prem.
 
-Although there exist several free Android emulators, we recommend using AVD as it provides enhanced features appropriate for testing your app compared to the others. In the remainder of this guide, we will use the official AVD to perform tests.
+Embora existam vários emuladores Android gratuitos, recomendamos usar o AVD, pois ele fornece recursos aprimorados apropriados para testar seu aplicativo em comparação com os outros. No restante deste guia, usaremos o AVD oficial para realizar testes.
 
-AVD supports some hardware emulation, such as GPS or SMS through its so-called [Extended Controls](https://developer.android.com/studio/run/advanced-emulator-usage#extended "Extended Controls") as well as [motion sensors](https://developer.android.com/guide/topics/sensors/sensors_overview#test-with-the-android-emulator "Testing motion sensors on emulators").
+O AVD suporta alguma emulação de hardware, como GPS ou SMS através de seus chamados [Controles Estendidos](https://developer.android.com/studio/run/advanced-emulator-usage#extended "Controles Estendidos"), bem como [sensores de movimento](https://developer.android.com/guide/topics/sensors/sensors_overview#test-with-the-android-emulator "Testando sensores de movimento em emuladores").
 
-You can either start an Android Virtual Device (AVD) by using the AVD Manager in Android Studio or start the AVD manager from the command line with the `android` command, which is found in the tools directory of the Android SDK:
+Você pode iniciar um Android Virtual Device (AVD) usando o AVD Manager no Android Studio ou iniciar o gerenciador AVD a partir da linha de comando com o comando `android`, que é encontrado no diretório de ferramentas do Android SDK:
 
 ```bash
 ./android avd
 ```
 
-Several tools and VMs that can be used to test an app within an emulator environment are available:
+Várias ferramentas e VMs que podem ser usadas para testar um aplicativo dentro de um ambiente de emulador estão disponíveis:
 
 - @MASTG-TOOL-0035
-- [Nathan](https://github.com/mseclab/nathan "Nathan") (not updated since 2016)
+- [Nathan](https://github.com/mseclab/nathan "Nathan") (não atualizado desde 2016)
 
-#### Getting Privileged Access
+#### Obtendo Acesso Privilegiado
 
-_Rooting_ (i.e., modifying the OS so that you can run commands as the root user) is recommended for testing on a real device. This gives you full control over the operating system and allows you to bypass restrictions such as app sandboxing. These privileges in turn allow you to use techniques like code injection and function hooking more easily.
+_Rooting_ (ou seja, modificando o OS para que você possa executar comandos como o usuário root) é recomendado para teste em um dispositivo real. Isso dá a você controle total sobre o sistema operacional e permite que você contorne restrições como o sandboxing de aplicativos. Esses privilégios por sua vez permitem que você use técnicas como injeção de código e function hooking mais facilmente.
 
-Note that rooting is risky, and three main consequences need to be clarified before you proceed. Rooting can have the following negative effects:
+Note que rooting é arriscado, e três consequências principais precisam ser esclarecidas antes de você prosseguir. Rooting pode ter os seguintes efeitos negativos:
 
-- voiding the device warranty (always check the manufacturer's policy before taking any action)
-- "bricking" the device, i.e., rendering it inoperable and unusable
-- creating additional security risks (because built-in exploit mitigations are often removed)
+- anulando a garantia do dispositivo (sempre verifique a política do fabricante antes de tomar qualquer ação)
+- "bricking" o dispositivo, ou seja, tornando-o inoperante e inutilizável
+- criando riscos de segurança adicionais (porque mitigações de exploit integradas são frequentemente removidas)
 
-You should not root a personal device that you store your private information on. We recommend getting a cheap, dedicated test device instead. Many older devices, such as Google's Nexus series, can run the newest Android versions and are perfectly fine for testing.
+Você não deve rootear um dispositivo pessoal no qual você armazena suas informações privadas. Recomendamos obter um dispositivo de teste dedicado e barato. Muitos dispositivos mais antigos, como a série Nexus do Google, podem executar as versões mais recentes do Android e são perfeitamente adequados para teste.
 
-**You need to understand that rooting your device is ultimately YOUR decision and that OWASP shall in no way be held responsible for any damage. If you're uncertain, seek expert advice before starting the rooting process.**
+**Você precisa entender que rootear seu dispositivo é, em última análise, SUA decisão e que a OWASP não deve de forma alguma ser responsabilizada por qualquer dano. Se você estiver incerto, busque aconselhamento especializado antes de iniciar o processo de rooting.**
 
-##### Which Mobiles Can Be Rooted
+##### Quais Móveis Podem Ser Roteados
 
-Virtually any Android mobile can be rooted. Commercial versions of Android OS (which are Linux OS evolutions at the kernel level) are optimized for the mobile world. Some features have been removed or disabled for these versions, for example, non-privileged users' ability to become the 'root' user (who has elevated privileges). Rooting a phone means allowing users to become the root user, e.g., adding a standard Linux executable called `su`, which is used to change to another user account.
+Virtualmente qualquer móvel Android pode ser roteado. Versões comerciais do Android OS (que são evoluções do OS Linux no nível do kernel) são otimizadas para o mundo móvel. Alguns recursos foram removidos ou desabilitados para essas versões, por exemplo, a capacidade de usuários não privilegiados se tornarem o usuário 'root' (que tem privilégios elevados). Rootear um telefone significa permitir que usuários se tornem o usuário root, por exemplo, adicionando um executável Linux padrão chamado `su`, que é usado para mudar para outra conta de usuário.
 
-To root a mobile device, first unlock its boot loader. The unlocking procedure depends on the device manufacturer. However, for practical reasons, rooting some mobile devices is more popular than rooting others, particularly when it comes to security testing: devices created by Google and manufactured by companies like Samsung, LG, and Motorola are among the most popular, particularly because they are used by many developers. The device warranty is not nullified when the boot loader is unlocked and Google provides many tools to support the root itself.
+Para rootear um dispositivo móvel, primeiro desbloqueie seu boot loader. O procedimento de desbloqueio depende do fabricante do dispositivo. No entanto, por razões práticas, rootear alguns dispositivos móveis é mais popular do que outros, particularmente quando se trata de teste de segurança: dispositivos criados pelo Google e fabricados por empresas como Samsung, LG e Motorola estão entre os mais populares, particularmente porque são usados por muitos desenvolvedores. A garantia do dispositivo não é anulada quando o boot loader é desbloqueado e o Google fornece muitas ferramentas para suportar o root em si.
 
-##### Rooting with Magisk
+##### Rooting com Magisk
 
-Magisk ("Magic Mask") is one way to root your Android device. Its specialty lies in the way the modifications on the system are performed. While other rooting tools alter the actual data on the system partition, Magisk does not (which is called "systemless"). This enables a way to hide the modifications from root-sensitive applications (e.g. for banking or games) and allows using the official Android OTA upgrades without the need to unroot the device beforehand.
+Magisk ("Magic Mask") é uma maneira de rootear seu dispositivo Android. Sua especialidade está na maneira como as modificações no sistema são realizadas. Enquanto outras ferramentas de rooting alteram os dados reais na partição do sistema, o Magisk não (o que é chamado de "systemless"). Isso permite uma maneira de esconder as modificações de aplicativos sensíveis a root (por exemplo, para bancos ou jogos) e permite usar as atualizações OTA oficiais do Android sem a necessidade de desfazer o root do dispositivo antecipadamente.
 
-You can get familiar with Magisk reading the official [documentation on GitHub](https://topjohnwu.github.io/Magisk/ "Magisk Documentation"). If you don't have Magisk installed, you can find installation instructions in [the documentation](https://topjohnwu.github.io/Magisk/ "Magisk Documentation"). If you use an official Android version and plan to upgrade it, Magisk provides a [tutorial on GitHub](https://topjohnwu.github.io/Magisk/ota.html "OTA Installation").
+Você pode se familiarizar com o Magisk lendo a [documentação oficial no GitHub](https://topjohnwu.github.io/Magisk/ "Documentação do Magisk"). Se você não tem o Magisk instalado, pode encontrar instruções de instalação na [documentação](https://topjohnwu.github.io/Magisk/ "Documentação do Magisk"). Se você usa uma versão oficial do Android e planeja atualizá-la, o Magisk fornece um [tutorial no GitHub](https://topjohnwu.github.io/Magisk/ota.html "Instalação OTA").
 
-Furthermore, developers can use the power of Magisk to create custom modules and [submit](https://github.com/Magisk-Modules-Repo/submission "Submission") them to the official [Magisk Modules repository](https://github.com/Magisk-Modules-Repo "Magisk-Modules-Repo"). Submitted modules can then be installed inside the Magisk Manager application. One of these installable modules is a systemless version of @MASTG-TOOL-0027 (available for SDK versions up to 27).
+Além disso, desenvolvedores podem usar o poder do Magisk para criar módulos personalizados e [submetê-los](https://github.com/Magisk-Modules-Repo/submission "Submissão") ao repositório oficial de [Módulos Magisk](https://github.com/Magisk-Modules-Repo "Magisk-Modules-Repo"). Módulos submetidos podem então ser instalados dentro do aplicativo Magisk Manager. Um desses módulos instaláveis é uma versão systemless do @MASTG-TOOL-0027 (disponível para versões SDK até 27).
 
-##### Root Detection
+##### Detecção de Root
 
-An extensive list of root detection methods is presented in the "Testing Anti-Reversing Defenses on Android" chapter.
+Uma lista extensiva de métodos de detecção de root é apresentada no capítulo "Testando Defesas Anti-Reversão no Android".
 
-For a typical mobile app security build, you'll usually want to test a debug build with root detection disabled. If such a build is not available for testing, you can disable root detection in a variety of ways that will be introduced later in this book.
+Para uma construção típica de segurança de aplicativo móvel, você geralmente vai querer testar uma construção de depuração com detecção de root desabilitada. Se tal construção não estiver disponível para teste, você pode desabilitar a detecção de root de uma variedade de maneiras que serão introduzidas mais tarde neste livro.

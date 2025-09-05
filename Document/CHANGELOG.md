@@ -1,5 +1,5 @@
-# Changelog
+# Registro de Alterações
 
-All our Changelogs are available online at the OWASP MASTG GitHub repository, see the Releases page:
+Todos os nossos registros de alterações estão disponíveis online no repositório GitHub do OWASP MASTG, consulte a página de Releases:
 
 <https://github.com/OWASP/mastg/releases>

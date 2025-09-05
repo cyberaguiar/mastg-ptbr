@@ -3,10 +3,10 @@ masvs_category: MASVS-NETWORK
 platform: ios
 ---
 
-# iOS Network Communication
+# Comunicação de Rede iOS
 
-## Overview
+## Visão Geral
 
-Almost every iOS app acts as a client to one or more remote services. As this network communication usually takes place over untrusted networks such as public Wi-Fi, classical network based-attacks become a potential issue.
+Quase todos os aplicativos iOS atuam como cliente para um ou mais serviços remotos. Como essa comunicação de rede geralmente ocorre por redes não confiáveis, como Wi-Fi público, ataques baseados em rede clássicos se tornam um problema potencial.
 
-Most modern mobile apps use variants of HTTP-based web services, as these protocols are well-documented and supported.
+A maioria dos aplicativos móveis modernos usa variantes de serviços web baseados em HTTP, pois esses protocolos são bem documentados e suportados.

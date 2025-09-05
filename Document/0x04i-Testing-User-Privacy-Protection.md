@@ -1,150 +1,144 @@
-# Mobile App User Privacy Protection
 
-## Overview
+# Proteção de Privacidade do Usuário em Aplicativos Móveis
 
-**IMPORTANT DISCLAIMER:** The MASTG is not a legal handbook and it will not go into the specifics of the GDPR or other possibly relevant legislation here. Instead, this chapter will introduce you to the topics related to user privacy protection, provide you with essential references for your own research efforts, and give you tests or guidelines that determine whether an app adheres to the privacy-related requirements listed in the OWASP MASVS.
+## Visão Geral
 
-### The Main Problem
+**ISENÇÃO DE RESPONSABILIDADE IMPORTANTE:** O MASTG não é um manual jurídico e não entrará nos detalhes específicos do GDPR ou de outra legislação possivelmente relevante aqui. Em vez disso, este capítulo apresentará os tópicos relacionados à proteção da privacidade do usuário, fornecerá referências essenciais para seus próprios esforços de pesquisa e dará testes ou diretrizes que determinam se um aplicativo adere aos requisitos relacionados à privacidade listados no OWASP MASVS.
 
-Mobile apps handle all kinds of sensitive user data, from identification and banking information to health data, so both the developers and the public are understandably concerned about how this data is handled and where it ends up. It is also worth discussing the "benefits users get from using the apps" vs "the real price that they are paying for it" (often without even being aware of it).
+### O Problema Principal
 
-### The Solution (pre-2020)
+Aplicativos móveis lidam com todos os tipos de dados sensíveis do usuário, desde informações de identificação e bancárias até dados de saúde, então tanto os desenvolvedores quanto o público estão compreensivelmente preocupados com como esses dados são tratados e onde eles acabam. Também vale a pena discutir os "benefícios que os usuários obtêm ao usar os aplicativos" versus "o preço real que estão pagando por isso" (muitas vezes sem nem mesmo estar cientes disso).
 
-To ensure that users are properly protected, legislation such as the European Union's [General Data Protection Regulation (GDPR)](https://gdpr-info.eu/ "GDPR") in Europe have been developed and deployed (applicable since May 25, 2018). These laws can force developers to be more transparent regarding the handling of sensitive user data, which is usually implemented with privacy policies.
+### A Solução (pré-2020)
 
-### The Challenge
+Para garantir que os usuários estejam adequadamente protegidos, legislações como o [Regulamento Geral de Proteção de Dados (GDPR)](https://gdpr-info.eu/ "GDPR") da União Europeia na Europa foram desenvolvidas e implantadas (aplicáveis desde 25 de maio de 2018). Essas leis podem forçar os desenvolvedores a serem mais transparentes em relação ao tratamento de dados sensíveis do usuário, o que geralmente é implementado com políticas de privacidade.
 
-Consider these dimensions of mobile app privacy:
+### O Desafio
 
-- **Developer Compliance**: Developers need to be aware of laws about user privacy so their work is compliant. Ideally, the following principles must be followed:
-    - **Privacy-by-Design** approach (Art. 25 GDPR, "Data protection by design and by default").
-    - **Principle of Least Privilege** ("Every program and every user of the system should operate using the least set of privileges necessary to complete the job.")
-- **User Education**: Users need to be educated about their sensitive data and informed about how to use the application properly (to ensure secure handling and processing of their information).
+Considere estas dimensões da privacidade de aplicativos móveis:
 
-> Note: More often than not apps will claim to handle certain data, but in reality that's not the case. The IEEE article ["Engineering Privacy in Smartphone Apps: A Technical Guideline Catalog for App Developers" by Majid Hatamian](https://drive.google.com/file/d/1cp7zrqJuVkftJ0DARNN40Ga_m_tEhIrQ/view?usp=sharing) gives a very nice introduction to this topic.
+- **Conformidade do Desenvolvedor**: Os desenvolvedores precisam estar cientes das leis sobre privacidade do usuário para que seu trabalho seja compatível. Idealmente, os seguintes princípios devem ser seguidos:
+    - Abordagem **Privacy-by-Design** (Art. 25 GDPR, "Proteção de dados desde a concepção e por padrão").
+    - **Princípio do Privilégio Mínimo** ("Todo programa e todo usuário do sistema deve operar usando o menor conjunto de privilégios necessário para concluir o trabalho.")
+- **Educação do Usuário**: Os usuários precisam ser educados sobre seus dados sensíveis e informados sobre como usar o aplicativo corretamente (para garantir o manuseio e processamento seguros de suas informações).
 
-### Goals for Data Protection
+> Nota: Na maioria das vezes, os aplicativos afirmarão lidar com certos dados, mas na realidade esse não é o caso. O artigo IEEE ["Engineering Privacy in Smartphone Apps: A Technical Guideline Catalog for App Developers" de Majid Hatamian](https://drive.google.com/file/d/1cp7zrqJuVkftJ0DARNN40Ga_m_tEhIrQ/view?usp=sharing) dá uma introdução muito boa a este tópico.
 
-When an app requests personal information from a user, the user needs to know why the app needs that data and how it is used by the app. If there is a third party doing the actual processing of the data, the app should tell the user that too.
+### Metas para Proteção de Dados
 
-Like the classic triad of security protection goals: confidentiality, integrity, and availability, there are three protection goals that have been proposed for data protection:
+Quando um aplicativo solicita informações pessoais de um usuário, o usuário precisa saber por que o aplicativo precisa desses dados e como eles são usados pelo aplicativo. Se houver um terceiro fazendo o processamento real dos dados, o aplicativo também deve informar o usuário sobre isso.
 
-- **Unlinkability**:
-    - Users' privacy-relevant data is unlinkable to any other set of privacy-relevant data outside of the domain.
-    - Includes: data minimization, anonymization, pseudonymization, etc.
-- **Transparency**:
-    - Users should know how to request all information that the application has on them and be aware of all the information that the app has on them.
-    - Includes: privacy policies, user education, proper logging and auditing mechanisms, etc.
-- **Intervenability**:
-    - Users should know how to correct their personal information, request its deletion, withdraw any given consent at any time, and receive instructions on how to do so.
-    - Includes: privacy settings directly in the app, single points of contact for individuals' intervention requests (e.g. in-app chat, telephone number, e-mail), etc.
+Assim como a tríade clássica de metas de proteção de segurança: confidencialidade, integridade e disponibilidade, existem três metas de proteção que foram propostas para proteção de dados:
 
-> For more details, see Section 5.1.1 "Introduction to data protection goals" in ENISA's ["Privacy and data protection in mobile applications"](https://www.enisa.europa.eu/publications/privacy-and-data-protection-in-mobile-applications "ENISA - Privacy and data protection in mobile applications").
+- **Desvinculabilidade**:
+    - Os dados relevantes para privacidade dos usuários são desvinculáveis de qualquer outro conjunto de dados relevantes para privacidade fora do domínio.
+    - Inclui: minimização de dados, anonimização, pseudonimização, etc.
+- **Transparência**:
+    - Os usuários devem saber como solicitar todas as informações que o aplicativo tem sobre eles e estar cientes de todas as informações que o aplicativo tem sobre eles.
+    - Inclui: políticas de privacidade, educação do usuário, mecanismos adequados de registro e auditoria, etc.
+- **Intervenibilidade**:
+    - Os usuários devem saber como corrigir suas informações pessoais, solicitar sua exclusão, retirar qualquer consentimento dado a qualquer momento e receber instruções sobre como fazê-lo.
+    - Inclui: configurações de privacidade diretamente no aplicativo, pontos únicos de contato para solicitações de intervenção de indivíduos (por exemplo, chat no aplicativo, número de telefone, e-mail), etc.
 
-Since it is very challenging (if not impossible in many cases) to address both security and privacy protection goals at the same time, it is worth examining an visualization in IEEE's publication [Protection Goals for Privacy Engineering](https://ieeexplore.ieee.org/document/7163220) called ["The Three Axes"](https://ieeexplore.ieee.org/document/7163220#sec2e) which helps us understand why we cannot reach 100% of each of all six goals simultaneously.
+> Para mais detalhes, consulte a Seção 5.1.1 "Introdução às metas de proteção de dados" no ["Privacidade e proteção de dados em aplicações móveis" da ENISA](https://www.enisa.europa.eu/publications/privacy-and-data-protection-in-mobile-applications "ENISA - Privacidade e proteção de dados em aplicações móveis").
 
-Though a privacy policy traditionally protects most of the these processes, that approach is not always optimal because:
+Como é muito desafiador (se não impossível em muitos casos) abordar tanto as metas de proteção de segurança quanto de privacidade ao mesmo tempo, vale a pena examinar uma visualização na publicação IEEE [Metas de Proteção para Engenharia de Privacidade](https://ieeexplore.ieee.org/document/7163220) chamada ["Os Três Eixos"](https://ieeexplore.ieee.org/document/7163220#sec2e) que nos ajuda a entender por que não podemos atingir 100% de cada uma das seis metas simultaneamente.
 
-- Developers are not legal experts but still need to be compliant with legislation.
-- Users almost always have to read long and wordy policies.
+Embora uma política de privacidade tradicionalmente proteja a maioria desses processos, essa abordagem nem sempre é ideal porque:
 
-### The New Approach (Google and Apple)
+- Desenvolvedores não são especialistas jurídicos, mas ainda precisam estar em conformidade com a legislação.
+- Os usuários quase sempre têm que ler políticas longas e prolixas.
 
-In order to address these challenges and better inform users, Google and Apple have introduced new privacy labeling systems (very much along the lines of NIST's proposal) to help users easily understand how their data is being collected, handled, and shared, [Consumer Software Cybersecurity Labeling](https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.02042022-1.pdf). Their approaches can be seen at:
+### A Nova Abordagem (Google e Apple)
 
-- The App Store [Nutrition Labels](https://www.apple.com/privacy/labels/) (since 2020).
-- The Google Play [Data Safety Section](https://developer.android.com/guide/topics/data/collect-share) (since 2021).
+Para enfrentar esses desafios e informar melhor os usuários, Google e Apple introduziram novos sistemas de rotulagem de privacidade (muito na linha da proposta do NIST) para ajudar os usuários a entender facilmente como seus dados estão sendo coletados, tratados e compartilhados, [Rotulagem de Cibersegurança de Software de Consumo](https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.02042022-1.pdf). Suas abordagens podem ser vistas em:
 
-Since this is a new requirement on both platforms, these labels must be accurate in order to reassure users and mitigate abuse.
+- As [Etiquetas Nutricionais](https://www.apple.com/privacy/labels/) da App Store (desde 2020).
+- A [Seção de Segurança de Dados](https://developer.android.com/guide/topics/data/collect-share) do Google Play (desde 2021).
 
-### Google ADA MASA Program
+Como este é um novo requisito em ambas as plataformas, esses rótulos devem ser precisos para tranquilizar os usuários e mitigar abusos.
 
-Since regular security testing helps developers identify key vulnerabilities in their apps, Google Play will allow developers who have completed independent security validation to inform users by disclosing this fact in the app's Data Safety section. The developer's commitment to security and privacy is meant to reassure users.
+### Programa Google ADA MASA
 
-As part of the process to provide more transparency into the app's security architecture, Google has introduced the [MASA (Mobile Application Security Assessment)](https://appdefensealliance.dev/masa) program as part of the [App Defense Alliance (ADA)](https://appdefensealliance.dev/). Since MASA is a globally recognized standard for mobile app security to the mobile app ecosystem, Google is acknowledging the importance of security in this industry. Developers can work directly with an Authorized Lab partner to initiate a security assessment that is independently validated against a set of MASVS Level 1 requirements, and Google will recognize this effort by allowing them to disclose these tests in the app's Data Safety section.
+Como testes de segurança regulares ajudam os desenvolvedores a identificar vulnerabilidades-chave em seus aplicativos, o Google Play permitirá que desenvolvedores que concluíram validação de segurança independente informem os usuários divulgando esse fato na seção de Segurança de Dados do aplicativo. O compromisso do desenvolvedor com segurança e privacidade visa tranquilizar os usuários.
+
+Como parte do processo para fornecer mais transparência na arquitetura de segurança do aplicativo, o Google introduziu o programa [MASA (Avaliação de Segurança de Aplicativos Móveis)](https://appdefensealliance.dev/masa) como parte da [App Defense Alliance (ADA)](https://appdefensealliance.dev/). Como o MASA é um padrão globalmente reconhecido para segurança de aplicativos móveis para o ecossistema de aplicativos móveis, o Google está reconhecendo a importância da segurança nesta indústria. Os desenvolvedores podem trabalhar diretamente com um parceiro de Laboratório Autorizado para iniciar uma avaliação de segurança que é validada independentemente contra um conjunto de requisitos MASVS Nível 1, e o Google reconhecerá esse esforço permitindo que eles divulguem esses testes na seção de Segurança de Dados do aplicativo.
 
 <img src="Images/Chapters/0x04i/masa_framework.png" width="100%"/>
 
-> If you are a developer and would like to participate, complete the [Independent Security Review form](https://docs.google.com/forms/d/e/1FAIpQLSdBl_eCNcUeUVDiB2duiJLZ5s4AV5AhDVuOz_1u8S9qhcXF5g/viewform "Google Play - Independent Security Review form").
+> Se você é um desenvolvedor e gostaria de participar, complete o [formulário de Revisão de Segurança Independente](https://docs.google.com/forms/d/e/1FAIpQLSdBl_eCNcUeUVDiB2duiJLZ5s4AV5AhDVuOz_1u8S9qhcXF5g/viewform "Google Play - Formulário de Revisão de Segurança Independente").
 
-Of course the testing is limited and it does not guarantee complete safety of the application. The independent review may not be scoped to verify the accuracy and completeness of a developer's Data Safety declarations, and developers remain solely responsible for making complete and accurate declarations in their app's Play Store listing.
+Claro que o teste é limitado e não garante segurança completa do aplicativo. A revisão independente pode não ter como escopo verificar a precisão e integridade das declarações de Segurança de Dados de um desenvolvedor, e os desenvolvedores permanecem exclusivamente responsáveis por fazer declarações completas e precisas na listagem de sua loja Play Store.
 
-### References
+### Referências
 
-You can learn more about this and other privacy related topics here:
+Você pode aprender mais sobre este e outros tópicos relacionados à privacidade aqui:
 
-- [iOS App Privacy Policy](https://developer.apple.com/documentation/healthkit/protecting_user_privacy#3705073)
-- [iOS Privacy Details Section on the App Store](https://developer.apple.com/app-store/app-privacy-details/)
-- [iOS Privacy Best Practices](https://developer.apple.com/documentation/uikit/protecting_the_user_s_privacy)
-- [Android App Privacy Policy](https://support.google.com/googleplay/android-developer/answer/9859455#privacy_policy)
-- [Android Data Safety Section on Google Play](https://support.google.com/googleplay/android-developer/answer/10787469)
-- [Preparing your app for the new Data safety section in Google Play](https://www.youtube.com/watch?v=J7TM0Yy0aTQ)
-- [Android Privacy Best Practices](https://developer.android.com/privacy/best-practices)
+- [Política de Privacidade de Aplicativo iOS](https://developer.apple.com/documentation/healthkit/protecting_user_privacy#3705073)
+- [Seção de Detalhes de Privacidade iOS na App Store](https://developer.apple.com/app-store/app-privacy-details/)
+- [Melhores Práticas de Privacidade iOS](https://developer.apple.com/documentation/uikit/protecting_the_user_s_privacy)
+- [Política de Privacidade de Aplicativo Android](https://support.google.com/googleplay/android-developer/answer/9859455#privacy_policy)
+- [Seção de Segurança de Dados Android no Google Play](https://support.google.com/googleplay/android-developer/answer/10787469)
+- [Preparando seu aplicativo para a nova seção de segurança de dados no Google Play](https://www.youtube.com/watch?v=J7TM0Yy0aTQ)
+- [Melhores Práticas de Privacidade Android](https://developer.android.com/privacy/best-practices)
 
-## Testing for Privacy in Mobile Apps
+## Testando Privacidade em Aplicativos Móveis
 
-Security testers should be aware of Google Play's list of [common privacy violations](https://support.google.com/googleplay/android-developer/answer/10144311?hl=en-GB#1&2&3&4&5&6&7&87&9&zippy=%2Cexamples-of-common-violations) though it is not exhaustive. Some of the examples are below:
+Testadores de segurança devem estar cientes da lista do Google Play de [violações comuns de privacidade](https://support.google.com/googleplay/android-developer/answer/10144311?hl=en-GB#1&2&3&4&5&6&7&87&9&zippy=%2Cexamples-of-common-violations) embora não seja exaustiva. Alguns dos exemplos estão abaixo:
 
-- Example 1: An app that accesses a user's inventory of installed apps and doesn't treat this data as personal or sensitive data by sending it over the network (violating MSTG-STORAGE-4) or to another app via IPC mechanisms (violating MSTG-STORAGE-6).
-- Example 2: An app displays sensitive data such as credit card details or user passwords without user authorization e.g. biometrics (violating MSTG-AUTH-10).
-- Example 3: An app that accesses a user's phone or contact book data and doesn't treat this data as personal or sensitive data, additionally sending it over an unsecured network connection (violating MSTG-NETWORK-1).
-- Example 4: An app collects device location (which is apparently not required for its proper functioning) and does not have a prominent disclosure explaining which feature uses this data (violating MSTG-PLATFORM-1).
+- Exemplo 1: Um aplicativo que acessa o inventário de aplicativos instalados de um usuário e não trata esses dados como dados pessoais ou sensíveis, enviando-os pela rede (violando MSTG-STORAGE-4) ou para outro aplicativo via mecanismos IPC (violando MSTG-STORAGE-6).
+- Exemplo 2: Um aplicativo exibe dados sensíveis, como detalhes de cartão de crédito ou senhas de usuário, sem autorização do usuário, por exemplo, biometria (violando MSTG-AUTH-10).
+- Exemplo 3: Um aplicativo que acessa dados de telefone ou agenda de contatos de um usuário e não trata esses dados como dados pessoais ou sensíveis, além de enviá-los por uma conexão de rede não segura (violando MSTG-NETWORK-1).
+- Exemplo 4: Um aplicativo coleta localização do dispositivo (que aparentemente não é necessária para seu funcionamento adequado) e não tem uma divulgação proeminente explicando qual recurso usa esses dados (violando MSTG-PLATFORM-1).
 
-> You can find more [common violations in Google Play Console Help](https://support.google.com/googleplay/android-developer/answer/10144311?hl=en-GB#1&2&3&4&5&6&7&87&9&zippy=%2Cexamples-of-common-violations "Google Play Console Help - Examples of Common Privacy Violations") by going to **Policy Centre -> Privacy, deception and device abuse -> User data**.
+> Você pode encontrar mais [violações comuns na Ajuda do Google Play Console](https://support.google.com/googleplay/android-developer/answer/10144311?hl=en-GB#1&2&3&4&5&6&7&87&9&zippy=%2Cexamples-of-common-violations "Ajuda do Google Play Console - Exemplos de Violações Comuns de Privacidade") indo para **Centro de Políticas -> Privacidade, engano e abuso de dispositivo -> Dados do usuário**.
 
-As you might expect, these testing categories are related to each other. When you're testing them you're often indirectly testing for user privacy protection. This fact will allow you to help you provide better and more comprehensive reports. Often you'll be able to reuse evidence from other tests in order to test for User Privacy Protection).
+Como você pode esperar, essas categorias de teste estão relacionadas entre si. Quando você está testando elas, frequentemente está testando indiretamente a proteção da privacidade do usuário. Este fato permitirá que você forneça relatórios melhores e mais abrangentes. Muitas vezes você poderá reutilizar evidências de outros testes para testar a Proteção de Privacidade do Usuário).
 
-## Testing Disclosure of Data Privacy on the App Marketplace
+## Testando Divulgação de Privacidade de Dados no Mercado de Aplicativos
 
-This document is only interested in determining which privacy-related information is being disclosed by the developers and discussing how to evaluate this information to decide if it seems reasonable (similarly as you'd do when testing for permissions).
+Este documento está interessado apenas em determinar quais informações relacionadas à privacidade estão sendo divulgadas pelos desenvolvedores e discutir como avaliar essas informações para decidir se parecem razoáveis (da mesma forma que você faria ao testar permissões).
 
-> While it is possible that the developers are not declaring certain information that is indeed being collected and\/or shared, that is a topic for a different test. In this test, you are not supposed to provide privacy violation assurance.
+> Embora seja possível que os desenvolvedores não estejam declarando certas informações que de fato estão sendo coletadas e/ou compartilhadas, esse é um tópico para um teste diferente. Neste teste, você não deve fornecer garantia de violação de privacidade.
 
-### Static Analysis
+### Análise Estática
 
-To perform a static analysis, follow these steps:
+Para realizar uma análise estática, siga estas etapas:
 
-1. Search for the app in the corresponding app marketplace (e.g. Google Play, App Store).
-2. Go to the section ["Privacy Details"](https://developer.apple.com/app-store/app-privacy-details/) (App Store) or ["Safety Section"](https://developer.android.com/guide/topics/data/collect-share) (Google Play).
-3. Determine if there is any information available at all.
+1. Pesquise o aplicativo no mercado de aplicativos correspondente (por exemplo, Google Play, App Store).
+2. Vá para a seção ["Detalhes de Privacidade"](https://developer.apple.com/app-store/app-privacy-details/) (App Store) ou ["Seção de Segurança"](https://developer.android.com/guide/topics/data/collect-share) (Google Play).
+3. Determine se há alguma informação disponível.
 
-The app passes the test as long as the developer has complied with the app marketplace guidelines and included the required labels and explanations. The developer's disclosures in the app marketpace should be stored as evidence, so that you can later use it to determine potential violations of privacy or data protection.
+O aplicativo passa no teste desde que o desenvolvedor tenha cumprido as diretrizes do mercado de aplicativos e incluído os rótulos e explicações necessários. As divulgações do desenvolvedor no mercado de aplicativos devem ser armazenadas como evidência, para que você possa usá-las posteriormente para determinar possíveis violações de privacidade ou proteção de dados.
 
-### Dynamic Analysis
+### Análise Dinâmica
 
-As an optional step, you can also provide some kind of evidence as part of this test. For instance, if you're testing an iOS app you can easily enable app activity recording and export a [Privacy Report](https://developer.apple.com/documentation/network/privacy_management/inspecting_app_activity_data) that contains detailed app access to different resources such as photos, contacts, camera, microphone, network connections, etc.
+Como uma etapa opcional, você também pode fornecer algum tipo de evidência como parte deste teste. Por exemplo, se você está testando um aplicativo iOS, pode facilmente habilitar a gravação de atividade do aplicativo e exportar um [Relatório de Privacidade](https://developer.apple.com/documentation/network/privacy_management/inspecting_app_activity_data) que contém acesso detalhado do aplicativo a diferentes recursos, como fotos, contatos, câmera, microfone, conexões de rede, etc.
 
-A dynamic analysis has many advantages for testing other MASVS categories and it provides very useful information that you can use to [test network communication](0x06g-Testing-Network-Communication.md) for MASVS-NETWORK or when [testing app interaction with the platform](0x06h-Testing-Platform-Interaction.md) for MASVS-PLATFORM. While testing these other categories, you might have taken similar measurements using other testing tools. You can also provide this as evidence for this test.
+Uma análise dinâmica tem muitas vantagens para testar outras categorias MASVS e fornece informações muito úteis que você pode usar para [testar comunicação de rede](0x06g-Testing-Network-Communication.md) para MASVS-NETWORK ou ao [testar interação do aplicativo com a plataforma](0x06h-Testing-Platform-Interaction.md) para MASVS-PLATFORM. Ao testar essas outras categorias, você pode ter feito medições semelhantes usando outras ferramentas de teste. Você também pode fornecer isso como evidência para este teste.
 
-> Though the information available should be compared against what the app is actually meant to do, this will be far from a trivial task that could take from several days to weeks to finish depending on your resources and the capabilities of your automated tools. These tests also heavily depends on the app functionality and context and should be ideally performed on a white box setup working very closely with the app developers.
+> Embora as informações disponíveis devam ser comparadas com o que o aplicativo realmente deve fazer, isso estará longe de ser uma tarefa trivial que pode levar de vários dias a semanas para terminar, dependendo de seus recursos e das capacidades de suas ferramentas automatizadas. Esses testes também dependem muito da funcionalidade e contexto do aplicativo e devem ser idealmente realizados em uma configuração de caixa branca trabalhando muito de perto com os desenvolvedores do aplicativo.
 
-## Testing User Education on Security Best Practices
+## Testando Educação do Usuário sobre Melhores Práticas de Segurança
 
-Determining whether the app educates users and helps them understand security needs is especially challenging if you intend to automate the process. We recommend using the app extensively and try to answer the following questions whenever applicable:
+Determinar se o aplicativo educa os usuários e os ajuda a entender as necessidades de segurança é especialmente desafiador se você pretende automatizar o processo. Recomendamos usar o aplicativo extensivamente e tentar responder às seguintes perguntas sempre que aplicável:
 
-- **Fingerprint usage**: When fingerprints are used for authentication providing access to high-risk transactions/information,
+- **Uso de impressão digital**: Quando impressões digitais são usadas para autenticação fornecendo acesso a transações/informações de alto risco,
 
-    _does the app inform the user about potential issues when having multiple fingerprints of other people registered to the device as well?_
+    _o aplicativo informa o usuário sobre problemas potenciais ao ter múltiplas impressões digitais de outras pessoas registradas no dispositivo também?_
 
-- **Rooting/jailbreaking**: When root or jailbreak detection is implemented,
+- **Rooting/jailbreaking**: Quando a detecção de root ou jailbreak é implementada,
 
-    _does the app inform the user of the fact that certain high-risk actions will carry additional risk due to the jailbroken/rooted status of the device?_
+    _o aplicativo informa o usuário do fato de que certas ações de alto risco carregarão risco adicional devido ao status de jailbroken/rooted do dispositivo?_
 
-- **Specific credentials**: When a user gets a recovery code, a password, or a pin from the application (or sets one),
+- **Credenciais específicas**: Quando um usuário obtém um código de recuperação, uma senha ou um pin do aplicativo (ou define um),
 
-    _does the app instruct the user to never share this with anyone else and that only the app will request it?_
+    _o aplicativo instrui o usuário a nunca compartilhar isso com mais ninguém e que apenas o aplicativo o solicitará?_
 
-- **Application distribution**: In case of a high-risk application and in order to prevent users from downloading compromised versions of the application,
+- **Distribuição de aplicativo**: No caso de um aplicativo de alto risco e para evitar que os usuários baixem versões comprometidas do aplicativo,
 
-    _does the app manufacturer properly communicate the official way of distributing the app (e.g. from Google Play or the App Store)?_
+    _o fabricante do aplicativo comunica adequadamente a maneira oficial de distribuir o aplicativo (por exemplo, do Google Play ou da App Store)?_
 
-- **Prominent Disclosure**: In any case,
+- **Divulgação Proeminente**: Em qualquer caso,
 
-    _does the app display prominent disclosure of data access, collection, use, and sharing? e.g. does the app use the [App Tracking Transparency Framework](https://developer.apple.com/documentation/apptrackingtransparency) to ask for the permission on iOS?_
-
-Other references include:
-
-- Open-Source Licenses in Android - <https://www.bignerdranch.com/blog/open-source-licenses-and-android/>
-- Software Licenses in Plain English - <https://tldrlegal.com/>
-- Apple's approach to access private data - <https://developer.apple.com/design/human-interface-guidelines/privacy>
-- Android app permissions best practices - <https://developer.android.com/training/permissions/requesting.html#explain>
+    _o aplicativo exibe divulgação proeminente de acesso, coleta, uso e compartilhamento de dados? por exemplo, o aplicativo usa o [App Tracking Transparency Framework](https://developer.app

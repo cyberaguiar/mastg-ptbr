@@ -1,103 +1,104 @@
+
 ---
 masvs_category: MASVS-AUTH
 platform: all
 ---
 
-# Mobile App Authentication Architectures
+# Arquiteturas de Autenticação de Aplicativos Móveis
 
-Authentication and authorization problems are prevalent security vulnerabilities. In fact, they consistently rank second highest in the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
+Problemas de autenticação e autorização são vulnerabilidades de segurança prevalentes. Na verdade, eles consistentemente ocupam o segundo lugar mais alto no [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
-Most mobile apps implement some kind of user authentication. Even though part of the authentication and state management logic is performed by the backend service, authentication is such an integral part of most mobile app architectures that understanding its common implementations is important.
+A maioria dos aplicativos móveis implementa algum tipo de autenticação de usuário. Embora parte da lógica de autenticação e gerenciamento de estado seja realizada pelo serviço de backend, a autenticação é uma parte tão integral da maioria das arquiteturas de aplicativos móveis que entender suas implementações comuns é importante.
 
-Since the basic concepts are identical on iOS and Android, we'll discuss prevalent authentication and authorization architectures and pitfalls in this generic guide. OS-specific authentication issues, such as local and biometric authentication, will be discussed in the respective OS-specific chapters.
+Como os conceitos básicos são idênticos no iOS e Android, discutiremos arquiteturas de autenticação e autorização prevalentes e armadilhas neste guia genérico. Problemas específicos de autenticação do sistema operacional, como autenticação local e biométrica, serão discutidos nos respectivos capítulos específicos do sistema operacional.
 
-## General Assumptions
+## Pressupostos Gerais
 
-### Appropriate Authentication is in Place
+### Autenticação Adequada Está em Vigor
 
-Perform the following steps when testing authentication and authorization:
+Execute as seguintes etapas ao testar autenticação e autorização:
 
-- Identify the additional authentication factors the app uses.
-- Locate all endpoints that provide critical functionality.
-- Verify that the additional factors are strictly enforced on all server-side endpoints.
+- Identifique os fatores de autenticação adicionais que o aplicativo usa.
+- Localize todos os endpoints que fornecem funcionalidade crítica.
+- Verifique se os fatores adicionais são estritamente aplicados em todos os endpoints do lado do servidor.
 
-Authentication bypass vulnerabilities exist when authentication state is not consistently enforced on the server and when the client can tamper with the state. While the backend service is processing requests from the mobile client, it must consistently enforce authorization checks: verifying that the user is logged in and authorized every time a resource is requested.
+Vulnerabilidades de bypass de autenticação existem quando o estado de autenticação não é consistentemente aplicado no servidor e quando o cliente pode adulterar o estado. Enquanto o serviço de backend está processando solicitações do cliente móvel, ele deve aplicar consistentemente verificações de autorização: verificando que o usuário está logado e autorizado toda vez que um recurso é solicitado.
 
-Consider the following example from the [OWASP Web Testing Guide](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing/04-Testing_for_Bypassing_Authentication_Schema "Testing for Bypassing Authentication Schema (WSTG-ATHN-04)"). In the example, a web resource is accessed through a URL, and the authentication state is passed through a GET parameter:
+Considere o seguinte exemplo do [OWASP Web Testing Guide](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing/04-Testing_for_Bypassing_Authentication_Schema "Testing for Bypassing Authentication Schema (WSTG-ATHN-04)"). No exemplo, um recurso web é acessado através de uma URL, e o estado de autenticação é passado através de um parâmetro GET:
 
 ```html
 http://www.site.com/page.asp?authenticated=no
 ```
 
-The client can arbitrarily change the GET parameters sent with the request. Nothing prevents the client from simply changing the value of the `authenticated` parameter to "yes", effectively bypassing authentication.
+O cliente pode alterar arbitrariamente os parâmetros GET enviados com a solicitação. Nada impede o cliente de simplesmente mudar o valor do parâmetro `authenticated` para "sim", efetivamente contornando a autenticação.
 
-Although this is a simplistic example that you probably won't find in the wild, programmers sometimes rely on "hidden" client-side parameters, such as cookies, to maintain authentication state. They assume that these parameters can't be tampered with. Consider, for example, the following [classic vulnerability in Nortel Contact Center Manager](http://seclists.org/bugtraq/2009/May/251 "SEC Consult SA-20090525-0 :: Nortel Contact Center Manager Server Authentication Bypass Vulnerability"). The administrative web application of Nortel's appliance relied on the cookie "isAdmin" to determine whether the logged-in user should be granted administrative privileges. Consequently, it was possible to get admin access by simply setting the cookie value as follows:
+Embora este seja um exemplo simplista que você provavelmente não encontrará na prática, programadores às vezes confiam em parâmetros "ocultos" do lado do cliente, como cookies, para manter o estado de autenticação. Eles assumem que esses parâmetros não podem ser adulterados. Considere, por exemplo, a seguinte [vulnerabilidade clássica no Nortel Contact Center Manager](http://seclists.org/bugtraq/2009/May/251 "SEC Consult SA-20090525-0 :: Nortel Contact Center Manager Server Authentication Bypass Vulnerability"). A aplicação web administrativa do appliance da Nortel confiava no cookie "isAdmin" para determinar se o usuário logado deveria receber privilégios administrativos. Consequentemente, era possível obter acesso de administrador simplesmente definindo o valor do cookie como segue:
 
 ```html
 isAdmin=True
 ```
 
-Security experts used to recommend using session-based authentication and maintaining session data on the server only. This prevents any form of client-side tampering with the session state. However, the whole point of using stateless authentication instead of session-based authentication is to _not_ have session state on the server. Instead, state is stored in client-side tokens and transmitted with every request. In this case, seeing client-side parameters such as `isAdmin` is perfectly normal.
+Especialistas em segurança costumavam recomendar usar autenticação baseada em sessão e manter dados de sessão apenas no servidor. Isso impede qualquer forma de adulteração do lado do cliente com o estado da sessão. No entanto, o ponto principal de usar autenticação stateless em vez de autenticação baseada em sessão é _não_ ter estado de sessão no servidor. Em vez disso, o estado é armazenado em tokens do lado do cliente e transmitido com cada solicitação. Nesse caso, ver parâmetros do lado do cliente como `isAdmin` é perfeitamente normal.
 
-To prevent tampering cryptographic signatures are added to client-side tokens. Of course, things may go wrong, and popular implementations of stateless authentication have been vulnerable to attacks. For example, the signature verification of some JSON Web Token (JWT) implementations could be deactivated by [setting the signature type to "None"](https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/ "Critical vulnerabilities in JSON Web Token libraries").
+Para prevenir adulteração, assinaturas criptográficas são adicionadas a tokens do lado do cliente. Claro, as coisas podem dar errado, e implementações populares de autenticação stateless foram vulneráveis a ataques. Por exemplo, a verificação de assinatura de algumas implementações de JSON Web Token (JWT) poderia ser desativada [definindo o tipo de assinatura para "None"](https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/ "Critical vulnerabilities in JSON Web Token libraries").
 
-### Best Practices for Passwords
+### Melhores Práticas para Senhas
 
-Password strength is a key concern when passwords are used for authentication. The password policy defines requirements to which end users should adhere. A password policy typically specifies password length, password complexity, and password topologies. A "strong" password policy makes manual or automated password cracking difficult or impossible. For further information please consult the [OWASP Authentication Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Authentication_Cheat_Sheet.md#implement-proper-password-strength-controls "Implement Proper Password Strength Controls").
+A força da senha é uma preocupação chave quando senhas são usadas para autenticação. A política de senha define requisitos aos quais os usuários finais devem aderir. Uma política de senha normalmente especifica comprimento da senha, complexidade da senha e topologias de senha. Uma política de senha "forte" torna a quebra de senha manual ou automatizada difícil ou impossível. Para mais informações, consulte a [OWASP Authentication Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Authentication_Cheat_Sheet.md#implement-proper-password-strength-controls "Implement Proper Password Strength Controls").
 
-## General Guidelines on Testing Authentication
+## Diretrizes Gerais sobre Teste de Autenticação
 
-There's no one-size-fits-all approach to authentication. When reviewing the authentication architecture of an app, you should first consider whether the authentication method(s) used are appropriate in the given context. Authentication can be based on one or more of the following:
+Não há uma abordagem única para autenticação. Ao revisar a arquitetura de autenticação de um aplicativo, você deve primeiro considerar se o(s) método(s) de autenticação usados são apropriados no contexto dado. A autenticação pode ser baseada em um ou mais dos seguintes:
 
-- Something the user knows (password, PIN, pattern, etc.)
-- Something the user has (SIM card, one-time password generator, or hardware token)
-- A biometric property of the user (fingerprint, retina, voice)
+- Algo que o usuário sabe (senha, PIN, padrão, etc.)
+- Algo que o usuário tem (cartão SIM, gerador de senha única ou token de hardware)
+- Uma propriedade biométrica do usuário (impressão digital, retina, voz)
 
-The number of authentication procedures implemented by mobile apps depends on the sensitivity of the functions or accessed resources. Refer to industry best practices when reviewing authentication functions. Username/password authentication (combined with a reasonable password policy) is generally considered sufficient for apps that have a user login and aren't very sensitive. This form of authentication is used by most social media apps.
+O número de procedimentos de autenticação implementados por aplicativos móveis depende da sensibilidade das funções ou recursos acessados. Consulte as melhores práticas da indústria ao revisar funções de autenticação. Autenticação de nome de usuário/senha (combinada com uma política de senha razoável) é geralmente considerada suficiente para aplicativos que têm um login de usuário e não são muito sensíveis. Esta forma de autenticação é usada pela maioria dos aplicativos de mídia social.
 
-For sensitive apps, adding a second authentication factor is usually appropriate. This includes apps that provide access to very sensitive information (such as credit card numbers) or allow users to transfer funds. In some industries, these apps must also comply with certain standards. For example, financial apps have to ensure compliance with the Payment Card Industry Data Security Standard (PCI DSS), the Gramm Leach Bliley Act, and the Sarbanes-Oxley Act (SOX). Compliance considerations for the US health care sector include the Health Insurance Portability and Accountability Act (HIPAA) and the Patient Safety Rule.
+Para aplicativos sensíveis, adicionar um segundo fator de autenticação é geralmente apropriado. Isso inclui aplicativos que fornecem acesso a informações muito sensíveis (como números de cartão de crédito) ou permitem que usuários transfiram fundos. Em algumas indústrias, esses aplicativos também devem cumprir certos padrões. Por exemplo, aplicativos financeiros devem garantir conformidade com o Payment Card Industry Data Security Standard (PCI DSS), o Gramm Leach Bliley Act e o Sarbanes-Oxley Act (SOX). Considerações de conformidade para o setor de saúde dos EUA incluem o Health Insurance Portability and Accountability Act (HIPAA) e o Patient Safety Rule.
 
-## Stateful vs. Stateless Authentication
+## Autenticação Stateful vs. Stateless
 
-You'll usually find that the mobile app uses HTTP as the transport layer. The HTTP protocol itself is stateless, so there must be a way to associate a user's subsequent HTTP requests with that user. Otherwise, the user's log in credentials would have to be sent with every request. Also, both the server and client need to keep track of user data (e.g., the user's privileges or role). This can be done in two different ways:
+Você geralmente encontrará que o aplicativo móvel usa HTTP como camada de transporte. O protocolo HTTP em si é stateless, então deve haver uma maneira de associar as solicitações HTTP subsequentes do usuário a esse usuário. Caso contrário, as credenciais de login do usuário teriam que ser enviadas com cada solicitação. Além disso, tanto o servidor quanto o cliente precisam acompanhar os dados do usuário (por exemplo, os privilégios ou função do usuário). Isso pode ser feito de duas maneiras diferentes:
 
-- With _stateful_ authentication, a unique session id is generated when the user logs in. In subsequent requests, this session ID serves as a reference to the user details stored on the server. The session ID is _opaque_; it doesn't contain any user data.
+- Com autenticação _stateful_, um ID de sessão único é gerado quando o usuário faz login. Em solicitações subsequentes, este ID de sessão serve como referência aos detalhes do usuário armazenados no servidor. O ID de sessão é _opaco_; não contém nenhum dado do usuário.
 
-- With _stateless_ authentication, all user-identifying information is stored in a client-side token. The token can be passed to any server or micro service, eliminating the need to maintain session state on the server. Stateless authentication is often factored out to an authorization server, which produces, signs, and optionally encrypts the token upon user login.
+- Com autenticação _stateless_, todas as informações de identificação do usuário são armazenadas em um token do lado do cliente. O token pode ser passado para qualquer servidor ou micro serviço, eliminando a necessidade de manter estado de sessão no servidor. A autenticação stateless é frequentemente fatorada para um servidor de autorização, que produz, assina e opcionalmente criptografa o token após o login do usuário.
 
-Web applications commonly use stateful authentication with a random session ID that is stored in a client-side cookie. Although mobile apps sometimes use stateful sessions in a similar fashion, stateless token-based approaches are becoming popular for a variety of reasons:
+Aplicações web comumente usam autenticação stateful com um ID de sessão aleatório que é armazenado em um cookie do lado do cliente. Embora aplicativos móveis às vezes usem sessões stateful de forma similar, abordagens baseadas em token stateless estão se tornando populares por várias razões:
 
-- They improve scalability and performance by eliminating the need to store session state on the server.
-- Tokens enable developers to decouple authentication from the app. Tokens can be generated by an authentication server, and the authentication scheme can be changed seamlessly.
+- Elas melhoram a escalabilidade e o desempenho eliminando a necessidade de armazenar estado de sessão no servidor.
+- Tokens permitem que desenvolvedores desacoplem a autenticação do aplicativo. Tokens podem ser gerados por um servidor de autenticação, e o esquema de autenticação pode ser alterado de forma transparente.
 
-As a mobile security tester, you should be familiar with both types of authentication.
+Como testador de segurança móvel, você deve estar familiarizado com ambos os tipos de autenticação.
 
-### Stateful Authentication
+### Autenticação Stateful
 
-Stateful (or "session-based") authentication is characterized by authentication records on both the client and server. The authentication flow is as follows:
+Autenticação stateful (ou "baseada em sessão") é caracterizada por registros de autenticação tanto no cliente quanto no servidor. O fluxo de autenticação é o seguinte:
 
-1. The app sends a request with the user's credentials to the backend server.
-2. The server verifies the credentials. If the credentials are valid, the server creates a new session along with a random session ID.
-3. The server sends to the client a response that includes the session ID.
-4. The client sends the session ID with all subsequent requests. The server validates the session ID and retrieves the associated session record.
-5. After the user logs out, the server-side session record is destroyed and the client discards the session ID.
+1. O aplicativo envia uma solicitação com as credenciais do usuário para o servidor backend.
+2. O servidor verifica as credenciais. Se as credenciais forem válidas, o servidor cria uma nova sessão junto com um ID de sessão aleatório.
+3. O servidor envia ao cliente uma resposta que inclui o ID de sessão.
+4. O cliente envia o ID de sessão com todas as solicitações subsequentes. O servidor valida o ID de sessão e recupera o registro de sessão associado.
+5. Após o logout do usuário, o registro de sessão do lado do servidor é destruído e o cliente descarta o ID de sessão.
 
-When sessions are improperly managed, they are vulnerable to a variety of attacks that may compromise the session of a legitimate user, allowing the attacker to impersonate the user. This may result in lost data, compromised confidentiality, and illegitimate actions.
+Quando as sessões são gerenciadas inadequadamente, elas são vulneráveis a uma variedade de ataques que podem comprometer a sessão de um usuário legítimo, permitindo que o atacante se passe pelo usuário. Isso pode resultar em perda de dados, comprometimento de confidencialidade e ações ilegítimas.
 
-**Best Practices:**
+**Melhores Práticas:**
 
-Locate any server-side endpoints that provide sensitive information or functions and verify the consistent enforcement of authorization. The backend service must verify the user's session ID or token and make sure that the user has sufficient privileges to access the resource. If the session ID or token is missing or invalid, the request must be rejected.
+Localize quaisquer endpoints do lado do servidor que forneçam informações ou funções sensíveis e verifique a aplicação consistente de autorização. O serviço backend deve verificar o ID de sessão ou token do usuário e garantir que o usuário tenha privilégios suficientes para acessar o recurso. Se o ID de sessão ou token estiver faltando ou for inválido, a solicitação deve ser rejeitada.
 
-Make sure that:
+Certifique-se de que:
 
-- Session IDs are randomly generated on the server side.
-- The IDs can't be guessed easily (use proper length and entropy).
-- Session IDs are always exchanged over secure connections (e.g. HTTPS).
-- The mobile app doesn't save session IDs in permanent storage.
-- The server verifies the session whenever a user tries to access privileged application elements (a session ID must be valid and must correspond to the proper authorization level).
-- The session is terminated on the server side and session information deleted within the mobile app after it times out or the user logs out.
+- IDs de sessão são gerados aleatoriamente no lado do servidor.
+- Os IDs não podem ser facilmente adivinhados (use comprimento e entropia adequados).
+- IDs de sessão são sempre trocados sobre conexões seguras (por exemplo, HTTPS).
+- O aplicativo móvel não salva IDs de sessão em armazenamento permanente.
+- O servidor verifica a sessão sempre que um usuário tenta acessar elementos privilegiados do aplicativo (um ID de sessão deve ser válido e deve corresponder ao nível de autorização adequado).
+- A sessão é encerrada no lado do servidor e as informações da sessão são excluídas dentro do aplicativo móvel após expirar ou o usuário fazer logout.
 
-Authentication shouldn't be implemented from scratch but built on top of proven frameworks. Many popular frameworks provide ready-made authentication and session management functionality. If the app uses framework APIs for authentication, check the framework security documentation for best practices. Security guides for common frameworks are available at the following links:
+A autenticação não deve ser implementada do zero, mas construída sobre estruturas comprovadas. Muitas estruturas populares fornecem funcionalidade de autenticação e gerenciamento de sessão prontas. Se o aplicativo usar APIs de estrutura para autenticação, verifique a documentação de segurança da estrutura para melhores práticas. Guias de segurança para estruturas comuns estão disponíveis nos seguintes links:
 
 - [Spring (Java)](https://projects.spring.io/spring-security "Spring (Java)")
 - [Struts (Java)](https://struts.apache.org/security/ "Struts (Java)")
@@ -105,210 +106,213 @@ Authentication shouldn't be implemented from scratch but built on top of proven 
 - [Ruby on Rails](https://guides.rubyonrails.org/security.html "Ruby on Rails")
 - [ASP.Net](https://learn.microsoft.com/en-us/aspnet/core/security "ASP.NET")
 
-A great resource for testing server-side authentication is the OWASP Web Testing Guide, specifically the [Testing Authentication](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing/README) and [Testing Session Management](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing/README) chapters.
+Um ótimo recurso para testar autenticação do lado do servidor é o OWASP Web Testing Guide, especificamente os capítulos [Testing Authentication](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing/README) e [Testing Session Management](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing/README).
 
-### Stateless Authentication
+### Autenticação Stateless
 
-Token-based authentication is implemented by sending a signed token (verified by the server) with each HTTP request. The most commonly used token format is the JSON Web Token, defined in [RFC7519](https://tools.ietf.org/html/rfc7519 "RFC7519"). A JWT may encode the complete session state as a JSON object. Therefore, the server doesn't have to store any session data or authentication information.
+Autenticação baseada em token é implementada enviando um token assinado (verificado pelo servidor) com cada solicitação HTTP. O formato de token mais comumente usado é o JSON Web Token, definido em [RFC7519](https://tools.ietf.org/html/rfc7519 "RFC7519"). Um JWT pode codificar o estado completo da sessão como um objeto JSON. Portanto, o servidor não precisa armazenar nenhum dado de sessão ou informação de autenticação.
 
-JWT tokens consist of three Base64Url-encoded parts separated by dots. The Token structure is as follows:
+Tokens JWT consistem em três partes codificadas em Base64Url separadas por pontos. A estrutura do Token é a seguinte:
 
 ```default
 base64UrlEncode(header).base64UrlEncode(payload).base64UrlEncode(signature)
 ```
 
-The following example shows a [Base64Url-encoded JSON Web Token](https://jwt.io/#debugger "JWT Example on jwt.io"):
+O seguinte exemplo mostra um [JSON Web Token codificado em Base64Url](https://jwt.io/#debugger "JWT Example on jwt.io"):
 
 ```default
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikpva
 G4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 ```
 
-The _header_ typically consists of two parts: the token type, which is JWT, and the hashing algorithm being used to compute the signature. In the example above, the header decodes as follows:
+O _header_ normalmente consiste em duas partes: o tipo de token, que é JWT, e o algoritmo de hash sendo usado para computar a assinatura. No exemplo acima, o header decodifica da seguinte forma:
 
 ```json
 {"alg":"HS256","typ":"JWT"}
 ```
 
-The second part of the token is the _payload_, which contains so-called claims. Claims are statements about an entity (typically, the user) and additional metadata. For example:
+A segunda parte do token é o _payload_, que contém as chamadas claims. Claims são declarações sobre uma entidade (tipicamente, o usuário) e metadados adicionais. Por exemplo:
 
 ```json
 {"sub":"1234567890","name":"John Doe","admin":true}
 ```
 
-The signature is created by applying the algorithm specified in the JWT header to the encoded header, encoded payload, and a secret value. For example, when using the HMAC SHA256 algorithm the signature is created in the following way:
+A assinatura é criada aplicando o algoritmo especificado no header JWT ao header codificado, payload codificado e um valor secreto. Por exemplo, ao usar o algoritmo HMAC SHA256 a assinatura é criada da seguinte maneira:
 
 ```java
 HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret)
 ```
 
-Note that the secret is shared between the authentication server and the backend service - the client does not know it. This proves that the token was obtained from a legitimate authentication service. It also prevents the client from tampering with the claims contained in the token.
+Note que o segredo é compartilhado entre o servidor de autenticação e o serviço backend - o cliente não o conhece. Isso prova que o token foi obtido de um serviço de autenticação legítimo. Também impede que o cliente adultere as claims contidas no token.
 
-**Best Practices:**
+**Melhores Práticas:**
 
-Verify that the implementation adheres to JWT [best practices](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html):
+Verifique se a implementação adere às [melhores práticas](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html) do JWT:
 
-- Verify that the HMAC is checked for all incoming requests containing a token.
-- Verify that the private signing key or HMAC secret key is never shared with the client. It should be available for the issuer and verifier only.
-- Verify that no sensitive data, such as personal identifiable information, is embedded in the JWT. For example, by decoding the base64-encoded JWT and find out what kind of data it transmits and whether that data is encrypted. If, for some reason, the architecture requires transmission of such information in the token, make sure that payload encryption is being applied.
-- Make sure that replay attacks are addressed with the `jti` (JWT ID) claim, which gives the JWT a unique identifier.
-- Make sure that cross service relay attacks are addressed with the `aud` (audience) claim, which defines for which application the token is entitled.
-- Verify that tokens are stored securely on the mobile phone, with, for example, KeyChain (iOS) or KeyStore (Android).
-- Verify that the hashing algorithm is enforced. A common attack includes altering the token to use an empty signature (e.g., signature = "") and set the signing algorithm to `none`, indicating that "the integrity of the token has already been verified". Some libraries might treat tokens signed with the `none` algorithm as if they were valid tokens with verified signatures, so the application will trust altered token claims.
-- Verify that tokens include an ["exp" expiration claim](https://tools.ietf.org/html/rfc7519#section-4.1.4 "RFC 7519") and the backend doesn't process expired tokens. A common method of granting tokens combines [access tokens and refresh tokens](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/ "Refresh tokens & access tokens"). When the user logs in, the backend service issues a short-lived _access token_ and a long-lived _refresh token_. The application can then use the refresh token to obtain a new access token, if the access token expires.
+- Verifique se o HMAC é verificado para todas as solicitações de entrada contendo um token.
+- Verifique se a chave de assinatura privada ou chave secreta HMAC nunca é compartilhada com o cliente. Ela deve estar disponível apenas para o emissor e verificador.
+- Verifique se nenhum dado sensível, como informações pessoais identificáveis, está embutido no JWT. Por exemplo, decodificando o JWT codificado em base64 e descobrindo que tipo de dados ele transmite e se esses dados são criptografados. Se, por alguma razão, a arquitetura exigir a transmissão de tais informações no token, certifique-se de que a criptografia de payload está sendo aplicada.
+- Certifique-se de que ataques de replay são tratados com a claim `jti` (JWT ID), que dá ao JWT um identificador único.
+- Certifique-se de que ataques de relay entre serviços são tratados com a claim `aud` (audience), que define para qual aplicação o token é destinado.
+- Verifique se os tokens são armazenados com segurança no telefone móvel, com, por exemplo, KeyChain (iOS) ou KeyStore (Android).
+- Verifique se o algoritmo de hash é aplicado. Um ataque comum inclui alterar o token para usar uma assinatura vazia (por exemplo, signature = "") e definir o algoritmo de assinatura para `none`, indicando que "a integridade do token já foi verificada". Algumas bibliotecas podem tratar
 
-There are two different Burp Plugins that can help you for testing the vulnerabilities listed above:
+tokens assinados com o algoritmo `none` como se fossem tokens válidos com assinaturas verificadas, então o aplicativo confiará em claims de token alteradas.
+- Verifique se os tokens incluem uma [claim de expiração "exp"](https://tools.ietf.org/html/rfc7519#section-4.1.4 "RFC 7519") e o backend não processa tokens expirados. Um método comum de conceder tokens combina [tokens de acesso e tokens de atualização](https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/ "Refresh tokens & access tokens"). Quando o usuário faz login, o serviço backend emite um _token de acesso_ de curta duração e um _token de atualização_ de longa duração. O aplicativo pode então usar o token de atualização para obter um novo token de acesso, se o token de acesso expirar.
+
+Existem dois plugins Burp diferentes que podem ajudá-lo a testar as vulnerabilidades listadas acima:
 
 - [JSON Web Token Attacker](https://portswigger.net/bappstore/82d6c60490b540369d6d5d01822bdf61 "JSON Web Token Attacker")
 - [JSON Web Tokens](https://portswigger.net/bappstore/f923cbf91698420890354c1d8958fee6 "JSON Web Tokens")
 
-Also, make sure to check out the [OWASP JWT Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html "JSON Web Token (JWT) Cheat Sheet for Java") for additional information.
+Além disso, certifique-se de verificar a [OWASP JWT Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html "JSON Web Token (JWT) Cheat Sheet for Java") para informações adicionais.
 
 ## OAuth 2.0
 
-[OAuth 2.0](https://oauth.net/articles/authentication/ "OAuth 2.0") is an authorization framework that enables third-party applications to obtain limited access to user accounts on remote HTTP services such as APIs and web-enabled applications.
+[OAuth 2.0](https://oauth.net/articles/authentication/ "OAuth 2.0") é um framework de autorização que permite que aplicações de terceiros obtenham acesso limitado a contas de usuário em serviços HTTP remotos, como APIs e aplicações habilitadas para web.
 
-Common uses for OAuth2 include:
+Usos comuns para OAuth2 incluem:
 
-- Getting permission from the user to access an online service using their account.
-- Authenticating to an online service on behalf of the user.
-- Handling authentication errors.
+- Obter permissão do usuário para acessar um serviço online usando sua conta.
+- Autenticar em um serviço online em nome do usuário.
+- Lidar com erros de autenticação.
 
-According to OAuth 2.0, a mobile client seeking access to a user's resources must first ask the user to authenticate against an _authentication server_. With the users' approval, the authorization server then issues a token that allows the app to act on behalf of the user. Note that the OAuth2 specification doesn't define any particular kind of authentication or access token format.
+De acordo com o OAuth 2.0, um cliente móvel que busca acesso aos recursos de um usuário deve primeiro pedir ao usuário para autenticar em um _servidor de autenticação_. Com a aprovação dos usuários, o servidor de autorização então emite um token que permite que o aplicativo aja em nome do usuário. Note que a especificação OAuth2 não define nenhum tipo particular de autenticação ou formato de token de acesso.
 
-### Protocol Overview
+### Visão Geral do Protocolo
 
-OAuth 2.0 defines four roles:
+OAuth 2.0 define quatro papéis:
 
-- Resource Owner: the account owner
-- Client: the application that wants to access the user's account with the access tokens
-- Resource Server: hosts the user accounts
-- Authorization Server: verifies user identity and issues access tokens to the application
+- Proprietário do Recurso: o proprietário da conta
+- Cliente: a aplicação que quer acessar a conta do usuário com os tokens de acesso
+- Servidor de Recurso: hospeda as contas de usuário
+- Servidor de Autorização: verifica a identidade do usuário e emite tokens de acesso para a aplicação
 
-Note: The API fulfills both the Resource Server and Authorization Server roles. Therefore, we will refer to both as the API.
+Nota: A API cumpre ambos os papéis de Servidor de Recurso e Servidor de Autorização. Portanto, nos referiremos a ambos como a API.
 
 <img src="Images/Chapters/0x04e/abstract_oath2_flow.png" width="400px" />
 
-Here is a more [detailed explanation](https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2 "An Introduction into OAuth2") of the steps in the diagram:
+Aqui está uma [explicação mais detalhada](https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2 "An Introduction into OAuth2") das etapas no diagrama:
 
-1. The application requests user authorization to access service resources.
-2. If the user authorizes the request, the application receives an authorization grant. The authorization grant may take several forms (explicit, implicit, etc.).
-3. The application requests an access token from the authorization server (API) by presenting authentication of its own identity along with the authorization grant.
-4. If the application identity is authenticated and the authorization grant is valid, the authorization server (API) issues an access token to the application, completing the authorization process. The access token may have a companion refresh token.
-5. The application requests the resource from the resource server (API) and presents the access token for authentication. The access token may be used in several ways (e.g., as a bearer token).
-6. If the access token is valid, the resource server (API) serves the resource to the application.
+1. A aplicação solicita autorização do usuário para acessar recursos do serviço.
+2. Se o usuário autorizar a solicitação, a aplicação recebe uma concessão de autorização. A concessão de autorização pode tomar várias formas (explícita, implícita, etc.).
+3. A aplicação solicita um token de acesso do servidor de autorização (API) apresentando autenticação de sua própria identidade junto com a concessão de autorização.
+4. Se a identidade da aplicação for autenticada e a concessão de autorização for válida, o servidor de autorização (API) emite um token de acesso para a aplicação, completando o processo de autorização. O token de acesso pode ter um token de atualização companheiro.
+5. A aplicação solicita o recurso do servidor de recurso (API) e apresenta o token de acesso para autenticação. O token de acesso pode ser usado de várias maneiras (por exemplo, como um token bearer).
+6. Se o token de acesso for válido, o servidor de recurso (API) serve o recurso para a aplicação.
 
-In OAuth2, the _user agent_ is the entity that performs the authentication. OAuth2 authentication can be performed either through an external user agent (e.g. Chrome or Safari) or in the app itself (e.g. through a WebView embedded into the app or an authentication library). None of the two modes is intrinsically "better" than the other. The choice depends on the app's specific use case and threat model.
+No OAuth2, o _agente do usuário_ é a entidade que realiza a autenticação. A autenticação OAuth2 pode ser realizada através de um agente de usuário externo (por exemplo, Chrome ou Safari) ou no próprio aplicativo (por exemplo, através de um WebView incorporado no aplicativo ou uma biblioteca de autenticação). Nenhum dos dois modos é intrinsecamente "melhor" que o outro. A escolha depende do caso de uso específico do aplicativo e do modelo de ameaça.
 
-**External User Agent:** Using an _external user agent_ is the method of choice for apps that need to interact with social media accounts (Facebook, Twitter, etc.). Advantages of this method include:
+**Agente de Usuário Externo:** Usar um _agente de usuário externo_ é o método de escolha para aplicativos que precisam interagir com contas de mídia social (Facebook, Twitter, etc.). Vantagens deste método incluem:
 
-- The user's credentials are never directly exposed to the app. This guarantees that the app cannot obtain the credentials during the login process ("credential phishing").
-- Almost no authentication logic must be added to the app itself, preventing coding errors.
+- As credenciais do usuário nunca são expostas diretamente ao aplicativo. Isso garante que o aplicativo não possa obter as credenciais durante o processo de login ("phishing de credenciais").
+- Quase nenhuma lógica de autenticação deve ser adicionada ao próprio aplicativo, prevenindo erros de codificação.
 
-On the negative side, there is no way to control the behavior of the browser (e.g. to activate certificate pinning).
+No lado negativo, não há como controlar o comportamento do navegador (por exemplo, para ativar o certificate pinning).
 
-**Embedded User Agent:** Using an _embedded user agent_ is the method of choice for apps that need to operate within a closed ecosystem, for example to interact with corporate accounts. For example, consider a banking app that uses OAuth2 to retrieve an access token from the bank's authentication server, which is then used to access a number of micro services. In that case, credential phishing is not a viable scenario. It is likely preferable to keep the authentication process in the (hopefully) carefully secured banking app, instead of placing trust on external components.
+**Agente de Usuário Incorporado:** Usar um _agente de usuário incorporado_ é o método de escolha para aplicativos que precisam operar dentro de um ecossistema fechado, por exemplo para interagir com contas corporativas. Por exemplo, considere um aplicativo bancário que usa OAuth2 para recuperar um token de acesso do servidor de autenticação do banco, que é então usado para acessar vários micro serviços. Nesse caso, phishing de credenciais não é um cenário viável. É provavelmente preferível manter o processo de autenticação no (esperançosamente) aplicativo bancário cuidadosamente protegido, em vez de colocar confiança em componentes externos.
 
-### Best Practices
+### Melhores Práticas
 
-For additional best practices and detailed information please refer to the following source documents:
+Para melhores práticas adicionais e informações detalhadas, consulte os seguintes documentos de origem:
 
 - [RFC6749 - The OAuth 2.0 Authorization Framework (October 2012)](https://tools.ietf.org/html/rfc6749)
 - [RFC8252 - OAuth 2.0 for Native Apps (October 2017)](https://tools.ietf.org/html/rfc8252)
 - [RFC6819 - OAuth 2.0 Threat Model and Security Considerations (January 2013)](https://tools.ietf.org/html/rfc6819)
 
-Some of the best practices include but are not limited to:
+Algumas das melhores práticas incluem, mas não estão limitadas a:
 
-- **User agent:**
-    - The user should have a way to visually verify trust (e.g., Transport Layer Security (TLS) confirmation, website mechanisms).
-    - To prevent [Machine-in-the-Middle (MITM)](0x04f-Testing-Network-Communication.md#intercepting-network-traffic-through-mitm) attacks, the client should validate the server's fully qualified domain name with the public key the server presented when the connection was established.
-- **Type of grant:**
-    - On native apps, code grant should be used instead of implicit grant.
-    - When using code grant, PKCE (Proof Key for Code Exchange) should be implemented to protect the code grant. Make sure that the server also implements it.
-    - The auth "code" should be short-lived and used immediately after it is received. Verify that auth codes only reside on transient memory and aren't stored or logged.
-- **Client secrets:**
-    - Shared secrets should not be used to prove the client's identity because the client could be impersonated ("client_id" already serves as proof). If they do use client secrets, be sure that they are stored in secure local storage.
-- **End-User credentials:**
-    - Secure the transmission of end-user credentials with a transport-layer method, such as TLS.
+- **Agente do usuário:**
+    - O usuário deve ter uma maneira de verificar visualmente a confiança (por exemplo, confirmação de Transport Layer Security (TLS), mecanismos de website).
+    - Para prevenir ataques [Machine-in-the-Middle (MITM)](0x04f-Testing-Network-Communication.md#intercepting-network-traffic-through-mitm), o cliente deve validar o nome de domínio totalmente qualificado do servidor com a chave pública que o servidor apresentou quando a conexão foi estabelecida.
+- **Tipo de concessão:**
+    - Em aplicativos nativos, a concessão de código deve ser usada em vez da concessão implícita.
+    - Ao usar a concessão de código, o PKCE (Proof Key for Code Exchange) deve ser implementado para proteger a concessão de código. Certifique-se de que o servidor também o implemente.
+    - O "código" de autenticação deve ser de curta duração e usado imediatamente após ser recebido. Verifique se os códigos de autenticação residem apenas na memória transitória e não são armazenados ou registrados.
+- **Segredos do cliente:**
+    - Segredos compartilhados não devem ser usados para provar a identidade do cliente porque o cliente poderia ser impersonado ("client_id" já serve como prova). Se eles usarem segredos do cliente, certifique-se de que eles estão armazenados em armazenamento local seguro.
+- **Credenciais do usuário final:**
+    - Proteja a transmissão de credenciais do usuário final com um método de camada de transporte, como TLS.
 - **Tokens:**
-    - Keep access tokens in transient memory.
-    - Access tokens must be transmitted over an encrypted connection.
-    - Reduce the scope and duration of access tokens when end-to-end confidentiality can't be guaranteed or the token provides access to sensitive information or transactions.
-    - Remember that an attacker who has stolen tokens can access their scope and all resources associated with them if the app uses access tokens as bearer tokens with no other way to identify the client.
-    - Store refresh tokens in secure local storage; they are long-term credentials.
+    - Mantenha tokens de acesso na memória transitória.
+    - Tokens de acesso devem ser transmitidos sobre uma conexão criptografada.
+    - Reduza o escopo e a duração dos tokens de acesso quando a confidencialidade ponto a ponto não puder ser garantida ou o token fornecer acesso a informações ou transações sensíveis.
+    - Lembre-se de que um atacante que roubou tokens pode acessar seu escopo e todos os recursos associados a eles se o aplicativo usar tokens de acesso como tokens bearer sem outra maneira de identificar o cliente.
+    - Armazene tokens de atualização em armazenamento local seguro; eles são credenciais de longo prazo.
 
-## User Logout
+## Logout do Usuário
 
-Failing to destroy the server-side session is one of the most common logout functionality implementation errors. This error keeps the session or token alive, even after the user logs out of the application. An attacker who gets valid authentication information can continue to use it and hijack a user's account.
+Falhar em destruir a sessão do lado do servidor é um dos erros de implementação de funcionalidade de logout mais comuns. Este erro mantém a sessão ou token vivo, mesmo após o usuário fazer logout do aplicativo. Um atacante que obtém informações de autenticação válidas pode continuar a usá-las e sequestrar a conta de um usuário.
 
-Many mobile apps don't automatically log users out. There can be various reasons, such as: because it is inconvenient for customers, or because of decisions made when implementing stateless authentication. The application should still have a logout function, and it should be implemented according to best practices, destroying all locally stored tokens or session identifiers.
+Muitos aplicativos móveis não fazem logout automático dos usuários. Pode haver várias razões, como: porque é inconveniente para os clientes, ou devido a decisões tomadas ao implementar autenticação stateless. O aplicativo ainda deve ter uma função de logout, e deve ser implementada de acordo com as melhores práticas, destruindo todos os tokens ou identificadores de sessão armazenados localmente.
 
-If session information is stored on the server, it should be destroyed by sending a logout request to that server. In case of a high-risk application, tokens should be invalidated. Not removing tokens or session identifiers can result in unauthorized access to the application in case the tokens are leaked.
-Note that other sensitive types of information should be removed as well, as any information that is not properly cleared may be leaked later, for example during a device backup.
+Se informações de sessão são armazenadas no servidor, elas devem ser destruídas enviando uma solicitação de logout para esse servidor. No caso de um aplicativo de alto risco, os tokens devem ser invalidados. Não remover tokens ou identificadores de sessão pode resultar em acesso não autorizado ao aplicativo no caso de os tokens serem vazados.
+Note que outros tipos sensíveis de informação também devem ser removidos, pois qualquer informação que não seja adequadamente limpa pode ser vazada posteriormente, por exemplo durante um backup do dispositivo.
 
-Here are different examples of session termination for proper server-side logout:
+Aqui estão diferentes exemplos de término de sessão para logout adequado do lado do servidor:
 
 - [Spring (Java)](https://docs.spring.io/autorepo/docs/spring-security/4.1.x/apidocs/org/springframework/security/web/authentication/logout/SecurityContextLogoutHandler.html "Spring (Java)")
 - [Ruby on Rails](https://guides.rubyonrails.org/security.html "Ruby on Rails")
 - [PHP](https://php.net/manual/en/function.session-destroy.php "PHP")
 
-If access and refresh tokens are used with stateless authentication, they should be deleted from the mobile device. The [refresh token should be invalidated on the server](https://auth0.com/blog/denylist-json-web-token-api-keys/ "Invalidating JSON Web Token API Keys").
+Se tokens de acesso e atualização são usados com autenticação stateless, eles devem ser excluídos do dispositivo móvel. O [token de atualização deve ser invalidado no servidor](https://auth0.com/blog/denylist-json-web-token-api-keys/ "Invalidating JSON Web Token API Keys").
 
-The OWASP Web Testing Guide ([WSTG-SESS-06](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/06-Testing_for_Logout_Functionality "WSTG-SESS-006")) includes a detailed explanation and more test cases.
+O OWASP Web Testing Guide ([WSTG-SESS-06](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/06-Testing_for_Logout_Functionality "WSTG-SESS-006")) inclui uma explicação detalhada e mais casos de teste.
 
-## Supplementary Authentication
+## Autenticação Suplementar
 
-Authentication schemes are sometimes supplemented by [passive contextual authentication](https://pdfs.semanticscholar.org/13aa/7bf53070ac8e209a84f6389bab58a1e2c888.pdf "Best Practices for
-Multi-factor Authentication"), which can incorporate:
+Esquemas de autenticação são às vezes suplementados por [autenticação contextual passiva](https://pdfs.semanticscholar.org/13aa/7bf53070ac8e209a84f6389bab58a1e2c888.pdf "Best Practices for
+Multi-factor Authentication"), que pode incorporar:
 
-- Geolocation
-- IP address
-- Time of day
-- The device being used
+- Geolocalização
+- Endereço IP
+- Hora do dia
+- O dispositivo sendo usado
 
-Ideally, in such a system the user's context is compared to previously recorded data to identify anomalies that might indicate account abuse or potential fraud. This process is transparent to the user, but can become a powerful deterrent to attackers.
+Idealmente, em tal sistema o contexto do usuário é comparado a dados previamente registrados para identificar anomalias que possam indicar abuso de conta ou potencial fraude. Este processo é transparente para o usuário, mas pode se tornar um poderoso impedimento para atacantes.
 
-## Two-factor Authentication
+## Autenticação de Dois Fatores
 
-Two-factor authentication (2FA) is standard for apps that allow users to access sensitive functions and data. Common implementations use a password for the first factor and any of the following as the second factor:
+Autenticação de dois fatores (2FA) é padrão para aplicativos que permitem que usuários acessem funções e dados sensíveis. Implementações comuns usam uma senha para o primeiro fator e qualquer um dos seguintes como o segundo fator:
 
-- One-time password via SMS (SMS-OTP)
-- One-time code via phone call
-- Hardware or software token
-- Push notifications in combination with PKI and local authentication
+- Senha única via SMS (SMS-OTP)
+- Código único via chamada telefônica
+- Token de hardware ou software
+- Notificações push em combinação com PKI e autenticação local
 
-Whatever option is used, it always must be enforced and verified on the server-side and never on client-side. Otherwise the 2FA can be easily bypassed within the app.
+Qualquer opção que seja usada, sempre deve ser aplicada e verificada no lado do servidor e nunca no lado do cliente. Caso contrário, o 2FA pode ser facilmente contornado dentro do aplicativo.
 
-The 2FA can be performed at login or later in the user's session.
+O 2FA pode ser realizado no login ou posteriormente na sessão do usuário.
 
-> For example, after logging in to a banking app with a username and PIN, the user is authorized to perform non-sensitive tasks. Once the user attempts to execute a bank transfer, the second factor ("step-up authentication") must be presented.
+> Por exemplo, após fazer login em um aplicativo bancário com um nome de usuário e PIN, o usuário está autorizado a realizar tarefas não sensíveis. Uma vez que o usuário tenta executar uma transferência bancária, o segundo fator ("autenticação step-up") deve ser apresentado.
 
-**Best Practices:**
+**Melhores Práticas:**
 
-- Don't roll your own 2FA: There are various two-factor authentication mechanisms available which can range from third-party libraries, usage of external apps to self implemented checks by the developers.
-- Use short-lived OTPs: A OTP should be valid for only a certain amount of time (usually 30 seconds) and after keying in the OTP wrongly several times (usually 3 times) the provided OTP should be invalidated and the user should be redirected to the landing page or logged out.
-- Store tokens securely: To prevent these kind of attacks, the application should always verify some kind of user token or other dynamic information related to the user that was previously securely stored (e.g. in the Keychain/KeyStore).
+- Não implemente seu próprio 2FA: Existem vários mecanismos de autenticação de dois fatores disponíveis que podem variar desde bibliotecas de terceiros, uso de aplicativos externos até verificações auto implementadas pelos desenvolvedores.
+- Use OTPs de curta duração: Um OTP deve ser válido apenas por uma certa quantidade de tempo (geralmente 30 segundos) e após digitar o OTP incorretamente várias vezes (geralmente 3 vezes) o OTP fornecido deve ser invalidado e o usuário deve ser redirecionado para a página inicial ou deslogado.
+- Armazene tokens com segurança: Para prevenir esses tipos de ataques, o aplicativo deve sempre verificar algum tipo de token de usuário ou outra informação dinâmica relacionada ao usuário que foi previamente armazenada com segurança (por exemplo, no Keychain/KeyStore).
 
 ### SMS-OTP
 
-Although one-time passwords (OTP) sent via SMS are a common second factor for two-factor authentication, this method has its shortcomings. In 2016, NIST suggested: "Due to the risk that SMS messages may be intercepted or redirected, implementers of new systems SHOULD carefully consider alternative authenticators.". Below you will find a list of some related threats and suggestions to avoid successful attacks on SMS-OTP.
+Embora senhas únicas (OTP) enviadas via SMS sejam um segundo fator comum para autenticação de dois fatores, este método tem suas deficiências. Em 2016, o NIST sugeriu: "Devido ao risco de que mensagens SMS possam ser interceptadas ou redirecionadas, implementadores de novos sistemas DEVEM considerar cuidadosamente autenticadores alternativos.". Abaixo você encontrará uma lista de algumas ameaças relacionadas e sugestões para evitar ataques bem-sucedidos em SMS-OTP.
 
-Threats:
+Ameaças:
 
-- Wireless Interception: The adversary can intercept SMS messages by abusing femtocells and other known vulnerabilities in the telecommunications network.
-- Trojans: Installed malicious applications with access to text messages may forward the OTP to another number or backend.
-- SIM SWAP Attack: In this attack, the adversary calls the phone company, or works for them, and has the victim's number moved to a SIM card owned by the adversary. If successful, the adversary can see the SMS messages which are sent to the victim's phone number. This includes the messages used in the two-factor authentication.
-- Verification Code Forwarding Attack: This social engineering attack relies on the trust the users have in the company providing the OTP. In this attack, the user receives a code and is later asked to relay that code using the same means in which it received the information.
-- Voicemail: Some two-factor authentication schemes allow the OTP to be sent through a phone call when SMS is no longer preferred or available. Many of these calls, if not answered, send the information to voicemail. If an attacker was able to gain access to the voicemail, they could also use the OTP to gain access to a user's account.
+- Interceptação Sem Fio: O adversário pode interceptar mensagens SMS abusando de femtocells e outras vulnerabilidades conhecidas na rede de telecomunicações.
+- Trojans: Aplicativos maliciosos instalados com acesso a mensagens de texto podem encaminhar o OTP para outro número ou backend.
+- Ataque SIM SWAP: Neste ataque, o adversário liga para a companhia telefônica, ou trabalha para ela, e tem o número da vítima movido para um cartão SIM pertencente ao adversário. Se bem-sucedido, o adversário pode ver as mensagens SMS que são enviadas para o número de telefone da vítima. Isso inclui as mensagens usadas na autenticação de dois fatores.
+- Ataque de Encaminhamento de Código de Verificação: Este ataque de engenharia social depende da confiança que os usuários têm na empresa que fornece o OTP. Neste ataque, o usuário recebe um código e é posteriormente solicitado a retransmitir esse código usando os mesmos meios pelos quais recebeu a informação.
+- Correio de Voz: Alguns esquemas de autenticação de dois fatores permitem que o OTP seja enviado através de uma chamada telefônica quando o SMS não é mais preferido ou disponível. Muitas dessas chamadas, se não atendidas, enviam a informação para o correio de voz. Se um atacante conseguisse acesso ao correio de voz, ele também poderia usar o OTP para obter acesso à conta de um usuário.
 
-You can find below several suggestions to reduce the likelihood of exploitation when using SMS for OTP:
+Você pode encontrar abaixo várias sugestões para reduzir a probabilidade de exploração ao usar SMS para OTP:
 
-- **Messaging**: When sending an OTP via SMS, be sure to include a message that lets the user know 1) what to do if they did not request the code 2) your company will never call or text them requesting that they relay their password or code.
-- **Dedicated Channel**: When using the OS push notification feature (APN on iOS and FCM on Android), OTPs can be sent securely to a registered application. This information is, compared to SMS, not accessible by other applications. Alternatively of a OTP the push notification could trigger a pop-up to approve the requested access.
-- **Entropy**: Use authenticators with high entropy to make OTPs harder to crack or guess and use at least 6 digits. Make sure that digits are separates in smaller groups in case people have to remember them to copy them to your app.
-- **Avoid Voicemail**: If a user prefers to receive a phone call, do not leave the OTP information as a voicemail.
+- **Mensagens**: Ao enviar um OTP via SMS, certifique-se de incluir uma mensagem que informe ao usuário 1) o que fazer se ele não solicitou o código 2) sua empresa nunca ligará ou enviará mensagens solicitando que ele retransmita sua senha ou código.
+- **Canal Dedicado**: Ao usar o recurso de notificação push do SO (AP
+no iOS e FCM no Android), OTPs podem ser enviados com segurança para um aplicativo registrado. Esta informação é, comparada ao SMS, não acessível por outros aplicativos. Alternativamente de um OTP, a notificação push poderia acionar um pop-up para aprovar o acesso solicitado.
+- **Entropia**: Use autenticadores com alta entropia para tornar OTPs mais difíceis de quebrar ou adivinhar e use pelo menos 6 dígitos. Certifique-se de que os dígitos sejam separados em grupos menores caso as pessoas precisem lembrá-los para copiá-los para seu aplicativo.
+- **Evite Correio de Voz**: Se um usuário preferir receber uma chamada telefônica, não deixe a informação do OTP como um correio de voz.
 
-**SMS-OTP Research:**
+**Pesquisa SMS-OTP:**
 
 - [#dmitrienko] Dmitrienko, Alexandra, et al. "On the (in) security of mobile two-factor authentication." International Conference on Financial Cryptography and Data Security. Springer, Berlin, Heidelberg, 2014.
 - [#grassi] Grassi, Paul A., et al. Digital identity guidelines: Authentication and lifecycle management (DRAFT). No. Special Publication (NIST SP)-800-63B. 2016.
@@ -318,37 +322,37 @@ You can find below several suggestions to reduce the likelihood of exploitation 
 - [#siadati] Siadati, Hossein, et al. "Mind your SMSes: Mitigating social engineering in second factor authentication." Computers & Security 65 (2017): 14-28.
 - [#siadati2] Siadati, Hossein, Toan Nguyen, and Nasir Memon. "Verification code forwarding attack (short paper)." International Conference on Passwords. Springer, Cham, 2015.
 
-### Transaction Signing with Push Notifications and PKI
+### Assinatura de Transação com Notificações Push e PKI
 
-Another alternative and strong mechanisms to implement a second factor is transaction signing.
+Outro mecanismo alternativo e forte para implementar um segundo fator é a assinatura de transação.
 
-Transaction signing requires authentication of the user's approval of critical transactions. Asymmetric cryptography is the best way to implement transaction signing. The app will generate a public/private key pair when the user signs up, then registers the public key on the backend. The private key is securely stored in the KeyStore (Android) or KeyChain (iOS). To authorize a transaction, the backend sends the mobile app a push notification containing the transaction data. The user is then asked to confirm or deny the transaction. After confirmation, the user is prompted to unlock the Keychain (by entering the PIN or fingerprint), and the data is signed with user's private key. The signed transaction is then sent to the server, which verifies the signature with the user's public key.
+A assinatura de transação requer autenticação da aprovação do usuário de transações críticas. Criptografia assimétrica é a melhor maneira de implementar assinatura de transação. O aplicativo gerará um par de chaves pública/privada quando o usuário se cadastrar, então registra a chave pública no backend. A chave privada é armazenada com segurança no KeyStore (Android) ou KeyChain (iOS). Para autorizar uma transação, o backend envia ao aplicativo móvel uma notificação push contendo os dados da transação. O usuário é então solicitado a confirmar ou negar a transação. Após confirmação, o usuário é solicitado a desbloquear o Keychain (inserindo o PIN ou impressão digital), e os dados são assinados com a chave privada do usuário. A transação assinada é então enviada para o servidor, que verifica a assinatura com a chave pública do usuário.
 
-## Login Activity and Device Blocking
+## Atividade de Login e Bloqueio de Dispositivo
 
-It is a best practice that apps should inform the user about all login activities within the app with the possibility of blocking certain devices. This can be broken down into various scenarios:
+É uma melhor prática que aplicativos devam informar o usuário sobre todas as atividades de login dentro do aplicativo com a possibilidade de bloquear certos dispositivos. Isso pode ser dividido em vários cenários:
 
-1. The application provides a push notification the moment their account is used on another device to notify the user of different activities. The user can then block this device after opening the app via the push-notification.
-2. The application provides an overview of the last session after login. If the previous session was with a different configuration (e.g. location, device, app-version) compared to the current configuration, then the user should have the option to report suspicious activities and block devices used in the previous session.
-3. The application provides an overview of the last session after login at all times.
-4. The application has a self-service portal in which the user can see an audit-log. This allows the user to manage the different devices that are logged in.
+1. O aplicativo fornece uma notificação push no momento em que sua conta é usada em outro dispositivo para notificar o usuário de atividades diferentes. O usuário pode então bloquear este dispositivo após abrir o aplicativo via notificação push.
+2. O aplicativo fornece uma visão geral da última sessão após o login. Se a sessão anterior foi com uma configuração diferente (por exemplo, localização, dispositivo, versão do aplicativo) comparada à configuração atual, então o usuário deve ter a opção de reportar atividades suspeitas e bloquear dispositivos usados na sessão anterior.
+3. O aplicativo fornece uma visão geral da última sessão após o login em todos os momentos.
+4. O aplicativo tem um portal de autoatendimento no qual o usuário pode ver um log de auditoria. Isso permite que o usuário gerencie os diferentes dispositivos que estão logados.
 
-The developer can make use of specific meta-information and associate it to each different activity or event within the application. This will make it easier for the user to spot suspicious behavior and block the corresponding device. The meta-information may include:
+O desenvolvedor pode fazer uso de meta-informação específica e associá-la a cada atividade ou evento diferente dentro do aplicativo. Isso tornará mais fácil para o usuário detectar comportamento suspeito e bloquear o dispositivo correspondente. A meta-informação pode incluir:
 
-- Device: The user can clearly identify all devices where the app is being used.
-- Date and Time: The user can clearly see the latest date and time when the app was used.
-- Location: The user can clearly identify the latest locations where the app was used.
+- Dispositivo: O usuário pode identificar claramente todos os dispositivos onde o aplicativo está sendo usado.
+- Data e Hora: O usuário pode ver claramente a última data e hora quando o aplicativo foi usado.
+- Localização: O usuário pode identificar claramente os últimos locais onde o aplicativo foi usado.
 
-The application can provide a list of activities history which will be updated after each sensitive activity within the application. The choice of which activities to audit needs to be done for each application based on the data it handles and the level of security risk the team is willing to have. Below is a list of common sensitive activities that are usually audited:
+O aplicativo pode fornecer uma lista de histórico de atividades que será atualizada após cada atividade sensível dentro do aplicativo. A escolha de quais atividades auditar precisa ser feita para cada aplicativo com base nos dados que ele manipula e no nível de risco de segurança que a equipe está disposta a ter. Abaixo está uma lista de atividades sensíveis comuns que são geralmente auditadas:
 
-- Login attempts
-- Password changes
-- Personal Identifiable Information changes (name, email address, telephone number, etc.)
-- Sensitive activities (purchase, accessing important resources, etc.)
-- Consent to Terms and Conditions clauses
+- Tentativas de login
+- Alterações de senha
+- Alterações de Informações Pessoais Identificáveis (nome, endereço de email, número de telefone, etc.)
+- Atividades sensíveis (compra, acesso a recursos importantes, etc.)
+- Consentimento a cláusulas de Termos e Condições
 
-Paid content requires special care, and additional meta-information (e.g., operation cost, credit, etc.) might be used to ensure user's knowledge about the whole operation's parameters.
+Conteúdo pago requer cuidado especial, e meta-informação adicional (por exemplo, custo da operação, crédito, etc.) pode ser usada para garantir o conhecimento do usuário sobre todos os parâmetros da operação.
 
-In addition, non-repudiation mechanisms should be applied to sensitive transactions (e.g. paid content access, given consent to Terms and Conditions clauses, etc.) in order to prove that a specific transaction was in fact performed (integrity) and by whom (authentication).
+Além disso, mecanismos de não-repúdio devem ser aplicados a transações sensíveis (por exemplo, acesso a conteúdo pago, consentimento dado a cláusulas de Termos e Condições, etc.) para provar que uma transação específica foi de fato realizada (integridade) e por quem (autenticação).
 
-Lastly, it should be possible for the user to log out specific open sessions and in some cases it might be interesting to fully block certain devices using a device identifier.
+Por último, deve ser possível para o usuário fazer logout de sessões abertas específicas e em alguns casos pode ser interessante bloquear totalmente certos dispositivos usando um identificador de dispositivo.

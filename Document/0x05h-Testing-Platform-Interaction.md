@@ -3,6 +3,6 @@ masvs_category: MASVS-PLATFORM
 platform: android
 ---
 
-# Android Platform APIs
+# APIs da Plataforma Android
 
-## Overview
+## Visão Geral

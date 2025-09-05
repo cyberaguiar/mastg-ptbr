@@ -3,6 +3,6 @@ masvs_category: MASVS-CODE
 platform: android
 ---
 
-# Android Code Quality and Build Settings
+# Qualidade de Código e Configurações de Build Android
 
-## Overview
+## Visão Geral

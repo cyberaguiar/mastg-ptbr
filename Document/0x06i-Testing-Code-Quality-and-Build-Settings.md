@@ -3,6 +3,6 @@ masvs_category: MASVS-CODE
 platform: ios
 ---
 
-# iOS Code Quality and Build Settings
+# Qualidade de Código e Configurações de Build iOS
 
-## Overview
+## Visão Geral

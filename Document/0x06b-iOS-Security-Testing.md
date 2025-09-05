@@ -1,50 +1,50 @@
-# iOS Security Testing
+# Teste de Segurança iOS
 
-In this chapter, we'll dive into setting up a security testing environment and introduce you to some practical processes and techniques for testing the security of iOS apps. These are the building blocks for the MASTG test cases.
+Neste capítulo, vamos mergulhar na configuração de um ambiente de teste de segurança e apresentar alguns processos e técnicas práticas para testar a segurança de aplicativos iOS. Estes são os blocos de construção para os casos de teste MASTG.
 
-## iOS Testing Setup
+## Configuração de Teste iOS
 
-Although you can use a Linux or Windows host computer for testing, you'll find that many tasks are difficult or impossible on these platforms. In addition, the Xcode development environment and the iOS SDK are only available for macOS. This means that you'll definitely want to work on macOS for source code analysis and debugging (it also makes black box testing easier).
+Embora você possa usar um computador host Linux ou Windows para testes, descobrirá que muitas tarefas são difíceis ou impossíveis nessas plataformas. Além disso, o ambiente de desenvolvimento Xcode e o iOS SDK estão disponíveis apenas para macOS. Isso significa que você definitivamente vai querer trabalhar no macOS para análise de código fonte e depuração (também facilita o teste de caixa preta).
 
-### Host Device
+### Dispositivo Host
 
-The following is the most basic iOS app testing setup:
+A seguir está a configuração mais básica para teste de aplicativos iOS:
 
-- Ideally macOS host computer with admin rights
-- @MASTG-TOOL-0070 and @MASTG-TOOL-0071 installed.
-- Wi-Fi network that permits client-to-client traffic.
-- At least one jailbroken iOS device (of the desired iOS version).
-- @MASTG-TOOL-0097 or other interception proxy tool.
+- Idealmente computador host macOS com direitos de administrador
+- @MASTG-TOOL-0070 e @MASTG-TOOL-0071 instalados.
+- Rede Wi-Fi que permite tráfego cliente-a-cliente.
+- Pelo menos um dispositivo iOS jailbroken (da versão iOS desejada).
+- @MASTG-TOOL-0097 ou outra ferramenta de proxy de interceptação.
 
-### Obtaining the UDID of an iOS device
+### Obtendo o UDID de um dispositivo iOS
 
-The UDID is a 40-digit unique sequence of letters and numbers to identify an iOS device. You can find the UDID of your iOS device on macOS Catalina onwards in the Finder app, as iTunes is not available anymore in Catalina. Open Finder and select the connected iOS device in the sidebar.
+O UDID é uma sequência única de 40 dígitos de letras e números para identificar um dispositivo iOS. Você pode encontrar o UDID do seu dispositivo iOS no macOS Catalina em diante no aplicativo Finder, já que o iTunes não está mais disponível no Catalina. Abra o Finder e selecione o dispositivo iOS conectado na barra lateral.
 
 <img src="Images/Chapters/0x06b/finder_ipad_view.png" width="100%" />
 
-Click on the text containing the model, storage capacity, and battery information, and it will display the serial number, UDID, and model instead:
+Clique no texto contendo o modelo, capacidade de armazenamento e informações da bateria, e ele exibirá o número de série, UDID e modelo:
 
 <img src="Images/Chapters/0x06b/finder_unveil_udid.png" width="100%" />
 
-You can copy the UDID by right clicking on it.
+Você pode copiar o UDID clicando com o botão direito nele.
 
-It is also possible to get the UDID via various command line tools on macOS while the device is attached via USB:
+Também é possível obter o UDID via várias ferramentas de linha de comando no macOS enquanto o dispositivo está conectado via USB:
 
-- By using the [I/O Registry Explorer](https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/IOKitFundamentals/TheRegistry/TheRegistry.html "I/O Registry Explorer") tool `ioreg`:
+- Usando a ferramenta [I/O Registry Explorer](https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/IOKitFundamentals/TheRegistry/TheRegistry.html "I/O Registry Explorer") `ioreg`:
 
     ```sh
     $ ioreg -p IOUSB -l | grep "USB Serial"
     |         "USB Serial Number" = "9e8ada44246cee813e2f8c1407520bf2f84849ec"
     ```
 
-- By using @MASTG-TOOL-0126:
+- Usando @MASTG-TOOL-0126:
 
     ```sh
     $ idevice_id -l
     316f01bd160932d2bf2f95f1f142bc29b1c62dbc
     ```
 
-- By using the system_profiler:
+- Usando o system_profiler:
 
     ```sh
     $ system_profiler SPUSBDataType | sed -n -e '/iPad/,/Serial/p;/iPhone/,/Serial/p;/iPod/,/Serial/p' | grep "Serial Number:"
@@ -52,79 +52,79 @@ It is also possible to get the UDID via various command line tools on macOS whil
                 Serial Number: 64655621de6ef5e56a874d63f1e1bdd14f7103b1
     ```
 
-- By using instruments:
+- Usando instruments:
 
     ```sh
     instruments -s devices
     ```
 
-### Testing on a real device (Jailbroken)
+### Testando em um dispositivo real (Jailbroken)
 
-You should have a jailbroken iPhone or iPad for running tests. These devices allow root access and tool installation, making the security testing process more straightforward. If you don't have access to a jailbroken device, you can apply the workarounds described later in this chapter, but be prepared for a more difficult experience.
+Você deve ter um iPhone ou iPad jailbroken para executar testes. Esses dispositivos permitem acesso root e instalação de ferramentas, tornando o processo de teste de segurança mais direto. Se você não tem acesso a um dispositivo jailbroken, pode aplicar as soluções alternativas descritas posteriormente neste capítulo, mas esteja preparado para uma experiência mais difícil.
 
-### Testing on the iOS Simulator
+### Testando no iOS Simulator
 
-Unlike the Android emulator, which fully emulates the hardware of an actual Android device, the iOS SDK simulator offers a higher-level _simulation_ of an iOS device. Most importantly, emulator binaries are compiled to x86 code instead of ARM code. Apps compiled for a real device don't run, making the simulator useless for black box analysis and reverse engineering.
+Ao contrário do emulador Android, que emula completamente o hardware de um dispositivo Android real, o simulador iOS SDK oferece uma _simulação_ de nível superior de um dispositivo iOS. Mais importante, os binários do emulador são compilados para código x86 em vez de código ARM. Aplicativos compilados para um dispositivo real não são executados, tornando o simulador inútil para análise de caixa preta e engenharia reversa.
 
-### Testing on an Emulator
+### Testando em um Emulador
 
-@MASTG-TOOL-0108 is the only publicly available iOS emulator. It is an enterprise SaaS solution with a per user license model and does not offer community licenses.
+@MASTG-TOOL-0108 é o único emulador iOS disponível publicamente. É uma solução SaaS empresarial com um modelo de licença por usuário e não oferece licenças comunitárias.
 
-### Getting Privileged Access
+### Obtendo Acesso Privilegiado
 
-iOS jailbreaking is often compared to Android rooting, but the process is actually quite different. To explain the difference, we'll first review the concepts of "rooting" and "flashing" on Android.
+O jailbreaking do iOS é frequentemente comparado ao rooting do Android, mas o processo é realmente bastante diferente. Para explicar a diferença, primeiro revisaremos os conceitos de "rooting" e "flashing" no Android.
 
-- **Rooting**: This typically involves installing the `su` binary on the system or replacing the whole system with a rooted custom ROM. Exploits aren't required to obtain root access as long as the bootloader is accessible.
-- **Flashing custom ROMs**: This allows you to replace the OS that's running on the device after you unlock the bootloader. The bootloader may require an exploit to unlock it.
+- **Rooting**: Isso normalmente envolve instalar o binário `su` no sistema ou substituir todo o sistema por uma ROM personalizada com root. Exploits não são necessários para obter acesso root, desde que o bootloader esteja acessível.
+- **Flashing de ROMs personalizadas**: Isso permite substituir o OS que está sendo executado no dispositivo após desbloquear o bootloader. O bootloader pode exigir um exploit para desbloqueá-lo.
 
-On iOS devices, flashing a custom ROM is impossible because the iOS bootloader only allows Apple-signed images to be booted and flashed. This is why even official iOS images can't be installed if they aren't signed by Apple, and it makes iOS downgrades only possible for as long as the previous iOS version is still signed.
+Em dispositivos iOS, flashing de ROMs personalizadas é impossível porque o bootloader iOS só permite inicializar e flashear imagens assinadas pela Apple. É por isso que mesmo imagens iOS oficiais não podem ser instaladas se não forem assinadas pela Apple, e torna os downgrades do iOS possíveis apenas enquanto a versão anterior do iOS ainda estiver sendo assinada.
 
-The purpose of jailbreaking is to disable iOS protections (Apple's code signing mechanisms in particular) so that arbitrary unsigned code can run on the device (e.g. custom code or downloaded from alternative app stores such as @MASTG-TOOL-0047 or @MASTG-TOOL-0064). The word "jailbreak" is a colloquial reference to all-in-one tools that automate the disabling process.
+O propósito do jailbreaking é desativar as proteções do iOS (mecanismos de code signing da Apple em particular) para que código arbitrário não assinado possa ser executado no dispositivo (por exemplo, código personalizado ou baixado de lojas de aplicativos alternativas como @MASTG-TOOL-0047 ou @MASTG-TOOL-0064). A palavra "jailbreak" é uma referência coloquial a ferramentas all-in-one que automatizam o processo de desativação.
 
-Developing a jailbreak for a given version of iOS is not easy. As a security tester, you'll most likely want to use publicly available jailbreak tools. Still, we recommend studying the techniques that have been used to jailbreak various versions of iOS-you'll encounter many interesting exploits and learn a lot about OS internals. For example, Pangu9 for iOS 9.x [exploited at least five vulnerabilities](https://www.theiphonewiki.com/wiki/Jailbreak_Exploits "Jailbreak Exploits"), including a use-after-free kernel bug (CVE-2015-6794) and an arbitrary file system access vulnerability in the Photos app (CVE-2015-7037).
+Desenvolver um jailbreak para uma determinada versão do iOS não é fácil. Como testador de segurança, você provavelmente vai querer usar ferramentas de jailbreak disponíveis publicamente. Ainda assim, recomendamos estudar as técnicas que foram usadas para fazer jailbreak em várias versões do iOS - você encontrará muitos exploits interessantes e aprenderá muito sobre os internos do OS. Por exemplo, Pangu9 para iOS 9.x [explorou pelo menos cinco vulnerabilidades](https://www.theiphonewiki.com/wiki/Jailbreak_Exploits "Jailbreak Exploits"), incluindo um bug de kernel use-after-free (CVE-2015-6794) e uma vulnerabilidade de acesso arbitrário ao sistema de arquivos no aplicativo Fotos (CVE-2015-7037).
 
-Some apps attempt to detect whether the iOS device on which they're running is jailbroken. This is because jailbreaking deactivates some of iOS' default security mechanisms. However, there are several ways to get around these detections, and we'll introduce them in the chapter ["iOS Anti-Reversing Defenses"](0x06j-Testing-Resiliency-Against-Reverse-Engineering.md).
+Alguns aplicativos tentam detectar se o dispositivo iOS no qual estão sendo executados está com jailbreak. Isso ocorre porque o jailbreak desativa alguns dos mecanismos de segurança padrão do iOS. No entanto, existem várias maneiras de contornar essas detecções, e as apresentaremos no capítulo ["Defesas Anti-Reversão iOS"](0x06j-Testing-Resiliency-Against-Reverse-Engineering.md).
 
-#### Benefits of Jailbreaking
+#### Benefícios do Jailbreaking
 
-End users often jailbreak their devices to tweak the iOS system's appearance, add new features, and install third-party apps from unofficial app stores. For a security tester, however, jailbreaking an iOS device has even more benefits. They include, but aren't limited to, the following:
+Usuários finais frequentemente fazem jailbreak em seus dispositivos para ajustar a aparência do sistema iOS, adicionar novos recursos e instalar aplicativos de terceiros de lojas de aplicativos não oficiais. Para um testador de segurança, no entanto, fazer jailbreak em um dispositivo iOS tem ainda mais benefícios. Eles incluem, mas não se limitam a:
 
-- Root access to the file system.
-- Possibility of executing applications that haven't been signed by Apple (which includes many security tools).
-- Unrestricted debugging and dynamic analysis.
-- Access to the Objective-C or Swift runtime.
+- Acesso root ao sistema de arquivos.
+- Possibilidade de executar aplicativos que não foram assinados pela Apple (o que inclui muitas ferramentas de segurança).
+- Depuração e análise dinâmica irrestritas.
+- Acesso ao runtime Objective-C ou Swift.
 
-#### Jailbreak Types
+#### Tipos de Jailbreak
 
-There are _tethered_, _semi-tethered_, _semi-untethered_, and _untethered_ jailbreaks.
+Existem jailbreaks _tethered_, _semi-tethered_, _semi-untethered_ e _untethered_.
 
-- Tethered jailbreaks don't persist through reboots, so re-applying jailbreaks requires the device to be connected (tethered) to a computer during every reboot. The device may not reboot at all if the computer is not connected.
+- Jailbreaks tethered não persistem através de reinicializações, portanto, reaplicar jailbreaks requer que o dispositivo esteja conectado (tethered) a um computador durante cada reinicialização. O dispositivo pode nem reinicializar se o computador não estiver conectado.
 
-- Semi-tethered jailbreaks can't be re-applied unless the device is connected to a computer during reboot. The device can also boot into non-jailbroken mode on its own.
+- Jailbreaks semi-tethered não podem ser reaplicados a menos que o dispositivo esteja conectado a um computador durante a reinicialização. O dispositivo também pode inicializar no modo não jailbroken por conta própria.
 
-- Semi-untethered jailbreaks allow the device to boot on its own, but the kernel patches (or user-land modifications) for disabling code signing aren't applied automatically. The user must re-jailbreak the device by starting an app or visiting a website (not requiring a connection to a computer, hence the term untethered).
+- Jailbreaks semi-untethered permitem que o dispositivo inicialize por conta própria, mas os patches do kernel (ou modificações user-land) para desativar o code signing não são aplicados automaticamente. O usuário deve refazer o jailbreak do dispositivo iniciando um aplicativo ou visitando um site (não requerendo conexão com um computador, daí o termo untethered).
 
-- Untethered jailbreaks are the most popular choice for end users because they need to be applied only once, after which the device will be permanently jailbroken.
+- Jailbreaks untethered são a escolha mais popular para usuários finais porque precisam ser aplicados apenas uma vez, após o que o dispositivo estará permanentemente com jailbreak.
 
-#### Caveats and Considerations
+#### Advertências e Considerações
 
-Developing a jailbreak for iOS is becoming more and more complicated as Apple continues to harden their OS. Whenever Apple becomes aware of a vulnerability, it is patched and a system update is pushed out to all users. As it is not possible to downgrade to a specific version of iOS, and since Apple only allows you to update to the latest iOS version, it is a challenge to have a device which is running a version of iOS for which a jailbreak is available. Some vulnerabilities cannot be patched by software, such as the [checkm8 exploit](https://www.theiphonewiki.com/wiki/Checkm8_Exploit "Checkm8 exploit") affecting the BootROM of all CPUs until A12.
+Desenvolver um jailbreak para iOS está se tornando cada vez mais complicado à medida que a Apple continua a endurecer seu OS. Sempre que a Apple toma conhecimento de uma vulnerabilidade, ela é corrigida e uma atualização do sistema é enviada para todos os usuários. Como não é possível fazer downgrade para uma versão específica do iOS, e como a Apple só permite que você atualize para a versão mais recente do iOS, é um desafio ter um dispositivo que esteja executando uma versão do iOS para a qual um jailbreak esteja disponível. Algumas vulnerabilidades não podem ser corrigidas por software, como o exploit [checkm8](https://www.theiphonewiki.com/wiki/Checkm8_Exploit "Checkm8 exploit") afetando o BootROM de todas as CPUs até A12.
 
-If you have a jailbroken device that you use for security testing, keep it as is unless you're 100% sure that you can re-jailbreak it after upgrading to the latest iOS version. Consider getting one (or multiple) spare device(s) (which will be updated with every major iOS release) and waiting for a jailbreak to be released publicly. Apple is usually quick to release a patch once a jailbreak has been released publicly, so you only have a couple of days to downgrade (if it is still signed by Apple) to the affected iOS version and apply the jailbreak.
+Se você tem um dispositivo com jailbreak que usa para teste de segurança, mantenha-o como está, a menos que tenha 100% de certeza de que pode refazer o jailbreak após atualizar para a versão mais recente do iOS. Considere obter um (ou vários) dispositivo(s) reserva(s) (que serão atualizados com cada lançamento principal do iOS) e aguardar até que um jailbreak seja lançado publicamente. A Apple geralmente é rápida em lançar um patch assim que um jailbreak é lançado publicamente, então você só tem alguns dias para fazer downgrade (se ainda estiver sendo assinado pela Apple) para a versão do iOS afetada e aplicar o jailbreak.
 
-iOS upgrades are based on a challenge-response process (generating the so-called SHSH blobs as a result). The device will allow the OS installation only if the response to the challenge is signed by Apple. This is what researchers call a "signing window", and it is the reason you can't simply store the OTA firmware package you downloaded and load it onto the device whenever you want to. During minor iOS upgrades, two versions may both be signed by Apple (the latest one, and the previous iOS version). This is the only situation in which you can downgrade the iOS device. You can check the current signing window and download OTA firmware from the [IPSW Downloads website](https://ipsw.me "IPSW Downloads").
+As atualizações do iOS são baseadas em um processo challenge-response (gerando os chamados SHSH blobs como resultado). O dispositivo permitirá a instalação do OS apenas se a resposta ao desafio for assinada pela Apple. Isso é o que os pesquisadores chamam de "janela de assinatura", e é a razão pela qual você não pode simplesmente armazenar o pacote de firmware OTA que baixou e carregá-lo no dispositivo sempre que quiser. Durante atualizações menores do iOS, duas versões podem estar sendo assinadas pela Apple (a mais recente e a versão anterior do iOS). Esta é a única situação em que você pode fazer downgrade do dispositivo iOS. Você pode verificar a janela de assinatura atual e baixar o firmware OTA do site [IPSW Downloads](https://ipsw.me "IPSW Downloads").
 
-For some devices and iOS versions, it is possible to downgrade to older versions in case the SHSH blobs for that device were collected when the signing window was active. More information on this can be found on the [cfw iOS Guide - Saving Blobs](https://ios.cfw.guide/saving-blobs/)
+Para alguns dispositivos e versões do iOS, é possível fazer downgrade para versões mais antigas caso os SHSH blobs para esse dispositivo tenham sido coletados quando a janela de assinatura estava ativa. Mais informações sobre isso podem ser encontradas no [cfw iOS Guide - Saving Blobs](https://ios.cfw.guide/saving-blobs/)
 
-#### Which Jailbreaking Tool to Use
+#### Qual Ferramenta de Jailbreak Usar
 
-Different iOS versions require different jailbreaking techniques. [Determine whether a public jailbreak is available for your version of iOS](https://appledb.dev/ "Apple DB"). Beware of fake tools and spyware, which are often hiding behind domain names that are similar to the name of the jailbreaking group/author.
+Diferentes versões do iOS requerem diferentes técnicas de jailbreak. [Determine se um jailbreak público está disponível para sua versão do iOS](https://appledb.dev/ "Apple DB"). Cuidado com ferramentas falsas e spyware, que frequentemente se escondem atrás de nomes de domínio semelhantes ao nome do grupo/autor do jailbreak.
 
-The iOS jailbreak scene evolves so rapidly that providing up-to-date instructions is difficult. However, we can point you to some sources that are currently reliable.
+A cena de jailbreak do iOS evolui tão rapidamente que fornecer instruções atualizadas é difícil. No entanto, podemos indicar algumas fontes atualmente confiáveis.
 
 - [AppleDB](https://appledb.dev/ "AppleDB")
 - [The iPhone Wiki](https://www.theiphonewiki.com/ "The iPhone Wiki")
 - [Redmond Pie](https://www.redmondpie.com/ "Redmone Pie")
 - [Reddit Jailbreak](https://www.reddit.com/r/jailbreak/ "Reddit Jailbreak")
 
-> Note that any modification you make to your device is at your own risk. While jailbreaking is typically safe, things can go wrong and you may end up bricking your device. No other party except yourself can be held accountable for any damage.
+> Observe que qualquer modificação que você fizer em seu dispositivo é por sua conta e risco. Embora o jailbreak seja tipicamente seguro, as coisas podem dar errado e você pode acabar brickando seu dispositivo. Nenhuma outra parte, exceto você mesmo, pode ser responsabilizada por qualquer dano.

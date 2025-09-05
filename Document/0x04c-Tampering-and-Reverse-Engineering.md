@@ -1,99 +1,100 @@
+
 ---
 masvs_category: MASVS-RESILIENCE
 platform: all
 ---
 
-# Mobile App Tampering and Reverse Engineering
+# Adulteração e Engenharia Reversa de Aplicativos Móveis
 
-Reverse engineering and tampering techniques have long belonged to the realm of crackers, modders, malware analysts, etc. For "traditional" security testers and researchers, reverse engineering has been more of a complementary skill. But the tides are turning: mobile app black-box testing increasingly requires disassembling compiled apps, applying patches, and tampering with binary code or even live processes. The fact that many mobile apps implement defenses against unwelcome tampering doesn't make things easier for security testers.
+As técnicas de engenharia reversa e adulteração há muito pertencem ao domínio de crackers, modders, analistas de malware, etc. Para testadores e pesquisadores de segurança "tradicionais", a engenharia reversa tem sido mais uma habilidade complementar. Mas as marés estão mudando: o teste de caixa preta de aplicativos móveis requer cada vez mais a desmontagem de aplicativos compilados, aplicação de patches e adulteração de código binário ou até mesmo de processos em execução. O fato de que muitos aplicativos móveis implementam defesas contra adulteração indesejada não facilita as coisas para os testadores de segurança.
 
-Reverse engineering a mobile app is the process of analyzing the compiled app to extract information about its source code. The goal of reverse engineering is _comprehending_ the code.
+A engenharia reversa de um aplicativo móvel é o processo de analisar o aplicativo compilado para extrair informações sobre seu código-fonte. O objetivo da engenharia reversa é _compreender_ o código.
 
-_Tampering_ is the process of changing a mobile app (either the compiled app or the running process) or its environment to affect its behavior. For example, an app might refuse to run on your rooted test device, making it impossible to run some of your tests. In such cases, you'll want to alter the app's behavior.
+A _adulteração_ é o processo de alterar um aplicativo móvel (seja o aplicativo compilado ou o processo em execução) ou seu ambiente para afetar seu comportamento. Por exemplo, um aplicativo pode se recusar a ser executado em seu dispositivo de teste com root, tornando impossível executar alguns de seus testes. Nesses casos, você vai querer alterar o comportamento do aplicativo.
 
-Mobile security testers are served well by understanding basic reverse engineering concepts. They should also know mobile devices and operating systems inside out: processor architecture, executable format, programming language intricacies, and so forth.
+Os testadores de segurança móvel são bem servidos ao entender conceitos básicos de engenharia reversa. Eles também devem conhecer dispositivos móveis e sistemas operacionais por completo: arquitetura do processador, formato executável, intricidades da linguagem de programação e assim por diante.
 
-Reverse engineering is an art, and describing its every facet would fill a whole library. The sheer range of techniques and specializations is mind-blowing: one can spend years working on a very specific and isolated sub-problem, such as automating malware analysis or developing novel de-obfuscation methods. Security testers are generalists; to be effective reverse engineers, they must filter through the vast amount of relevant information.
+A engenharia reversa é uma arte, e descrever cada faceta dela preencheria uma biblioteca inteira. A enorme variedade de técnicas e especializações é impressionante: pode-se passar anos trabalhando em um subproblema muito específico e isolado, como automatizar a análise de malware ou desenvolver novos métodos de desofuscação. Os testadores de segurança são generalistas; para serem engenheiros reversos eficazes, eles devem filtrar a vasta quantidade de informações relevantes.
 
-There is no generic reverse engineering process that always works. That said, we'll describe commonly used methods and tools later in this guide, and give examples of tackling the most common defenses.
+Não existe um processo genérico de engenharia reversa que sempre funcione. Dito isso, descreveremos métodos e ferramentas comumente usados posteriormente neste guia e daremos exemplos de como lidar com as defesas mais comuns.
 
-## Why You Need It
+## Por que você precisa disso
 
-Mobile security testing requires at least basic reverse engineering skills for several reasons:
+O teste de segurança móvel requer pelo menos habilidades básicas de engenharia reversa por várias razões:
 
-**1. To enable black-box testing of mobile apps.** Modern apps often include controls that will hinder dynamic analysis. SSL pinning and end-to-end (E2E) encryption sometimes prevent you from intercepting or manipulating traffic with a proxy. Root detection could prevent the app from running on a rooted device, preventing you from using advanced testing tools. You must be able to deactivate these defenses.
+**1. Para permitir o teste de caixa preta de aplicativos móveis.** Aplicativos modernos geralmente incluem controles que dificultarão a análise dinâmica. O SSL pinning e a criptografia ponto a ponto (E2E) às vezes impedem você de interceptar ou manipular o tráfego com um proxy. A detecção de root pode impedir que o aplicativo seja executado em um dispositivo com root, impedindo você de usar ferramentas avançadas de teste. Você deve ser capaz de desativar essas defesas.
 
-**2. To enhance static analysis in black-box security testing.** In a black-box test, static analysis of the app bytecode or binary code helps you understand the internal logic of the app. It also allows you to identify flaws such as hardcoded credentials.
+**2. Para melhorar a análise estática no teste de segurança de caixa preta.** Em um teste de caixa preta, a análise estática do bytecode ou código binário do aplicativo ajuda você a entender a lógica interna do aplicativo. Também permite identificar falhas como credenciais embutidas no código.
 
-**3. To assess resilience against reverse engineering.** Apps that implement the software protection measures listed in the Mobile Application Security Verification Standard Anti-Reversing Controls (MASVS-R) should withstand reverse engineering to a certain degree. To verify the effectiveness of such controls, the tester may perform a _resilience assessment_ as part of the general security test. For the resilience assessment, the tester assumes the role of the reverse engineer and attempts to bypass defenses.
+**3. Para avaliar a resiliência contra engenharia reversa.** Aplicativos que implementam as medidas de proteção de software listadas nos Controles Anti-Reversão do Padrão de Verificação de Segurança de Aplicativos Móveis (MASVS-R) devem resistir à engenharia reversa até certo ponto. Para verificar a eficácia de tais controles, o testador pode realizar uma _avaliação de resiliência_ como parte do teste de segurança geral. Para a avaliação de resiliência, o testador assume o papel do engenheiro reverso e tenta contornar as defesas.
 
-Before we dive into the world of mobile app reversing, we have some good news and some bad news. Let's start with the good news:
+Antes de mergulharmos no mundo da reversão de aplicativos móveis, temos algumas boas e más notícias. Vamos começar com as boas notícias:
 
-**Ultimately, the reverse engineer always wins.**
+**No final, o engenheiro reverso sempre vence.**
 
-This is particularly true in the mobile industry, where the reverse engineer has a natural advantage: the way mobile apps are deployed and sandboxed is by design more restrictive than the deployment and sandboxing of classical Desktop apps, so including the rootkit-like defensive mechanisms often found in Windows software (e.g., DRM systems) is simply not feasible. The openness of Android allows reverse engineers to make favorable changes to the operating system, aiding the reverse engineering process. iOS gives reverse engineers less control, but defensive options are also more limited.
+Isso é particularmente verdadeiro na indústria móvel, onde o engenheiro reverso tem uma vantagem natural: a forma como os aplicativos móveis são implantados e sandboxados é por design mais restritiva do que a implantação e sandboxing de aplicativos clássicos de desktop, então incluir os mecanismos defensivos semelhantes a rootkits frequentemente encontrados em software Windows (por exemplo, sistemas DRM) simplesmente não é viável. A abertura do Android permite que engenheiros reversos façam alterações favoráveis ao sistema operacional, auxiliando o processo de engenharia reversa. O iOS dá aos engenheiros reversos menos controle, mas as opções defensivas também são mais limitadas.
 
-The bad news is that dealing with multi-threaded anti-debugging controls, cryptographic white-boxes, stealthy anti-tampering features, and highly complex control flow transformations is not for the faint-hearted. The most effective software protection schemes are proprietary and won't be beaten with standard tweaks and tricks. Defeating them requires tedious manual analysis, coding, frustration and, depending on your personality, sleepless nights and strained relationships.
+A má notícia é que lidar com controles anti-depuração multi-threaded, white-boxes criptográficos, recursos anti-adulteração furtivos e transformações de fluxo de controle altamente complexas não é para os fracos de coração. Os esquemas de proteção de software mais eficazes são proprietários e não serão vencidos com ajustes e truques padrão. Derrotá-los requer análise manual tediosa, codificação, frustração e, dependendo da sua personalidade, noites sem dormir e relacionamentos tensos.
 
-It's easy for beginners to get overwhelmed by the sheer scope of reversing. The best way to get started is to set up some basic tools (see the relevant sections in the Android and iOS reversing chapters) and start with simple reversing tasks and crackmes. You'll need to learn about the assembler/bytecode language, the operating system, obfuscations you encounter, and so on. Start with simple tasks and gradually level up to more difficult ones.
+É fácil para iniciantes ficarem sobrecarregados com o enorme escopo da reversão. A melhor maneira de começar é configurar algumas ferramentas básicas (veja as seções relevantes nos capítulos de reversão do Android e iOS) e começar com tarefas simples de reversão e crackmes. Você precisará aprender sobre a linguagem assembly/bytecode, o sistema operacional, ofuscações que encontrar e assim por diante. Comece com tarefas simples e gradualmente avance para as mais difíceis.
 
-In the following section, we'll give an overview of the techniques most commonly used in mobile app security testing. In later chapters, we'll drill down into OS-specific details of both Android and iOS.
+Na seção a seguir, daremos uma visão geral das técnicas mais comumente usadas no teste de segurança de aplicativos móveis. Em capítulos posteriores, nos aprofundaremos em detalhes específicos do sistema operacional, tanto do Android quanto do iOS.
 
-## Basic Tampering Techniques
+## Técnicas Básicas de Adulteração
 
-### Binary Patching
+### Aplicação de Patches Binários
 
-_Patching_ is the process of changing the compiled app, e.g., changing code in binary executables, modifying Java bytecode, or tampering with resources. This process is known as _modding_ in the mobile game hacking scene. Patches can be applied in many ways, including editing binary files in a hex editor and decompiling, editing, and re-assembling an app. We'll give detailed examples of useful patches in later chapters.
+A _aplicação de patches_ é o processo de alterar o aplicativo compilado, por exemplo, alterando código em executáveis binários, modificando bytecode Java ou adulterando recursos. Este processo é conhecido como _modding_ na cena de hacking de jogos móveis. Os patches podem ser aplicados de várias maneiras, incluindo edição de arquivos binários em um editor hexadecimal e descompilação, edição e re-montagem de um aplicativo. Daremos exemplos detalhados de patches úteis em capítulos posteriores.
 
-Keep in mind that modern mobile operating systems strictly enforce code signing, so running modified apps is not as straightforward as it used to be in desktop environments. Security experts had a much easier life in the 90s! Fortunately, patching is not very difficult if you work on your own device. You simply have to re-sign the app or disable the default code signature verification facilities to run modified code.
+Tenha em mente que os sistemas operacionais móveis modernos impõem estritamente a assinatura de código, portanto, executar aplicativos modificados não é tão direto quanto costumava ser em ambientes desktop. Os especialistas em segurança tinham uma vida muito mais fácil nos anos 90! Felizmente, a aplicação de patches não é muito difícil se você trabalhar em seu próprio dispositivo. Você simplesmente tem que re-assinar o aplicativo ou desabilitar as facilidades padrão de verificação de assinatura de código para executar código modificado.
 
-### Code Injection
+### Injeção de Código
 
-Code injection is a very powerful technique that allows you to explore and modify processes at runtime. Injection can be implemented in various ways, but you'll get by without knowing all the details thanks to freely available, well-documented tools that automate the process. These tools give you direct access to process memory and important structures such as live objects instantiated by the app. They come with many utility functions that are useful for resolving loaded libraries, hooking methods and native functions, and more. Process memory tampering is more difficult to detect than file patching, so it is the preferred method in most cases.
+A injeção de código é uma técnica muito poderosa que permite explorar e modificar processos em tempo de execução. A injeção pode ser implementada de várias maneiras, mas você se sairá bem sem conhecer todos os detalhes, graças a ferramentas gratuitas, bem documentadas e disponíveis que automatizam o processo. Essas ferramentas dão a você acesso direto à memória do processo e estruturas importantes, como objetos em tempo real instanciados pelo aplicativo. Elas vêm com muitas funções utilitárias que são úteis para resolver bibliotecas carregadas, conectar métodos e funções nativas e muito mais. A adulteração da memória do processo é mais difícil de detectar do que a aplicação de patches em arquivos, por isso é o método preferido na maioria dos casos.
 
-@MASTG-TOOL-0139, @MASTG-TOOL-0031, and @MASTG-TOOL-0027 are the most widely used hooking and code injection frameworks in the mobile industry. The three frameworks differ in design philosophy and implementation details: ElleKit and Xposed focus on code injection and/or hooking, while Frida aims to be a full-blown "dynamic instrumentation framework", incorporating code injection, language bindings, and an injectable JavaScript VM and console.
+@MASTG-TOOL-0139, @MASTG-TOOL-0031 e @MASTG-TOOL-0027 são as estruturas de injeção de código e conexão mais amplamente usadas na indústria móvel. As três estruturas diferem em filosofia de design e detalhes de implementação: ElleKit e Xposed focam em injeção de código e/ou conexão, enquanto o Frida visa ser uma "estrutura de instrumentação dinâmica" completa, incorporando injeção de código, vinculações de linguagem e uma VM e console JavaScript injetáveis.
 
-We'll include examples of all three frameworks. We recommend starting with Frida because it is the most versatile of the three (for this reason, we'll also include more Frida details and examples). Notably, Frida can inject a JavaScript VM into a process on both Android and iOS, while injection with ElleKit only works on iOS and Xposed only works on Android. Ultimately, however, you can of course achieve many of the same goals with either framework.
+Incluiremos exemplos de todas as três estruturas. Recomendamos começar com o Frida porque é o mais versátil dos três (por esta razão, também incluiremos mais detalhes e exemplos do Frida). Notavelmente, o Frida pode injetar uma VM JavaScript em um processo tanto no Android quanto no iOS, enquanto a injeção com ElleKit só funciona no iOS e o Xposed só funciona no Android. No final, no entanto, você pode, é claro, alcançar muitos dos mesmos objetivos com qualquer estrutura.
 
-## Static and Dynamic Binary Analysis
+## Análise Binária Estática e Dinâmica
 
-Reverse engineering is the process of reconstructing the semantics of a compiled program's source code. In other words, you take the program apart, run it, simulate parts of it, and do other unspeakable things to it to understand what it does and how.
+A engenharia reversa é o processo de reconstruir a semântica do código-fonte de um programa compilado. Em outras palavras, você desmonta o programa, executa-o, simula partes dele e faz outras coisas indizíveis para entender o que ele faz e como.
 
-### Using Disassemblers and Decompilers
+### Usando Desmontadores e Descompiladores
 
-Disassemblers and decompilers allow you to translate an app's binary code or bytecode back into a more or less understandable format. By using these tools on native binaries, you can obtain assembler code that matches the architecture the app was compiled for. Disassemblers convert machine code to assembly code which in turn is used by decompilers to generate equivalent high-level language code. Android Java apps can be disassembled to smali, which is an assembly language for the DEX format used by Dalvik, Android's Java VM. Smali assembly can also be quite easily decompiled back to equivalent Java code.
+Desmontadores e descompiladores permitem que você traduza o código binário ou bytecode de um aplicativo de volta para um formato mais ou menos compreensível. Ao usar essas ferramentas em binários nativos, você pode obter código assembly que corresponde à arquitetura para a qual o aplicativo foi compilado. Desmontadores convertem código de máquina para código assembly que por sua vez é usado por descompiladores para gerar código equivalente de linguagem de alto nível. Aplicativos Java Android podem ser desmontados para smali, que é uma linguagem assembly para o formato DEX usado pelo Dalvik, a VM Java do Android. O assembly Smali também pode ser facilmente descompilado de volta para código Java equivalente.
 
-In theory, the mapping between assembly and machine code should be one-to-one, and therefore it may give the impression that disassembling is a simple task. But in practice, there are multiple pitfalls such as:
+Em teoria, o mapeamento entre assembly e código de máquina deve ser um-para-um e, portanto, pode dar a impressão de que desmontar é uma tarefa simples. Mas na prática, existem múltiplas armadilhas, como:
 
-- Reliable distinction between code and data.
-- Variable instruction size.
-- Indirect branch instructions.
-- Functions without explicit CALL instructions within the executable's code segment.
-- Position independent code (PIC) sequences.
-- Hand crafted assembly code.
+- Distinção confiável entre código e dados.
+- Tamanho variável de instrução.
+- Instruções de branch indiretas.
+- Funções sem instruções CALL explícitas dentro do segmento de código do executável.
+- Sequências de código independente de posição (PIC).
+- Código assembly feito à mão.
 
-Similarly, decompilation is a very complicated process, involving many deterministic and heuristic based approaches. As a consequence, decompilation is usually not really accurate, but nevertheless very helpful in getting a quick understanding of the function being analyzed. The accuracy of decompilation depends on the amount of information available in the code being decompiled and the sophistication of the decompiler. In addition, many compilation and post-compilation tools introduce additional complexity to the compiled code in order to increase the difficulty of comprehension and/or even decompilation itself. Such code referred to as [_obfuscated code_](#obfuscation).
+Da mesma forma, a descompilação é um processo muito complicado, envolvendo muitas abordagens determinísticas e baseadas em heurísticas. Como consequência, a descompilação geralmente não é muito precisa, mas mesmo assim é muito útil para obter uma compreensão rápida da função que está sendo analisada. A precisão da descompilação depende da quantidade de informação disponível no código que está sendo descompilado e da sofisticação do descompilador. Além disso, muitas ferramentas de compilação e pós-compilação introduzem complexidade adicional ao código compilado para aumentar a dificuldade de compreensão e/ou até mesmo da própria descompilação. Tal código é referido como [_código ofuscado_](#obfuscation).
 
-Over the past decades many tools have perfected the process of disassembly and decompilation, producing output with high fidelity. Advanced usage instructions for any of the available tools can often easily fill a book of their own. The best way to get started is to simply pick up a tool that fits your needs and budget and get a well-reviewed user guide. In this section, we will provide an introduction to some of those tools and in the subsequent "Reverse Engineering and Tampering" Android and iOS chapters we'll focus on the techniques themselves, especially those that are specific to the platform at hand.
+Ao longo das últimas décadas, muitas ferramentas aperfeiçoaram o processo de desmontagem e descompilação, produzindo saída com alta fidelidade. Instruções de uso avançado para qualquer uma das ferramentas disponíveis podem facilmente preencher um livro próprio. A melhor maneira de começar é simplesmente pegar uma ferramenta que se adapte às suas necessidades e orçamento e obter um guia do usuário bem avaliado. Nesta seção, forneceremos uma introdução a algumas dessas ferramentas e nos capítulos subsequentes de "Engenharia Reversa e Adulteração" do Android e iOS, focaremos nas técnicas em si, especialmente aquelas que são específicas da plataforma em questão.
 
-### Obfuscation
+### Ofuscação
 
-Obfuscation is the process of transforming code and data to make it more difficult to comprehend (and sometimes even difficult to disassemble). It is usually an integral part of the software protection scheme. Obfuscation isn't something that can be simply turned on or off, programs can be made incomprehensible, in whole or in part, in many ways and to different degrees.
+A ofuscação é o processo de transformar código e dados para torná-los mais difíceis de compreender (e às vezes até difíceis de desmontar). Geralmente é uma parte integral do esquema de proteção de software. A ofuscação não é algo que pode ser simplesmente ligado ou desligado, programas podem ser tornados incompreensíveis, no todo ou em parte, de muitas maneiras e em diferentes graus.
 
-> Note: All presented techniques below will not stop someone with enough time and budget from reverse engineering your app. However, combining these techniques will make their job significantly harder. The aim is thus to discourage reverse engineers from performing further analysis and not making it worth the effort.
+> Nota: Todas as técnicas apresentadas abaixo não impedirão alguém com tempo e orçamento suficientes de fazer engenharia reversa do seu aplicativo. No entanto, combinar essas técnicas tornará seu trabalho significativamente mais difícil. O objetivo é, portanto, desencorajar engenheiros reversos de realizar análises adicionais e não valer a pena o esforço.
 
-The following techniques can be used to obfuscate an application:
+As seguintes técnicas podem ser usadas para ofuscar um aplicativo:
 
-- Name obfuscation
-- Instruction substitution
-- Control flow flattening
-- Dead code injection
-- String encryption
-- Packing
+- Ofuscação de nomes
+- Substituição de instruções
+- Achatamento de fluxo de controle
+- Injeção de código morto
+- Criptografia de strings
+- Empacotamento
 
-#### Name Obfuscation
+#### Ofuscação de Nomes
 
-The standard compiler generates binary symbols based on class and function names from the source code. Therefore, if no obfuscation is applied, symbol names remain meaningful and can easily be extracted from the app binary. For instance, a function which detects a jailbreak can be located by searching for relevant keywords (e.g. "jailbreak"). The listing below shows the disassembled function `JailbreakDetectionViewController.jailbreakTest4Tapped` from the @MASTG-APP-0024.
+O compilador padrão gera símbolos binários com base em nomes de classes e funções do código-fonte. Portanto, se nenhuma ofuscação for aplicada, os nomes dos símbolos permanecem significativos e podem ser facilmente extraídos do binário do aplicativo. Por exemplo, uma função que detecta jailbreak pode ser localizada pesquisando por palavras-chave relevantes (por exemplo, "jailbreak"). A listagem abaixo mostra a função desmontada `JailbreakDetectionViewController.jailbreakTest4Tapped` do @MASTG-APP-0024.
 
 ```assembly
 __T07DVIA_v232JailbreakDetectionViewControllerC20jailbreakTest4TappedyypF:
@@ -101,7 +102,7 @@ stp        x22, x21, [sp, #-0x30]!
 mov        rbp, rsp
 ```
 
-After the obfuscation we can observe that the symbol's name is no longer meaningful as shown on the listing below.
+Após a ofuscação, podemos observar que o nome do símbolo não é mais significativo, como mostrado na listagem abaixo.
 
 ```assembly
 __T07DVIA_v232zNNtWKQptikYUBNBgfFVMjSkvRdhhnbyyFySbyypF:
@@ -109,94 +110,95 @@ stp        x22, x21, [sp, #-0x30]!
 mov        rbp, rsp
 ```
 
-Nevertheless, this only applies to the names of functions, classes and fields. The actual code remains unmodified, so an attacker can still read the disassembled version of the function and try to understand its purpose (e.g. to retrieve the logic of a security algorithm).
+No entanto, isso só se aplica aos nomes de funções, classes e campos. O código real permanece inalterado, então um atacante ainda pode ler a versão desmontada da função e tentar entender seu propósito (por exemplo, para recuperar a lógica de um algoritmo de segurança).
 
-#### Instruction Substitution
+#### Substituição de Instruções
 
-This technique replaces standard binary operators like addition or subtraction with more complex representations. For example, an addition `x = a + b` can be represented as `x = -(-a) - (-b)`. However, using the same replacement representation could be easily reversed, so it is recommended to add multiple substitution techniques for a single case and introduce a random factor. This technique can be reversed during decompilation, but depending on the complexity and depth of the substitutions, reversing it can still be time consuming.
+Esta técnica substitui operadores binários padrão como adição ou subtração por representações mais complexas. Por exemplo, uma adição `x = a + b` pode ser representada como `x = -(-a) - (-b)`. No entanto, usar a mesma representação de substituição poderia ser facilmente revertido, então é recomendado adicionar múltiplas técnicas de substituição para um único caso e introduzir um fator aleatório
+. No entanto, usar a mesma representação de substituição poderia ser facilmente revertido, então é recomendado adicionar múltiplas técnicas de substituição para um único caso e introduzir um fator aleatório. Esta técnica pode ser revertida durante a descompilação, mas dependendo da complexidade e profundidade das substituições, revertê-la ainda pode ser demorado.
 
-#### Control Flow Flattening
+#### Achatamento de Fluxo de Controle
 
-Control flow flattening replaces original code with a more complex representation. The transformation breaks the body of a function into basic blocks and puts them all inside a single infinite loop with a switch statement that controls the program flow. This makes the program flow significantly harder to follow because it removes the natural conditional constructs that usually make the code easier to read.
+O achatamento de fluxo de controle substitui o código original por uma representação mais complexa. A transformação quebra o corpo de uma função em blocos básicos e os coloca todos dentro de um único loop infinito com uma instrução switch que controla o fluxo do programa. Isso torna o fluxo do programa significativamente mais difícil de seguir porque remove os construtos condicionais naturais que geralmente tornam o código mais fácil de ler.
 
 <img src="Images/Chapters/0x06j/control-flow-flattening.png" width="100%" />
 
-The image shows how control flow flattening alters code. See ["Obfuscating C++ programs via control flow flattening"](https://web.archive.org/web/20240414202600/http://ac.inf.elte.hu/Vol_030_2009/003.pdf) for more information.
+A imagem mostra como o achatamento de fluxo de controle altera o código. Veja ["Obfuscating C++ programs via control flow flattening"](https://web.archive.org/web/20240414202600/http://ac.inf.elte.hu/Vol_030_2009/003.pdf) para mais informações.
 
-#### Dead Code Injection
+#### Injeção de Código Morto
 
-This technique makes the program's control flow more complex by injecting dead code into the program. Dead code is a stub of code that doesn't affect the original program's behavior but increases the overhead of the reverse engineering process.
+Esta técnica torna o fluxo de controle do programa mais complexo injetando código morto no programa. Código morto é um trecho de código que não afeta o comportamento do programa original, mas aumenta a sobrecarga do processo de engenharia reversa.
 
-#### String Encryption
+#### Criptografia de Strings
 
-Applications are often compiled with hardcoded keys, licences, tokens and endpoint URLs. By default, all of them are stored in plaintext in the data section of an application's binary. This technique encrypts these values and injects stubs of code into the program that will decrypt that data before it is used by the program.
+Aplicativos são frequentemente compilados com chaves embutidas, licenças, tokens e URLs de endpoint. Por padrão, todos eles são armazenados em texto simples na seção de dados do binário de um aplicativo. Esta técnica criptografa esses valores e injeta trechos de código no programa que descriptografarão esses dados antes de serem usados pelo programa.
 
-#### Packing
+#### Empacotamento
 
-[Packing](https://attack.mitre.org/techniques/T1027/002/) is a dynamic rewriting obfuscation technique which compresses or encrypts the original executable into data and dynamically recovers it during execution. Packing an executable changes the file signature in an attempt to avoid signature-based detection.
+[Empacotamento](https://attack.mitre.org/techniques/T1027/002/) é uma técnica de ofuscação de reescrita dinâmica que comprime ou criptografa o executável original em dados e o recupera dinamicamente durante a execução. Empacotar um executável altera a assinatura do arquivo na tentativa de evitar detecção baseada em assinatura.
 
-### Debugging and Tracing
+### Depuração e Rastreamento
 
-In the traditional sense, debugging is the process of identifying and isolating problems in a program as part of the software development life cycle. The same tools used for debugging are valuable to reverse engineers even when identifying bugs is not the primary goal. Debuggers enable program suspension at any point during runtime, inspection of the process' internal state, and even register and memory modification. These abilities simplify program inspection.
+No sentido tradicional, a depuração é o processo de identificar e isolar problemas em um programa como parte do ciclo de vida do desenvolvimento de software. As mesmas ferramentas usadas para depuração são valiosas para engenheiros reversos, mesmo quando identificar bugs não é o objetivo principal. Depuradores permitem a suspensão do programa em qualquer ponto durante o tempo de execução, inspeção do estado interno do processo e até mesmo modificação de registradores e memória. Essas habilidades simplificam a inspeção do programa.
 
-_Debugging_ usually means interactive debugging sessions in which a debugger is attached to the running process. In contrast, _tracing_ refers to passive logging of information about the app's execution (such as API calls). Tracing can be done in several ways, including debugging APIs, function hooks, and Kernel tracing facilities. Again, we'll cover many of these techniques in the OS-specific "Reverse Engineering and Tampering" chapters.
+_Depuração_ geralmente significa sessões interativas de depuração nas quais um depurador é anexado ao processo em execução. Em contraste, _rastreamento_ refere-se ao registro passivo de informações sobre a execução do aplicativo (como chamadas de API). O rastreamento pode ser feito de várias maneiras, incluindo APIs de depuração, hooks de função e facilidades de rastreamento do Kernel. Novamente, cobriremos muitas dessas técnicas nos capítulos específicos do sistema operacional "Engenharia Reversa e Adulteração".
 
-## Advanced Techniques
+## Técnicas Avançadas
 
-For more complicated tasks, such as de-obfuscating heavily obfuscated binaries, you won't get far without automating certain parts of the analysis. For example, understanding and simplifying a complex control flow graph based on manual analysis in the disassembler would take you years (and most likely drive you mad long before you're done). Instead, you can augment your workflow with custom made tools. Fortunately, modern disassemblers come with scripting and extension APIs, and many useful extensions are available for popular disassemblers. There are also open source disassembling engines and binary analysis frameworks.
+Para tarefas mais complicadas, como desofuscar binários fortemente ofuscados, você não irá longe sem automatizar certas partes da análise. Por exemplo, entender e simplificar um grafo de fluxo de controle complexo com base em análise manual no desmontador levaria anos (e muito provavelmente o deixaria louco muito antes de terminar). Em vez disso, você pode aumentar seu fluxo de trabalho com ferramentas personalizadas. Felizmente, desmontadores modernos vêm com APIs de script e extensão, e muitas extensões úteis estão disponíveis para desmontadores populares. Também existem motores de desmontagem de código aberto e estruturas de análise binária.
 
-As always in hacking, the anything-goes rule applies: simply use whatever is most efficient. Every binary is different, and all reverse engineers have their own style. Often, the best way to achieve your goal is to combine approaches (such as emulator-based tracing and symbolic execution). To get started, pick a good disassembler and/or reverse engineering framework, then get comfortable with their particular features and extension APIs. Ultimately, the best way to get better is to get hands-on experience.
+Como sempre no hacking, a regra do vale-tudo se aplica: simplesmente use o que for mais eficiente. Cada binário é diferente, e todos os engenheiros reversos têm seu próprio estilo. Muitas vezes, a melhor maneira de alcançar seu objetivo é combinar abordagens (como rastreamento baseado em emulador e execução simbólica). Para começar, escolha um bom desmontador e/ou estrutura de engenharia reversa, então familiarize-se com seus recursos particulares e APIs de extensão. No final, a melhor maneira de melhorar é obter experiência prática.
 
-### Dynamic Binary Instrumentation
+### Instrumentação Binária Dinâmica
 
-Another useful approach for native binaries is dynamic binary instrumentations (DBI). Instrumentation frameworks such as Valgrind and PIN support fine-grained instruction-level tracing of single processes. This is accomplished by inserting dynamically generated code at runtime. Valgrind compiles fine on Android, and pre-built binaries are available for download.
+Outra abordagem útil para binários nativos é a instrumentação binária dinâmica (DBI). Estruturas de instrumentação como Valgrind e PIN suportam rastreamento de nível de instrução de granulação fina de processos únicos. Isso é realizado inserindo código gerado dinamicamente em tempo de execução. O Valgrind compila bem no Android, e binários pré-compilados estão disponíveis para download.
 
-The [Valgrind README](http://valgrind.org/docs/manual/dist.readme-android.html "Valgrind README") includes specific compilation instructions for Android.
+O [README do Valgrind](http://valgrind.org/docs/manual/dist.readme-android.html "Valgrind README") inclui instruções específicas de compilação para Android.
 
-### Emulation-based Dynamic Analysis
+### Análise Dinâmica Baseada em Emulação
 
-Emulation is an imitation of a certain computer platform or program being executed in different platform or within another program. The software or hardware performing this imitation is called an _emulator_. Emulators provide a much cheaper alternative to an actual device, where a user can manipulate it without worrying about damaging the device. There are multiple emulators available for Android, but for iOS there are practically no viable emulators available. iOS only has a simulator, shipped within Xcode.
+Emulação é uma imitação de uma certa plataforma de computador ou programa sendo executado em uma plataforma diferente ou dentro de outro programa. O software ou hardware que realiza esta imitação é chamado de _emulador_. Emuladores fornecem uma alternativa muito mais barata a um dispositivo real, onde um usuário pode manipulá-lo sem se preocupar em danificar o dispositivo. Existem múltiplos emuladores disponíveis para Android, mas para iOS praticamente não existem emuladores viáveis disponíveis. O iOS só tem um simulador, enviado dentro do Xcode.
 
-The difference between a simulator and an emulator often causes confusion and leads to use of the two terms interchangeably, but in reality they are different, specially for the iOS use case. An emulator mimics both the software and hardware environment of a targeted platform. On the other hand, a simulator only mimics the software environment.
+A diferença entre um simulador e um emulador frequentemente causa confusão e leva ao uso dos dois termos de forma intercambiável, mas na realidade eles são diferentes, especialmente para o caso de uso do iOS. Um emulador imita tanto o ambiente de software quanto o de hardware de uma plataforma alvo. Por outro lado, um simulador só imita o ambiente de software.
 
-QEMU based emulators for Android take into consideration the RAM, CPU, battery performance etc (hardware components) while running an application, but in an iOS simulator this hardware component behaviour is not taken into consideration at all. The iOS simulator even lacks the implementation of the iOS kernel, as a result if an application is using syscalls it cannot be executed in this simulator.
+Emuladores baseados em QEMU para Android levam em consideração a RAM, CPU, desempenho da bateria etc (componentes de hardware) ao executar um aplicativo, mas em um simulador iOS este comportamento de componente de hardware não é levado em consideração. O simulador iOS até carece da implementação do kernel do iOS, como resultado, se um aplicativo estiver usando syscalls, ele não pode ser executado neste simulador.
 
-In simple words, an emulator is a much closer imitation of the targeted platform, while a simulator mimics only a part of it.
+Em palavras simples, um emulador é uma imitação muito mais próxima da plataforma alvo, enquanto um simulador imita apenas uma parte dela.
 
-Running an app in the emulator gives you powerful ways to monitor and manipulate its environment. For some reverse engineering tasks, especially those that require low-level instruction tracing, emulation is the best (or only) choice. Unfortunately, this type of analysis is only viable for Android, because no free or open source emulator exists for iOS (the iOS simulator is not an emulator, and apps compiled for an iOS device don't run on it). The only iOS emulator available is a commercial SaaS solution - @MASTG-TOOL-0108.
+Executar um aplicativo no emulador dá a você maneiras poderosas de monitorar e manipular seu ambiente. Para algumas tarefas de engenharia reversa, especialmente aquelas que requerem rastreamento de instruções de baixo nível, a emulação é a melhor (ou única) escolha. Infelizmente, este tipo de análise só é viável para Android, porque nenhum emulador gratuito ou de código aberto existe para iOS (o simulador iOS não é um emulador, e aplicativos compilados para um dispositivo iOS não são executados nele). O único emulador iOS disponível é uma solução comercial SaaS - @MASTG-TOOL-0108.
 
-### Custom Tooling with Reverse Engineering Frameworks
+### Ferramentas Personalizadas com Estruturas de Engenharia Reversa
 
-Even though most professional GUI-based disassemblers feature scripting facilities and extensibility, they are simply not well-suited to solving particular problems. Reverse engineering frameworks allow you to perform and automate any kind of reversing task without depending on a heavy-weight GUI. Notably, most reversing frameworks are open source and/or available for free. Popular frameworks with support for mobile architectures include @MASTG-TOOL-0073 and @MASTG-TOOL-0030.
+Embora a maioria dos desmontadores baseados em GUI profissionais apresentem facilidades de script e extensibilidade, eles simplesmente não são bem adequados para resolver problemas particulares. Estruturas de engenharia reversa permitem que você realize e automatize qualquer tipo de tarefa de reversão sem depender de uma GUI pesada. Notavelmente, a maioria das estruturas de reversão são de código aberto e/ou disponíveis gratuitamente. Estruturas populares com suporte para arquiteturas móveis incluem @MASTG-TOOL-0073 e @MASTG-TOOL-0030.
 
-#### Example: Program Analysis with Symbolic/Concolic Execution
+#### Exemplo: Análise de Programa com Execução Simbólica/Concolica
 
-In the late 2000s, testing based on symbolic execution has become a popular way to identify security vulnerabilities. Symbolic "execution" actually refers to the process of representing possible paths through a program as formulas in first-order logic. Satisfiability Modulo Theories (SMT) solvers are used to check the satisfiability of these formulas and provide solutions, including concrete values of the variables needed to reach a certain point of execution on the path corresponding to the solved formula.
+No final dos anos 2000, testes baseados em execução simbólica tornaram-se uma maneira popular de identificar vulnerabilidades de segurança. Execução "simbólica" na verdade se refere ao processo de representar caminhos possíveis através de um programa como fórmulas em lógica de primeira ordem. Solucionadores de Satisfiability Modulo Theories (SMT) são usados para verificar a satisfatibilidade dessas fórmulas e fornecer soluções, incluindo valores concretos das variáveis necessárias para alcançar um certo ponto de execução no caminho correspondente à fórmula resolvida.
 
-In simple words, symbolic execution is mathematically analyzing a program without executing it. During analysis, each unknown input is represented as a mathematical variable (a symbolic value), and hence all the operations performed on these variables are recorded as a tree of operations (aka. AST (abstract syntax tree), from compiler theory). These ASTs can be translated into so-called _constraints_ that will be interpreted by a SMT solver. In the end of this analysis, a final mathematical equation is obtained, in which the variables are the inputs whose values are not known. SMT solvers are special programs which solve these equations to give possible values for the input variables given a final state.
+Em palavras simples, a execução simbólica é analisar matematicamente um programa sem executá-lo. Durante a análise, cada entrada desconhecida é representada como uma variável matemática (um valor simbólico), e portanto todas as operações realizadas nessas variáveis são registradas como uma árvore de operações (também conhecida como AST (árvore sintática abstrata), da teoria de compiladores). Essas ASTs podem ser traduzidas para as chamadas _restrições_ que serão interpretadas por um solucionador SMT. No final desta análise, uma equação matemática final é obtida, na qual as variáveis são as entradas cujos valores não são conhecidos. Solucionadores SMT são programas especiais que resolvem essas equações para dar valores possíveis para as variáveis de entrada dado um estado final.
 
-To illustrate this, imagine a function which takes one input (`x`) and multiplies it by the value of a second input (`y`). Finally, there is an _if_ condition which checks if the value calculated is greater than the value of an external variable(`z`), and returns "success" if true, else returns "fail". The equation for this operation will be `(x * y) > z`.
+Para ilustrar isso, imagine uma função que recebe uma entrada (`x`) e a multiplica pelo valor de uma segunda entrada (`y`). Finalmente, há uma condição _if_ que verifica se o valor calculado é maior que o valor de uma variável externa(`z`), e retorna "sucesso" se verdadeiro, caso contrário retorna "falha". A equação para esta operação será `(x * y) > z`.
 
-If we want the function to always return "success" (final state), we can tell the SMT solver to calculate the values for `x` and `y` (input variables) which satisfy the corresponding equation. As is the case for global variables, their value can be changed from outside this function, which may lead to different outputs whenever this function is executed. This adds to additional complexity in determining correct solution.
+Se quisermos que a função sempre retorne "sucesso" (estado final), podemos dizer ao solucionador SMT para calcular os valores para `x` e `y` (variáveis de entrada) que satisfazem a equação correspondente. Como é o caso de variáveis globais, seu valor pode ser alterado de fora desta função, o que pode levar a saídas diferentes sempre que esta função for executada. Isso adiciona complexidade adicional na determinação da solução correta.
 
-Internally SMT solvers use various equation solving techniques to generate solution for such equations. Some of the techniques are very advanced and their discussion is beyond the scope of this book.
+Internamente, solucionadores SMT usam várias técnicas de resolução de equações para gerar solução para tais equações. Algumas das técnicas são muito avançadas e sua discussão está além do escopo deste livro.
 
-In a real world situation, the functions are much more complex than the above example. The increased complexity of the functions can pose significant challenges for classical symbolic execution. Some of the challenges are summarised below:
+Em uma situação do mundo real, as funções são muito mais complexas do que o exemplo acima. A complexidade aumentada das funções pode representar desafios significativos para a execução simbólica clássica. Alguns dos desafios são resumidos abaixo:
 
-- Loops and recursions in a program may lead to _infinite execution tree_.
-- Multiple conditional branches or nested conditions may lead to _path explosion_.
-- Complex equations generated by symbolic execution may not be solvable by SMT solvers because of their limitations.
-- Program is using system calls, library calls or network events which cannot be handled by symbolic execution.
+- Loops e recursões em um programa podem levar a _árvore de execução infinita_.
+- Múltiplos branches condicionais ou condições aninhadas podem levar a _explosão de caminhos_.
+- Equações complexas geradas por execução simbólica podem não ser solucionáveis por solucionadores SMT devido às suas limitações.
+- O programa está usando chamadas de sistema, chamadas de biblioteca ou eventos de rede que não podem ser tratados por execução simbólica.
 
-To overcome these challenges, typically, symbolic execution is combined with other techniques such as _dynamic execution_ (also called _concrete execution_) to mitigate the path explosion problem specific to classical symbolic execution. This combination of concrete (actual) and symbolic execution is referred to as _concolic execution_ (the name concolic stems from **conc**rete and symb**olic**), sometimes also called as _dynamic symbolic execution_.
+Para superar esses desafios, tipicamente, a execução simbólica é combinada com outras técnicas, como _execução dinâmica_ (também chamada de _execução concreta_) para mitigar o problema de explosão de caminhos específico da execução simbólica clássica. Esta combinação de execução concreta (real) e simbólica é referida como _execução concolica_ (o nome concolic vem de **conc**reto e simb**ólico**), às vezes também chamada de _execução simbólica dinâmica_.
 
-To visualize this, in the above example, we can obtain the value of the external variable by performing further reverse engineering or by dynamically executing the program and feeding this information into our symbolic execution analysis. This extra information will reduce the complexity of our equations and may produce more accurate analysis results. Together with improved SMT solvers and current hardware speeds, concolic execution allows to explore paths in medium-size software modules (i.e., on the order of 10 KLOC).
+Para visualizar isso, no exemplo acima, podemos obter o valor da variável externa realizando mais engenharia reversa ou executando dinamicamente o programa e alimentando esta informação em nossa análise de execução simbólica. Esta informação extra reduzirá a complexidade de nossas equações e pode produzir resultados de análise mais precisos. Juntamente com solucionadores SMT melhorados e velocidades de hardware atuais, a execução concolica permite explorar caminhos em módulos de software de tamanho médio (ou seja, na ordem de 10 KLOC).
 
-In addition, symbolic execution also comes in handy for supporting de-obfuscation tasks, such as simplifying control flow graphs. For example, Jonathan Salwan and Romain Thomas have [shown how to reverse engineer VM-based software protections using Dynamic Symbolic Execution](https://drive.google.com/file/d/1EzuddBA61jEMy8XbjQKFF3jyoKwW7tLq/view?usp=sharing "Jonathan Salwan and Romain Thomas: How Triton can help to reverse virtual machine based software protections") [#salwan] (i.e., using a mix of actual execution traces, simulation, and symbolic execution).
+Além disso, a execução simbólica também é útil para apoiar tarefas de desofuscação, como simplificar grafos de fluxo de controle. Por exemplo, Jonathan Salwan e Romain Thomas [mostraram como fazer engenharia reversa de proteções de software baseadas em VM usando Execução Simbólica Dinâmica](https://drive.google.com/file/d/1EzuddBA61jEMy8XbjQKFF3jyoKwW7tLq/view?usp=sharing "Jonathan Salwan and Romain Thomas: How Triton can help to reverse virtual machine based software protections") [#salwan] (ou seja, usando uma mistura de traços de execução reais, simulação e execução simbólica).
 
-In the Android section, you'll find a walkthrough for cracking a simple license check in an Android application using symbolic execution.
+Na seção Android, você encontrará um passo a passo para quebrar uma verificação de licença simples em um aplicativo Android usando execução simbólica.
 
-## References
+## Referências
 
 - [#vadla] Ole André Vadla Ravnås, Anatomy of a code tracer - <https://medium.com/@oleavr/anatomy-of-a-code-tracer-b081aadb0df8>
 - [#salwan] Jonathan Salwan and Romain Thomas, How Triton can help to reverse virtual machine based software protections - <https://drive.google.com/file/d/1EzuddBA61jEMy8XbjQKFF3jyoKwW7tLq/view?usp=sharing>

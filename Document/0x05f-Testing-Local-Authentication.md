@@ -3,12 +3,12 @@ masvs_category: MASVS-AUTH
 platform: android
 ---
 
-# Android Local Authentication
+# Autenticação Local Android
 
-## Overview
+## Visão Geral
 
-During local authentication, an app authenticates the user against credentials stored locally on the device. In other words, the user "unlocks" the app or some inner layer of functionality by providing a valid PIN, password or biometric characteristics such as face or fingerprint, which is verified by referencing local data. Generally, this is done so that users can more conveniently resume an existing session with a remote service or as a means of step-up authentication to protect some critical function.
+Durante a autenticação local, um aplicativo autentica o usuário contra credenciais armazenadas localmente no dispositivo. Em outras palavras, o usuário "desbloqueia" o aplicativo ou alguma camada interna de funcionalidade fornecendo um PIN, senha ou características biométricas válidas, como rosto ou impressão digital, que são verificadas referenciando dados locais. Geralmente, isso é feito para que os usuários possam retomar mais convenientemente uma sessão existente com um serviço remoto ou como meio de autenticação de step-up para proteger alguma função crítica.
 
-As stated before in chapter ["Mobile App Authentication Architectures"](0x04e-Testing-Authentication-and-Session-Management.md): The tester should be aware that local authentication should always be enforced at a remote endpoint or based on a cryptographic primitive. Attackers can easily bypass local authentication if no data returns from the authentication process.
+Como afirmado anteriormente no capítulo ["Arquiteturas de Autenticação de Aplicativos Móveis"](0x04e-Testing-Authentication-and-Session-Management.md): O testador deve estar ciente de que a autenticação local deve sempre ser aplicada em um endpoint remoto ou baseada em um primitivo criptográfico. Os atacantes podem facilmente contornar a autenticação local se nenhum dado retornar do processo de autenticação.
 
-On Android, there are two mechanisms supported by the Android Runtime for local authentication: the Confirm Credential flow and the Biometric Authentication flow.
+No Android, existem dois mecanismos suportados pelo Android Runtime para autenticação local: o fluxo de Confirmação de Credenciais e o fluxo de Autenticação Biométrica.

@@ -1,37 +1,38 @@
+
 ---
 masvs_category: MASVS-CRYPTO
 platform: all
 ---
 
-# Mobile App Cryptography
+# Criptografia em Aplicativos Móveis
 
-Cryptography plays an especially important role in securing the user's data - even more so in a mobile environment, where attackers having physical access to the user's device is a likely scenario. This chapter provides an outline of cryptographic concepts and best practices relevant to mobile apps. These best practices are valid independent of the mobile operating system.
+A criptografia desempenha um papel especialmente importante na segurança dos dados do usuário - ainda mais em um ambiente móvel, onde o acesso físico ao dispositivo do usuário por parte de atacantes é um cenário provável. Este capítulo fornece um esboço dos conceitos criptográficos e melhores práticas relevantes para aplicativos móveis. Essas melhores práticas são válidas independentemente do sistema operacional móvel.
 
-## Key Concepts
+## Conceitos Fundamentais
 
-The goal of cryptography is to provide constant confidentiality, data integrity, and authenticity, even in the face of an attack. Confidentiality involves ensuring data privacy through the use of encryption. Data integrity deals with data consistency and detection of tampering and modification of data through the use of hashing. Authenticity ensures that the data comes from a trusted source.
+O objetivo da criptografia é fornecer confidencialidade, integridade de dados e autenticidade constantes, mesmo diante de um ataque. A confidencialidade envolve garantir a privacidade dos dados por meio do uso de criptografia. A integridade de dados trata da consistência dos dados e da detecção de adulteração e modificação de dados por meio do uso de hashing. A autenticidade garante que os dados venham de uma fonte confiável.
 
-An encryption algorithm converts plaintext data into ciphertext, which conceals the original content. The plaintext data can be restored from the ciphertext through decryption. There are two types of encryption: **symmetric** (encryption and decryption use the same secret key) and **asymmetric** (encryption and decryption use a public and private key pair). Symmetric encryption operations do not protect data integrity unless they are used with an approved cipher mode that supports authenticated encryption with a random initialization vector (IV) that fulfills the "uniqueness" requirement [NIST SP 800-38D - "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC", 2007](https://csrc.nist.gov/pubs/sp/800/38/d/final).
+Um algoritmo de criptografia converte dados em texto simples (plaintext) em texto cifrado (ciphertext), que oculta o conteúdo original. Os dados em texto simples podem ser restaurados a partir do texto cifrado por meio da descriptografia. Existem dois tipos de criptografia: **simétrica** (criptografia e descriptografia usam a mesma chave secreta) e **assimétrica** (criptografia e descriptografia usam um par de chaves pública e privada). As operações de criptografia simétrica não protegem a integridade dos dados, a menos que sejam usadas com um modo de cifra aprovado que suporte criptografia autenticada com um vetor de inicialização (IV) aleatório que atenda ao requisito de "unicidade" [NIST SP 800-38D - "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC", 2007](https://csrc.nist.gov/pubs/sp/800/38/d/final).
 
-**Symmetric-key encryption algorithms** use the same key for both encryption and decryption. This type of encryption is fast and suitable for bulk data processing. Since everybody who has access to the key is able to decrypt the encrypted content, this method requires careful key management and centralized control over key distribution.
+**Algoritmos de criptografia de chave simétrica** usam a mesma chave para criptografia e descriptografia. Este tipo de criptografia é rápido e adequado para processamento de dados em massa. Como todos que têm acesso à chave são capazes de descriptografar o conteúdo criptografado, este método requer gerenciamento cuidadoso de chaves e controle centralizado sobre a distribuição de chaves.
 
-**Public-key encryption algorithms** operate with two separate keys: the public key and the private key. The public key can be distributed freely while the private key shouldn't be shared with anyone. A message encrypted with the public key can only be decrypted with the private key and vice-versa. Since asymmetric encryption is several times slower than symmetric operations, it's typically only used to encrypt small amounts of data, such as symmetric keys for bulk encryption.
+**Algoritmos de criptografia de chave pública** operam com duas chaves separadas: a chave pública e a chave privada. A chave pública pode ser distribuída livremente, enquanto a chave privada não deve ser compartilhada com ninguém. Uma mensagem criptografada com a chave pública só pode ser descriptografada com a chave privada e vice-versa. Como a criptografia assimétrica é várias vezes mais lenta que as operações simétricas, normalmente é usada apenas para criptografar pequenas quantidades de dados, como chaves simétricas para criptografia em massa.
 
-**Hashing** isn't a form of encryption, but it does use cryptography. Hash functions map arbitrary pieces of data into fixed-length values in a deterministic way. While it's easy to compute the hash from the input, it's very difficult (i.e., infeasible) to determine the original input from the hash. Additionally, the hash changes completely when even a single bit of the input changes. Hash functions are used for storing passwords, verifying integrity (e.g., digital signatures or document management), and managing files. Although hash functions don't provide an authenticity guarantee, they can be combined as cryptographic primitives to do so.
+**Hashing** não é uma forma de criptografia, mas usa criptografia. As funções de hash mapeiam partes arbitrárias de dados em valores de comprimento fixo de forma determinística. Embora seja fácil calcular o hash a partir da entrada, é muito difícil (ou seja, inviável) determinar a entrada original a partir do hash. Além disso, o hash muda completamente quando até um único bit da entrada é alterado. As funções de hash são usadas para armazenar senhas, verificar integridade (por exemplo, assinaturas digitais ou gerenciamento de documentos) e gerenciar arquivos. Embora as funções de hash não forneçam uma garantia de autenticidade, elas podem ser combinadas como primitivas criptográficas para fazê-lo.
 
-**Message Authentication Codes** (MACs) combine other cryptographic mechanisms (such as symmetric encryption or hashes) with secret keys to provide both integrity and authenticity protection. However, in order to verify a MAC, multiple entities have to share the same secret key and any of those entities can generate a valid MAC. HMACs, the most commonly used type of MAC, rely on hashing as the underlying cryptographic primitive. The full name of an HMAC algorithm usually includes the underlying hash function's type (for example, HMAC-SHA256 uses the SHA-256 hash function).
+**Códigos de Autenticação de Mensagem (MACs)** combinam outros mecanismos criptográficos (como criptografia simétrica ou hashes) com chaves secretas para fornecer proteção de integridade e autenticidade. No entanto, para verificar um MAC, várias entidades devem compartilhar a mesma chave secreta e qualquer uma dessas entidades pode gerar um MAC válido. HMACs, o tipo mais comumente usado de MAC, dependem de hashing como primitiva criptográfica subjacente. O nome completo de um algoritmo HMAC geralmente inclui o tipo da função de hash subjacente (por exemplo, HMAC-SHA256 usa a função de hash SHA-256).
 
-**Signatures** combine asymmetric cryptography (that is, using a public/private key pair) with hashing to provide integrity and authenticity by encrypting the hash of the message with the private key. However, unlike MACs, signatures also provide non-repudiation property as the private key should remain unique to the data signer.
+**Assinaturas** combinam criptografia assimétrica (ou seja, usando um par de chaves pública/privada) com hashing para fornecer integridade e autenticidade, criptografando o hash da mensagem com a chave privada. No entanto, ao contrário dos MACs, as assinaturas também fornecem a propriedade de não-repúdio, pois a chave privada deve permanecer exclusiva para o signatário dos dados.
 
-**Key Derivation Functions** (KDFs) derive secret keys from a secret value (such as a password) and are used to turn keys into other formats or to increase their length. KDFs are similar to hashing functions but have other uses as well (for example, they are used as components of multi-party key-agreement protocols). While both hashing functions and KDFs must be difficult to reverse, KDFs have the added requirement that the keys they produce must have a level of randomness.
+**Funções de Derivação de Chave (KDFs)** derivam chaves secretas de um valor secreto (como uma senha) e são usadas para transformar chaves em outros formatos ou aumentar seu comprimento. Os KDFs são semelhantes às funções de hash, mas têm outros usos também (por exemplo, são usados como componentes de protocolos de acordo de chave multipartidária). Embora ambas as funções de hash e KDFs devam ser difíceis de reverter, os KDFs têm o requisito adicional de que as chaves que produzem devem ter um nível de aleatoriedade.
 
-## Identifying Insecure and/or Deprecated Cryptographic Algorithms
+## Identificando Algoritmos Criptográficos Inseguros e/ou Obsoletos
 
-When assessing a mobile app, you should make sure that it does not use cryptographic algorithms and protocols that have significant known weaknesses or are otherwise insufficient for modern security requirements. Algorithms that were considered secure in the past may become insecure over time; therefore, it's important to periodically check current best practices and adjust configurations accordingly.
+Ao avaliar um aplicativo móvel, você deve garantir que ele não use algoritmos e protocolos criptográficos que tenham vulnerabilidades conhecidas significativas ou que sejam insuficientes para os requisitos modernos de segurança. Algoritmos que eram considerados seguros no passado podem se tornar inseguros com o tempo; portanto, é importante verificar periodicamente as melhores práticas atuais e ajustar as configurações de acordo.
 
-Verify that cryptographic algorithms are up to date and in-line with industry standards. Vulnerable algorithms include outdated block ciphers (such as DES and 3DES), stream ciphers (such as RC4), hash functions (such as MD5 and SHA1), and broken random number generators (such as Dual_EC_DRBG and SHA1PRNG). Note that even algorithms that are certified (for example, by NIST) can become insecure over time. A certification does not replace periodic verification of an algorithm's soundness. Algorithms with known weaknesses should be replaced with more secure alternatives. Additionally, algorithms used for encryption must be standardized and open to verification. Encrypting data using any unknown, or proprietary algorithms may expose the application to different cryptographic attacks which may result in recovery of the plaintext.
+Verifique se os algoritmos criptográficos estão atualizados e em conformidade com os padrões do setor. Algoritmos vulneráveis incluem cifras de bloco desatualizadas (como DES e 3DES), cifras de fluxo (como RC4), funções de hash (como MD5 e SHA1) e geradores de números aleatórios quebrados (como Dual_EC_DRBG e SHA1PRNG). Observe que mesmo algoritmos que são certificados (por exemplo, pelo NIST) podem se tornar inseguros com o tempo. Uma certificação não substitui a verificação periódica da solidez de um algoritmo. Algoritmos com vulnerabilidades conhecidas devem ser substituídos por alternativas mais seguras. Além disso, os algoritmos usados para criptografia devem ser padronizados e abertos à verificação. Criptografar dados usando algoritmos desconhecidos ou proprietários pode expor o aplicativo a diferentes ataques criptográficos que podem resultar na recuperação do texto simples.
 
-Inspect the app's source code to identify instances of cryptographic algorithms that are known to be weak, such as:
+Inspecione o código-fonte do aplicativo para identificar instâncias de algoritmos criptográficos conhecidos por serem fracos, como:
 
 - [DES, 3DES](https://www.enisa.europa.eu/publications/algorithms-key-size-and-parameters-report-2014 "ENISA Algorithms, key size and parameters report 2014")
 - RC2
@@ -41,186 +42,189 @@ Inspect the app's source code to identify instances of cryptographic algorithms 
 - MD5
 - SHA1
 
-The names of cryptographic APIs depend on the particular mobile platform.
+Os nomes das APIs criptográficas dependem da plataforma móvel específica.
 
-Please make sure that:
+Certifique-se de que:
 
-- Cryptographic algorithms are up to date and in-line with industry standards. This includes, but is not limited to outdated block ciphers (e.g. DES), stream ciphers (e.g. RC4), as well as hash functions (e.g. MD5) and broken random number generators like Dual_EC_DRBG (even if they are NIST certified). All of these should be marked as insecure and should not be used and removed from the application and server.
-- Key lengths are in line with industry standards and provide sufficient protection over a long period of time. A comparison of different key lengths and the protection they provide, taking Moore's Law into account, is available [online](https://www.keylength.com/ "Keylength comparison").
-- Through [NIST SP 800-131A - "Transitioning the Use of Cryptographic Algorithms and Key Lengths", 2024](https://csrc.nist.gov/pubs/sp/800/131/a/r3/ipd), NIST provides recommendations and guidance on aligning with future recommendations and transitioning to stronger cryptographic keys and more robust algorithms.
-- Cryptographic means are not mixed with each other: e.g. you do not sign with a public key, or try to reuse a key pair used for a signature to do encryption.
-- Cryptographic parameters are well defined within reasonable range. This includes, but is not limited to: cryptographic salt, which should be at least the same length as hash function output, reasonable choice of password derivation function and iteration count (e.g. PBKDF2, scrypt or bcrypt), IVs being random and unique, fit-for-purpose block encryption modes (e.g. ECB should not be used, except specific cases), key management being done properly (e.g. 3DES should have three independent keys) and so on.
+- Os algoritmos criptográficos estão atualizados e em conformidade com os padrões do setor. Isso inclui, mas não se limita a cifras de bloco desatualizadas (por exemplo, DES), cifras de fluxo (por exemplo, RC4), bem como funções de hash (por exemplo, MD5) e geradores de números aleatórios quebrados como Dual_EC_DRBG (mesmo que sejam certificados pelo NIST). Todos esses devem ser marcados como inseguros e não devem ser usados e removidos do aplicativo e do servidor.
+- Os comprimentos das chaves estão em conformidade com os padrões do setor e fornecem proteção suficiente por um longo período de tempo. Uma comparação de diferentes comprimentos de chave e a proteção que eles fornecem, levando em conta a Lei de Moore, está disponível [online](https://www.keylength.com/ "Keylength comparison").
+- Através do [NIST SP 800-131A - "Transitioning the Use of Cryptographic Algorithms and Key Lengths", 2024](https://csrc.nist.gov/pubs/sp/800/131/a/r3/ipd), o NIST fornece recomendações e orientações sobre o alinhamento com recomendações futuras e a transição para chaves criptográficas mais fortes e algoritmos mais robustos.
+- Os meios criptográficos não são misturados entre si: por exemplo, você não assina com uma chave pública ou tenta reutilizar um par de chaves usado para uma assinatura para fazer criptografia.
+- Os parâmetros criptográficos são bem definidos dentro de uma faixa razoável. Isso inclui, mas não se limita a: salt criptográfico, que deve ter pelo menos o mesmo comprimento que a saída da função de hash, escolha razoável da função de derivação de senha e contagem de iterações (por exemplo, PBKDF2, scrypt ou bcrypt), IVs sendo aleatórios e únicos, modos de criptografia de bloco adequados ao propósito (por exemplo, ECB não deve ser usado, exceto em casos específicos), gerenciamento de chaves sendo feito corretamente (por exemplo, 3DES deve ter três chaves independentes) e assim por diante.
 
-Recommended algorithms:
+Algoritmos recomendados:
 
-- Confidentiality algorithms: AES-GCM-256 or ChaCha20-Poly1305
-- Integrity algorithms: SHA-256, SHA-384, SHA-512, BLAKE3, the SHA-3 family
-- Digital signature algorithms: RSA (3072 bits and higher), ECDSA with NIST P-384 or EdDSA with Edwards448.
-- Key establishment algorithms: RSA (3072 bits and higher), DH (3072 bits or higher), ECDH with NIST P-384
+- Algoritmos de confidencialidade: AES-GCM-256 ou ChaCha20-Poly1305
+- Algoritmos de integridade: SHA-256, SHA-384, SHA-512, BLAKE3, a família SHA-3
+- Algoritmos de assinatura digital: RSA (3072 bits e superior), ECDSA com NIST P-384 ou EdDSA com Edwards448.
+- Algoritmos de estabelecimento de chave: RSA (3072 bits e superior), DH (3072 bits ou superior), ECDH com NIST P-384
 
-**Please note:** The recommendations are based on the current industry perception of what is considered appropriate. They align with NIST recommendations beyond 2030 but do not necessarily take into account advancements in quantum computing. For advice on post-quantum cryptography, please see the ["Post-Quantum"](#post-quantum) section below.
+**Observação:** As recomendações são baseadas na percepção atual do setor do que é considerado apropriado. Elas estão alinhadas com as recomendações do NIST além de 2030, mas não levam necessariamente em conta os avanços na computação quântica. Para conselhos sobre criptografia pós-quântica, consulte a seção ["Pós-Quântica"](#post-quantum) abaixo.
 
-Additionally, you should always rely on secure hardware (if available) for storing encryption keys, performing cryptographic operations, etc.
+Além disso, você deve sempre confiar em hardware seguro (se disponível) para armazenar chaves de criptografia, realizar operações criptográficas, etc.
 
-For more information on algorithm choice and best practices, see the following resources:
+Para mais informações sobre escolha de algoritmos e melhores práticas, consulte os seguintes recursos:
 
 - ["Commercial National Security Algorithm Suite and Quantum Computing FAQ"](https://web.archive.org/web/20250305234320/https://cryptome.org/2016/01/CNSA-Suite-and-Quantum-Computing-FAQ.pdf "Commercial National Security Algorithm Suite and Quantum Computing FAQ")
 - [NIST recommendations (2019)](https://www.keylength.com/en/4/ "NIST recommendations")
 - [BSI recommendations (2019)](https://www.keylength.com/en/8/ "BSI recommendations")
-- [NIST SP 800-56B Revision 2 - "Recommendation for Pair-Wise Key-Establishment Using Integer Factorization Cryptography", 2019](https://csrc.nist.gov/pubs/sp/800/56/b/r2/final): NIST advises using RSA-based key-transport schemes with a minimum modulus length of at least 2048 bits.
-- [NIST SP 800-56A Revision 3 - "Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm Cryptography", 2018](https://csrc.nist.gov/pubs/sp/800/56/a/r3/final): NIST advises using ECC-based key-agreement schemes, such as Elliptic Curve Diffie-Hellman (ECDH), utilizing curves from P-224 to P-521.
-- [FIPS 186-5 - "Digital Signature Standard (DSS)", 2023](https://csrc.nist.gov/pubs/fips/186-5/final): NIST approves RSA, ECDSA, and EdDSA for digital signature generation. DSA should only be used to verify previously generated signatures.
-- [NIST SP 800-186 - "Recommendations for Discrete Logarithm-Based Cryptography: Elliptic Curve Domain Parameters", 2023](https://csrc.nist.gov/pubs/sp/800/186/final): Provides recommendations for elliptic curve domain parameters used in discrete logarithm-based cryptography.
+- [NIST SP 800-56B Revision 2 - "Recommendation for Pair-Wise Key-Establishment Using Integer Factorization Cryptography", 2019](https://csrc.nist.gov/pubs/sp/800/56/b/r2/final): O NIST aconselha o uso de esquemas de transporte de chave baseados em RSA com um comprimento mínimo de módulo de pelo menos 2048 bits.
+- [NIST SP 800-56A Revision 3 - "Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm Cryptography", 2018](https://csrc.nist.gov/pubs/sp/800/56/a/r3/final): O NIST aconselha o uso de esquemas de acordo de chave baseados em ECC, como Elliptic Curve Diffie-Hellman (ECDH), utilizando curvas de P-224 a P-521.
+- [FIPS 186-5 - "Digital Signature Standard (DSS)", 2023](https://csrc.nist.gov/pubs/fips/186-5/final): O NIST aprova RSA, ECDSA e EdDSA para geração de assinatura digital. DSA deve ser usado apenas para verificar assinaturas previamente geradas.
+- [NIST SP 800-186 - "Recommendations for Discrete Logarithm-Based Cryptography: Elliptic Curve Domain Parameters", 2023](https://csrc.nist.gov/pubs/sp/800/186/final): Fornece recomendações para parâmetros de domínio de curva elíptica usados em criptografia baseada em logaritmo discreto.
 
-## Post-Quantum
+## Pós-Quântica
 
-### Public-Key Encryption Algorithms
+### Algoritmos de Criptografia de Chave Pública
 
-In 2024, NIST approved CRYSTALS-Kyber as a post-quantum key encapsulation mechanism (KEM) for establishing a shared secret over a public channel. This shared secret can then be used with symmetric-key algorithms for encryption and decryption.
+Em 2024, o NIST aprovou o CRYSTALS-Kyber como um mecanismo de encapsulamento de chave (KEM) pós-quântico para estabelecer um segredo compartilhado em um canal público. Este segredo compartilhado pode então ser usado com algoritmos de chave simétrica para criptografia e descriptografia.
 
-- [FIPS 203 - "Module-Lattice-Based Key-Encapsulation Mechanism Standard", 2024](https://csrc.nist.gov/pubs/fips/203/final): Specifies CRYSTALS-Kyber as the standard for post-quantum key encapsulation.
+- [FIPS 203 - "Module-Lattice-Based Key-Encapsulation Mechanism Standard", 2024](https://csrc.nist.gov/pubs/fips/203/final): Especifica o CRYSTALS-Kyber como padrão para encapsulamento de chave pós-quântico.
 
-## Signatures
+### Assinaturas
 
-In 2024, NIST approved SLH-DSA and ML-DSA as recommended digital signature algorithms for post-quantum signature generation and verification.
+Em 2024, o NIST aprovou o SLH-DSA e o ML-DSA como algoritmos de assinatura digital recomendados para geração e verificação de assinatura pós-quântica.
 
-- [FIPS 205 - "Stateless Hash-Based Digital Signature Standard", 2024](https://csrc.nist.gov/pubs/fips/205/final): Specifies SLH-DSA for post-quantum digital signatures.
-- [FIPS 204 - "Module-Lattice-Based Digital Signature Standard", 2024](https://csrc.nist.gov/pubs/fips/204/final): Specifies ML-DSA for post-quantum digital signatures.
+- [FIPS 205 - "Stateless Hash-Based Digital Signature Standard", 2024](https://csrc.nist.gov/pubs/fips/205/final): Especifica o SLH-DSA para assinaturas digitais pós-quânticas.
+- [FIPS 204 - "Module-Lattice-Based Digital Signature Standard", 2024](https://csrc.nist.gov/pubs/fips/204/final): Especifica o ML-DSA para assinaturas digitais pós-quânticas.
 
-## Common Configuration Issues
+## Problemas Comuns de Configuração
 
-### Insufficient Key Length
+### Comprimento de Chave Insuficiente
 
-Even the most secure encryption algorithm becomes vulnerable to brute-force attacks when that algorithm uses an insufficient key size.
+Mesmo o algoritmo de criptografia mais seguro se torna vulnerável a ataques de força bruta quando esse algoritmo usa um tamanho de chave insuficiente.
 
-Ensure that the key length fulfills [accepted industry standards](https://www.enisa.europa.eu/publications/algorithms-key-size-and-parameters-report-2014 "ENISA Algorithms, key size and parameters report 2014").
+Certifique-se de que o comprimento da chave atenda aos [padrões do setor aceitos](https://www.enisa.europa.eu/publications/algorithms-key-size-and-parameters-report-2014 "ENISA Algorithms, key size and parameters report 2014").
 
-### Symmetric Encryption with Hard-Coded Cryptographic Keys
+### Criptografia Simétrica com Chaves Criptográficas Embutidas no Código
 
-The security of symmetric encryption and keyed hashes (MACs) depends on the secrecy of the key. If the key is disclosed, the security gained by encryption is lost. To prevent this, never store secret keys in the same place as the encrypted data they helped create. A common mistake is encrypting locally stored data with a static, hardcoded encryption key and compiling that key into the app. This makes the key accessible to anyone who can use a disassembler.
+A segurança da criptografia simétrica e dos hashes com chave (MACs) depende do sigilo da chave. Se a chave for divulgada, a segurança obtida pela criptografia é perdida. Para evitar isso, nunca armazene chaves secretas no mesmo local que os dados criptografados que elas ajudaram a criar. Um erro comum é criptografar dados armazenados localmente com uma chave de criptografia estática e embutida no código e compilar essa chave no aplicativo. Isso torna a chave acessível a qualquer pessoa que possa usar um desmontador.
 
-Hardcoded encryption key means that a key is:
+Chave de criptografia embutida no código significa que uma chave é:
 
-- part of application resources
-- value which can be derived from known values
-- hardcoded in code
+- parte dos recursos do aplicativo
+- valor que pode ser derivado de valores conhecidos
+- embutida no código
 
-First, ensure that no keys or passwords are stored within the source code. This means you should check native code, JavaScript/Dart code, Java/Kotlin code on Android and Objective-C/Swift in iOS. Note that hard-coded keys are problematic even if the source code is obfuscated since obfuscation is easily bypassed by dynamic instrumentation.
+Primeiro, certifique-se de que nenhuma chave ou senha esteja armazenada dentro do código-fonte. Isso significa que você deve verificar código nativo, código JavaScript/Dart, código Java/Kotlin no Android e Objective-C/Swift no iOS. Observe que chaves embutidas no código são problemáticas mesmo se o código-fonte estiver ofuscado, pois a ofuscação é facilmente contornada por instrumentação dinâmica.
 
-If the app is using two-way TLS (both server and client certificates are validated), make sure that:
+Se o aplicativo estiver usando TLS bidirecional (tanto certificados do servidor quanto do cliente são validados), certifique-se de que:
 
-- The password to the client certificate isn't stored locally or is locked in the device Keychain.
-- The client certificate isn't shared among all installations.
+- A senha do certificado do cliente não esteja armazenada localmente ou esteja bloqueada no Keychain do dispositivo.
+- O certificado do cliente não seja compartilhado entre todas as instalações.
 
-If the app relies on an additional encrypted container stored in app data, check how the encryption key is used. If a key-wrapping scheme is used, ensure that the master secret is initialized for each user or the container is re-encrypted with new key. If you can use the master secret or previous password to decrypt the container, check how password changes are handled.
+Se o aplicativo depender de um contêiner criptografado adicional armazenado nos dados do aplicativo, verifique como a chave de criptografia é usada. Se um esquema de encapsulamento de chave for usado, certifique-se de que o segredo mestre seja inicializado para cada usuário ou que o contêiner seja recriptografado com uma nova chave. Se você puder usar o segredo mestre ou senha anterior para descriptografar o contêiner, verifique como as alterações de senha
 
-Secret keys must be stored in secure device storage whenever symmetric cryptography is used in mobile apps. For more information on the platform-specific APIs, see the "[Data Storage on Android](0x05d-Testing-Data-Storage.md)" and "[Data Storage on iOS](0x06d-Testing-Data-Storage.md)" chapters.
+são tratadas.
 
-### Improper Key Derivation Functions
+Chaves secretas devem ser armazenadas em armazenamento seguro do dispositivo sempre que a criptografia simétrica for usada em aplicativos móveis. Para obter mais informações sobre as APIs específicas da plataforma, consulte os capítulos "[Armazenamento de Dados no Android](0x05d-Testing-Data-Storage.md)" e "[Armazenamento de Dados no iOS](0x06d-Testing-Data-Storage.md)".
 
-Cryptographic algorithms (such as symmetric encryption or some MACs) expect a secret input of a given size. For example, AES uses a key of exactly 16 bytes. A native implementation might use the user-supplied password directly as an input key. Using a user-supplied password as an input key has the following problems:
+### Funções de Derivação de Chave Impropriamente Usadas
 
-- If the password is smaller than the key, the full key space isn't used. The remaining space is padded (spaces are sometimes used for padding).
-- A user-supplied password will realistically consist mostly of displayable and pronounceable characters. Therefore, only some of the possible 256 ASCII characters are used and entropy is decreased by approximately a factor of four.
+Algoritmos criptográficos (como criptografia simétrica ou alguns MACs) esperam uma entrada secreta de um determinado tamanho. Por exemplo, o AES usa uma chave de exatamente 16 bytes. Uma implementação nativa pode usar a senha fornecida pelo usuário diretamente como uma chave de entrada. Usar uma senha fornecida pelo usuário como uma chave de entrada tem os seguintes problemas:
 
-Ensure that passwords aren't directly passed into an encryption function. Instead, the user-supplied password should be passed into a KDF to create a cryptographic key. Choose an appropriate iteration count when using password derivation functions. For example, [NIST recommends an iteration count of at least 10,000 for PBKDF2](https://pages.nist.gov/800-63-3/sp800-63b.html#sec5 "NIST Special Publication 800-63B") and [for critical keys where user-perceived performance is not critical at least 10,000,000](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf "NIST Special Publication 800-132"). For critical keys, it is recommended to consider implementation of algorithms recognized by [Password Hashing Competition (PHC)](https://password-hashing.net/ "PHC") like [Argon2](https://github.com/p-h-c/phc-winner-argon2 "Argon2").
+- Se a senha for menor que a chave, o espaço completo da chave não é usado. O espaço restante é preenchido (espaços são às vezes usados para preenchimento).
+- Uma senha fornecida pelo usuário realisticamente consistirá principalmente de caracteres exibíveis e pronunciáveis. Portanto, apenas alguns dos possíveis 256 caracteres ASCII são usados e a entropia é diminuída aproximadamente por um fator de quatro.
 
-### Improper Random Number Generation
+Certifique-se de que as senhas não sejam passadas diretamente para uma função de criptografia. Em vez disso, a senha fornecida pelo usuário deve ser passada para um KDF para criar uma chave criptográfica. Escolha uma contagem de iteração apropriada ao usar funções de derivação de senha. Por exemplo, [o NIST recomenda uma contagem de iteração de pelo menos 10.000 para PBKDF2](https://pages.nist.gov/800-63-3/sp800-63b.html#sec5 "NIST Special Publication 800-63B") e [para chaves críticas onde o desempenho percebido pelo usuário não é crítico, pelo menos 10.000.000](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf "NIST Special Publication 800-132"). Para chaves críticas, é recomendado considerar a implementação de algoritmos reconhecidos pela [Password Hashing Competition (PHC)](https://password-hashing.net/ "PHC") como [Argon2](https://github.com/p-h-c/phc-winner-argon2 "Argon2").
 
-A common weakness in mobile apps is the improper use of random number generators. Regular Pseudo-Random Number Generators (PRNGs), while sufficient for general use, are not designed for cryptographic purposes. When used to generate keys, tokens, or other security-critical values, they can make systems vulnerable to prediction and attack.
+### Geração Impropria de Números Aleatórios
 
-The root issue is that deterministic devices cannot produce true randomness. PRNGs simulate randomness using algorithms, but without sufficient entropy and algorithmic strength, the output can be predictable. For example, UUIDs may appear random but do not provide enough entropy for secure use.
+Uma vulnerabilidade comum em aplicativos móveis é o uso inadequado de geradores de números aleatórios. Geradores de Números Pseudoaleatórios (PRNGs) regulares, embora suficientes para uso geral, não são projetados para fins criptográficos. Quando usados para gerar chaves, tokens ou outros valores críticos para segurança, eles podem tornar os sistemas vulneráveis à predição e ataque.
 
-The correct approach is to use a [**Cryptographically Secure Pseudo-Random Number Generator (CSPRNG)**](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator). CSPRNGs are designed to resist statistical analysis and prediction, making them suitable for generating non-guessable values. All security-sensitive values must be generated using a CSPRNG with at least 128 bits of entropy.
+A questão fundamental é que dispositivos determinísticos não podem produzir verdadeira aleatoriedade. PRNGs simulam aleatoriedade usando algoritmos, mas sem entropia suficiente e força algorítmica, a saída pode ser previsível. Por exemplo, UUIDs podem parecer aleatórios, mas não fornecem entropia suficiente para uso seguro.
 
-### Improper Hashing
+A abordagem correta é usar um [**Gerador de Números Pseudoaleatórios Criptograficamente Seguro (CSPRNG)**](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator). CSPRNGs são projetados para resistir à análise estatística e predição, tornando-os adequados para gerar valores não adivinháveis. Todos os valores sensíveis à segurança devem ser gerados usando um CSPRNG com pelo menos 128 bits de entropia.
 
-Using the wrong hash function for a given purpose can compromise both security and data integrity. Each hash function is designed with specific use cases in mind, and applying it incorrectly introduces risk.
+### Hashing Impropriamente Usado
 
-For integrity checks, choose a hash function that offers strong collision resistance. Algorithms such as SHA-256, SHA-384, SHA-512, BLAKE3, and the SHA-3 family are appropriate for verifying data integrity and authenticity. Avoid broken algorithms like MD5 or SHA-1, as they are vulnerable to collision attacks.
+Usar a função de hash errada para um determinado propósito pode comprometer tanto a segurança quanto a integridade dos dados. Cada função de hash é projetada com casos de uso específicos em mente, e aplicá-la incorretamente introduz risco.
 
-Do not use general-purpose hash functions like SHA-2 or SHA-3 for password hashing or key derivation, especially with predictable input.
+Para verificações de integridade, escolha uma função de hash que ofereça forte resistência a colisões. Algoritmos como SHA-256, SHA-384, SHA-512, BLAKE3 e a família SHA-3 são apropriados para verificar integridade e autenticidade de dados. Evite algoritmos quebrados como MD5 ou SHA-1, pois são vulneráveis a ataques de colisão.
 
-### Custom Implementations of Cryptography
+Não use funções de hash de propósito geral como SHA-2 ou SHA-3 para hashing de senhas ou derivação de chaves, especialmente com entrada previsível.
 
-Inventing proprietary cryptographic functions is time-consuming, difficult, and likely to fail. Instead, we can use well-known algorithms that are widely regarded as secure. Mobile operating systems offer standard cryptographic APIs that implement those algorithms.
+### Implementações Personalizadas de Criptografia
 
-Carefully inspect all the cryptographic methods used within the source code, especially those that are directly applied to sensitive data. All cryptographic operations should use standard cryptographic APIs for Android and iOS (we'll write about those in more detail in the platform-specific chapters). Any cryptographic operations that don't invoke standard routines from known providers should be closely inspected. Pay close attention to standard algorithms that have been modified. Remember that encoding isn't the same as encryption! Always investigate further when you find bit manipulation operators like XOR (exclusive OR).
+Inventar funções criptográficas proprietárias é demorado, difícil e provavelmente falhará. Em vez disso, podemos usar algoritmos bem conhecidos que são amplamente considerados seguros. Os sistemas operacionais móveis oferecem APIs criptográficas padrão que implementam esses algoritmos.
 
-In all implementations of cryptography, you need to ensure that the following always takes place:
+Inspecione cuidadosamente todos os métodos criptográficos usados dentro do código-fonte, especialmente aqueles que são aplicados diretamente a dados sensíveis. Todas as operações criptográficas devem usar APIs criptográficas padrão para Android e iOS (escreveremos sobre essas em mais detalhes nos capítulos específicos da plataforma). Qualquer operação criptográfica que não invoque rotinas padrão de provedores conhecidos deve ser inspecionada de perto. Preste muita atenção a algoritmos padrão que foram modificados. Lembre-se de que codificação não é o mesmo que criptografia! Sempre investigue mais quando encontrar operadores de manipulação de bits como XOR (OU exclusivo).
 
-- Working keys (like intermediary/derived keys in AES/DES/Rijndael) are properly removed from memory after consumption or in case of error.
-- The inner state of a cipher should be removed from memory as soon as possible.
+Em todas as implementações de criptografia, você precisa garantir que o seguinte sempre ocorra:
 
-### Improper Encryption
+- Chaves de trabalho (como chaves intermediárias/derivadas em AES/DES/Rijndael) são adequadamente removidas da memória após o consumo ou em caso de erro.
+- O estado interno de uma cifra deve ser removido da memória o mais rápido possível.
 
-Advanced Encryption Standard (AES) is the widely accepted standard for symmetric encryption in mobile apps. It's an iterative block cipher that is based on a series of linked mathematical operations. AES performs a variable number of rounds on the input, each of which involve substitution and permutation of the bytes in the input block. Each round uses a 128-bit round key which is derived from the original AES key.
+### Criptografia Impropriamente Implementada
 
-As of this writing, no efficient cryptanalytic attacks against AES have been discovered. However, implementation details and configurable parameters such as the block cipher mode leave some margin for error.
+O Advanced Encryption Standard (AES) é o padrão amplamente aceito para criptografia simétrica em aplicativos móveis. É uma cifra de bloco iterativa baseada em uma série de operações matemáticas vinculadas. O AES executa um número variável de rodadas na entrada, cada uma das quais envolve substituição e permutação dos bytes no bloco de entrada. Cada rodada usa uma chave de rodada de 128 bits que é derivada da chave AES original.
 
-#### Broken Block Cipher Modes
+Até o momento desta escrita, nenhum ataque criptoanalítico eficiente contra o AES foi descoberto. No entanto, detalhes de implementação e parâmetros configuráveis, como o modo de cifra de bloco, deixam alguma margem para erro.
 
-Block-based encryption is performed upon discrete input blocks (for example, AES has 128-bit blocks). If the plaintext is larger than the block size, the plaintext is internally split up into blocks of the given input size and encryption is performed on each block. A block cipher mode of operation (or block mode) determines if the result of encrypting the previous block impacts subsequent blocks.
+#### Modos de Cifra de Bloco Quebrados
 
-Avoid using the [ECB (Electronic Codebook)](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_%28ECB%29 "Electronic Codebook (ECB)") mode. ECB divides the input into fixed-size blocks that are encrypted separately using the same key. If multiple divided blocks contain the same plaintext, they will be encrypted into identical ciphertext blocks which makes patterns in data easier to identify. In some situations, an attacker might also be able to replay the encrypted data.
+A criptografia baseada em bloco é realizada em blocos de entrada discretos (por exemplo, o AES tem blocos de 128 bits). Se o texto simples for maior que o tamanho do bloco, o texto simples é dividido internamente em blocos do tamanho de entrada dado e a criptografia é realizada em cada bloco. Um modo de operação de cifra de bloco (ou modo de bloco) determina se o resultado da criptografia do bloco anterior impacta blocos subsequentes.
+
+Evite usar o modo [ECB (Electronic Codebook)](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_%28ECB%29 "Electronic Codebook (ECB)"). O ECB divide a entrada em blocos de tamanho fixo que são criptografados separadamente usando a mesma chave. Se vários blocos divididos contiverem o mesmo texto simples, eles serão criptografados em blocos de texto cifrado idênticos, o que torna os padrões nos dados mais fáceis de identificar. Em algumas situações, um atacante também pode ser capaz de reproduzir os dados criptografados.
 
 <img src="Images/Chapters/0x07c/EncryptionMode.png" width="550px" />
 
-For new designs, prefer authenticated encryption with associated data (AEAD) modes such as Galois/Counter Mode (GCM) or Counter with CBC-MAC (CCM), as these provide both confidentiality and integrity. If GCM or CCM are not available, Cipher Block Chaining (CBC) mode is better than ECB, but should be combined with an HMAC and/or ensure that no errors are given such as "Padding error", "MAC error", or "decryption failed" to be more resistant to padding oracle attacks. In CBC mode, plaintext blocks are XORed with the previous ciphertext block, ensuring that each encrypted block is unique and randomized even if blocks contain the same information.
+Para novos projetos, prefira modos de criptografia autenticada com dados associados (AEAD), como Galois/Counter Mode (GCM) ou Counter with CBC-MAC (CCM), pois esses fornecem confidencialidade e integridade. Se GCM ou CCM não estiverem disponíveis, o modo Cipher Block Chaining (CBC) é melhor que o ECB, mas deve ser combinado com um HMAC e/ou garantir que nenhum erro seja dado, como "erro de preenchimento", "erro de MAC" ou "falha na descriptografia" para ser mais resistente a ataques de oráculo de preenchimento. No modo CBC, os blocos de texto simples são XORed com o bloco de texto cifrado anterior, garantindo que cada bloco criptografado seja único e randomizado, mesmo que os blocos contenham as mesmas informações.
 
-When storing encrypted data, we recommend using a block mode that also protects the integrity of the stored data, such as Galois/Counter Mode (GCM). The latter has the additional benefit that the algorithm is mandatory for each TLSv1.2 implementation, and thus is available on all modern platforms. To protect the integrity and authenticity of the data using CBC mode, it is recommended to combine the techniques of the Counter (CTR) mode and the Cipher Block Chaining-Message Authentication Code (CBC-MAC) into what is called CCM Mode ([NIST, 2004](https://csrc.nist.gov/pubs/sp/800/38/c/upd1/final "NIST: Recommendation for Block Cipher Modes of Operation: the CCM Mode for Authentication and Confidentiality")).
+Ao armazenar dados criptografados, recomendamos usar um modo de bloco que também proteja a integridade dos dados armazenados, como o Galois/Counter Mode (GCM). Este último tem o benefício adicional de que o algoritmo é obrigatório para cada implementação TLSv1.2 e, portanto, está disponível em todas as plataformas modernas. Para proteger a integridade e autenticidade dos dados usando o modo CBC, é recomendado combinar as técnicas do modo Counter (CTR) e do Cipher Block Chaining-Message Authentication Code (CBC-MAC) no que é chamado de modo CCM ([NIST, 2004](https://csrc.nist.gov/pubs/sp/800/38/c/upd1/final "NIST: Recommendation for Block Cipher Modes of Operation: the CCM Mode for Authentication and Confidentiality")).
 
-For more information on effective block modes, see the [NIST guidelines on block mode selection](https://csrc.nist.gov/groups/ST/toolkit/BCM/modes_development.html "NIST Modes Development, Proposed Modes").
+Para mais informações sobre modos de bloco eficazes, consulte as [diretrizes do NIST sobre seleção de modo de bloco](https://csrc.nist.gov/groups/ST/toolkit/BCM/modes_development.html "NIST Modes Development, Proposed Modes").
 
-#### Predictable Initialization Vector
+#### Vetor de Inicialização Previsível
 
-CBC, OFB, CFB, PCBC, GCM mode require an initialization vector (IV) as an initial input to the cipher. The IV doesn't have to be kept secret, but it shouldn't be predictable: it should be random and unique/non-repeatable for each encrypted message. Make sure that IVs are generated using a cryptographically secure random number generator. For more information on IVs, see [Crypto Fail's initialization vectors article](http://www.cryptofails.com/post/70059609995/crypto-noobs-1-initialization-vectors "Crypto Noobs #1: Initialization Vectors").
+CBC, OFB, CFB, PCBC, GCM mode requerem um vetor de inicialização (IV) como entrada inicial para a cifra. O IV não precisa ser mantido em segredo, mas não deve ser previsível: deve ser aleatório e único/não repetível para cada mensagem criptografada. Certifique-se de que os IVs sejam gerados usando um gerador de números aleatórios criptograficamente seguro. Para mais informações sobre IVs, consulte o [artigo sobre vetores de inicialização do Crypto Fail](http://www.cryptofails.com/post/70059609995/crypto-noobs-1-initialization-vectors "Crypto Noobs #1: Initialization Vectors").
 
-Pay attention to cryptographic libraries used in the code: many open source libraries provide examples in their documentations that might follow bad practices (e.g. using a hardcoded IV). A popular mistake is copy-pasting example code without changing the IV value.
+Preste atenção às bibliotecas criptográficas usadas no código: muitas bibliotecas de código aberto fornecem exemplos em suas documentações que podem seguir más práticas (por exemplo, usando um IV embutido no código). Um erro popular é copiar e colar código de exemplo sem alterar o valor do IV.
 
-#### Using the Same Key for Encryption and Authentication
+#### Usando a Mesma Chave para Criptografia e Autenticação
 
-One common mistake is to reuse the same key for CBC encryption and CBC-MAC. Reuse of keys for different purposes is generally not recommended, but in the case of CBC-MAC the mistake can lead to a MitM attack (["CBC-MAC", 2024.10.11](https://en.wikipedia.org/wiki/CBC-MAC "Wikipedia: CBC-MAC")).
+Um erro comum é reutilizar a mesma chave para criptografia CBC e CBC-MAC. A reutilização de chaves para diferentes propósitos geralmente não é recomendada, mas no caso do CBC-MAC o erro pode levar a um ataque MitM (["CBC-MAC", 2024.10.11](https://en.wikipedia.org/wiki/CBC-MAC "Wikipedia: CBC-MAC")).
 
-#### Initialization Vectors in Stateful Operation Modes
+#### Vetores de Inicialização em Modos de Operação com Estado
 
-Please note that the usage of IVs is different when using CTR and GCM mode in which the initialization vector is often a counter (in CTR combined with a nonce). So here using a predictable IV with its own stateful model is exactly what is needed. In CTR you have a new nonce plus counter as an input to every new block operation. For example: for a 5120 bit long plaintext: you have 20 blocks, so you need 20 input vectors consisting of a nonce and counter. Whereas in GCM you have a single IV per cryptographic operation, which should not be repeated with the same key. See section 8 of the [documentation from NIST on GCM](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode and GMAC") for more details and recommendations of the IV.
+Observe que o uso de IVs é diferente ao usar os modos CTR e GCM, nos quais o vetor de inicialização é frequentemente um contador (no CTR combinado com um nonce). Então, aqui usar um IV previsível com seu próprio modelo stateful é exatamente o que é necessário. No CTR, você tem um novo nonce mais contador como entrada para cada nova operação de bloco. Por exemplo: para um texto simples de 5120 bits de comprimento: você tem 20 blocos, então precisa de 20 vetores de entrada consistindo de um nonce e contador. Já no GCM, você tem um único IV por operação criptográfica, que não deve ser repetido com a mesma chave. Consulte a seção 8 da [documentação do NIST sobre GCM](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode and GMAC") para mais detalhes e recomendações do IV.
 
-### Padding Oracle Attacks due to Weaker Padding or Block Operation Implementations
+### Ataques de Oráculo de Preenchimento devido a Implementações de Preenchimento ou Operação de Bloco Mais Fracas
 
-In the old days, [PKCS1.5](https://tools.ietf.org/html/rfc2313 "PCKS1.5 in RFC2313") padding (in code: `PKCS1Padding`) was used as a padding mechanism when doing asymmetric encryption. This mechanism is vulnerable to the padding oracle attack. Therefore, it is best to use OAEP (Optimal Asymmetric Encryption Padding) captured in [PKCS#1 v2.0](https://tools.ietf.org/html/rfc2437 "PKCS1 v2.0 in RFC 2437") (in code: `OAEPPadding`, `OAEPwithSHA-256andMGF1Padding`, `OAEPwithSHA-224andMGF1Padding`, `OAEPwithSHA-384andMGF1Padding`, `OAEPwithSHA-512andMGF1Padding`). Note that, even when using OAEP, you can still run into an issue known best as the Manger's attack as described [in the blog at Kudelskisecurity](https://research.kudelskisecurity.com/2018/04/05/breaking-rsa-oaep-with-mangers-attack/ "Kudelskisecurity").
+Nos velhos tempos, o preenchimento [PKCS1.5](https://tools.ietf.org/html/rfc2313 "PCKS1.5 in RFC2313") (em código: `PKCS1Padding`) era usado como um mecanismo de preenchimento ao fazer criptografia assimétrica. Este mecanismo é vulnerável ao ataque de oráculo de preenchimento. Portanto, é melhor usar OAEP (Optimal Asymmetric Encryption Padding) capturado em [PKCS#1 v2.0](https://tools.ietf.org/html/rfc2437 "PKCS1 v2.0 in RFC 2437") (em código: `OAEPPadding`, `OAEPwithSHA-256andMGF1Padding`, `OAEPwithSHA-224andMGF1Padding`, `OAEPwithSHA-384andMGF1Padding`, `OAEPwithSHA-512andMGF1Padding`). Observe que, mesmo ao usar OAEP, você ainda pode encontrar um problema conhecido como ataque de Manger, conforme descrito [no blog da Kudelskisecurity](https://research.kudelskisecurity.com/2018/04/05/breaking-rsa-oaep-with-mangers-attack/ "Kudelskisecurity").
 
-Note: AES-CBC with PKCS #7 has shown to be vulnerable to padding oracle attacks as well, given that the implementation gives warnings, such as "Padding error", "MAC error", or "decryption failed". See [The Padding Oracle Attack](https://robertheaton.com/2013/07/29/padding-oracle-attack/ "The Padding Oracle Attack") and [The CBC Padding Oracle Problem](https://eklitzke.org/the-cbc-padding-oracle-problem "The CBC Padding Oracle Problem") for an example. Next, it is best to ensure that you add an HMAC after you encrypt the plaintext: after all a ciphertext with a failing MAC will not have to be decrypted and can be discarded.
+Nota: AES-CBC com PKCS #7 mostrou ser vulnerável a ataques de oráculo de preenchimento também, desde que a implementação dê avisos, como "erro de preenchimento", "erro de MAC" ou "falha na descriptografia". Consulte [The Padding Oracle Attack](https://robertheaton.com/2013/07/29/padding-oracle-attack/ "The Padding Oracle Attack") e [The CBC Padding Oracle Problem](https://eklitzke.org/the-cbc-padding-oracle-problem "The CBC Padding Oracle Problem") para um exemplo. Em seguida, é melhor garantir que você adicione um HMAC após criptografar o texto simples: afinal, um texto cifrado com um MAC com falha não precisará ser descriptografado e pode ser descartado.
 
-### Protecting Keys in Storage and in Memory
+### Protegendo Chaves no Armazenamento e na Memória
 
-When memory dumping is part of your threat model, then keys can be accessed the moment they are actively used. Memory dumping either requires root-access (e.g. a rooted device or jailbroken device) or it requires a patched application with Frida (so you can use tools like @MASTG-TOOL-0106).
-Therefore it is best to consider the following, if keys are still needed at the device:
+Quando o dumping de memória faz parte do seu modelo de ameaça, as chaves podem ser acessadas no momento em que são usadas ativamente. O dumping de memória requer acesso root (por exemplo, um dispositivo root ou jailbroken) ou requer um aplicativo modificado com Frida (para que você possa usar ferramentas como @MASTG-TOOL-0106).
+Portanto, é melhor considerar o seguinte, se as chaves ainda forem necessárias no dispositivo:
 
-- **Keys in a Remote Server**: you can use remote Key vaults such as Amazon KMS or Azure Key Vault. For some use cases, developing an orchestration layer between the app and the remote resource might be a suitable option. For instance, a serverless function running on a Function as a Service (FaaS) system (e.g. AWS Lambda or Google Cloud Functions) which forwards requests to retrieve an API key or secret. There are other alternatives such as Amazon Cognito, Google Identity Platform or Azure Active Directory.
-- **Keys inside Secure Hardware-backed Storage**: make sure that all cryptographic actions and the key itself remain in the Trusted Execution Environment (e.g. use [Android Keystore](https://developer.android.com/training/articles/keystore.html "Android keystore system")) or [Secure Enclave](https://developer.apple.com/documentation/security/certificate_key_and_trust_services/keys/storing_keys_in_the_secure_enclave "Storing Keys in the Secure Enclave") (e.g. use the Keychain). Refer to the [Android Data Storage](0x05d-Testing-Data-Storage.md#storing-keys-using-hardware-backed-android-keystore) and [iOS Data Storage](0x06d-Testing-Data-Storage.md#the-keychain) chapters for more information.
-- **Keys protected by Envelope Encryption**: If keys are stored outside of the TEE / SE, consider using multi-layered encryption: an _envelope encryption_ approach (see [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#encrypting-stored-keys "OWASP Cryptographic Storage Cheat Sheet: Encrypting Stored Keys"), [Google Cloud Key management guide](https://cloud.google.com/kms/docs/envelope-encryption?hl=en "Google Cloud Key management guide: Envelope encryption"), [AWS Well-Architected Framework guide](https://docs.aws.amazon.com/wellarchitected/latest/financial-services-industry-lens/use-envelope-encryption-with-customer-master-keys.html "AWS Well-Architected Framework")), or [a HPKE approach](https://tools.ietf.org/html/draft-irtf-cfrg-hpke-08 "Hybrid Public Key Encryption") to encrypt data encryption keys with key encryption keys.
-- **Keys in Memory**: make sure that keys live in memory for the shortest time possible and consider zeroing out and nullifying keys after successful cryptographic operations, and in case of error. Note: In some languages and platforms (such as those with garbage collection or memory management optimizations), reliably zeroing memory may not be possible, as the runtime may move or copy memory or delay actual erasure. For general cryptocoding guidelines, refer to [Clean memory of secret data](https://github.com/veorq/cryptocoding#clean-memory-of-secret-data/ "The Cryptocoding Guidelines by @veorq: Clean memory of secret data").
+- **Chaves em um Servidor Remoto**: você pode usar cofres de chaves remotos, como Amazon KMS ou Azure Key Vault. Para alguns casos de uso, desenvolver uma camada de orquestração entre o aplicativo e o recurso remoto pode ser uma opção adequada. Por exemplo, uma função serverless em execução em um sistema Function as a Service (FaaS) (por exemplo, AWS Lambda ou Google Cloud Functions) que encaminha solicitações para recuperar uma chave de API ou segredo. Existem outras alternativas, como Amazon Cognito, Google Identity Platform ou Azure Active Directory.
+- **Chaves dentro de Armazenamento com Backing de Hardware Seguro**: certifique-se de que todas as ações criptográficas e a própria chave permaneçam no Trusted Execution Environment (por exemplo, use [Android Keystore](https://developer.android.com/training/articles/keystore.html "Android keystore system")) ou [Secure Enclave](https://developer.apple.com/documentation/security/certificate_key_and_trust_services/keys/storing_keys_in_the_secure_enclave "Storing Keys in the Secure Enclave") (por exemplo, use o Keychain). Consulte os capítulos [Armazenamento de Dados no Android](0x05d-Testing-Data-Storage.md#storing-keys-using-hardware-backed-android-keystore) e [Armazenamento de Dados no iOS](0x06d-Testing-Data-Storage.md#the-keychain) para obter mais informações.
+- **Chaves Protegidas por Criptografia de Envelope**: Se as chaves estiverem armazenadas fora do TEE / SE, considere usar criptografia multicamada: uma abordagem de _criptografia de envelope_ (consulte [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#encrypting-stored-keys "OWASP Cryptographic Storage Cheat Sheet: Encrypting Stored Keys"), [Google Cloud Key management guide](https://cloud.google.com/kms/docs/envelope-encryption?hl=en "Google Cloud Key management guide
+: Envelope encryption"), [AWS Well-Architected Framework guide](https://docs.aws.amazon.com/wellarchitected/latest/financial-services-industry-lens/use-envelope-encryption-with-customer-master-keys.html "AWS Well-Architected Framework")), ou [uma abordagem HPKE](https://tools.ietf.org/html/draft-irtf-cfrg-hpke-08 "Hybrid Public Key Encryption") para criptografar chaves de criptografia de dados com chaves de criptografia de chaves.
+- **Chaves na Memória**: certifique-se de que as chaves permaneçam na memória pelo menor tempo possível e considere zerar e anular chaves após operações criptográficas bem-sucedidas e em caso de erro. Nota: Em algumas linguagens e plataformas (como aquelas com coleta de lixo ou otimizações de gerenciamento de memória), zerar a memória de forma confiável pode não ser possível, pois o runtime pode mover ou copiar a memória ou atrasar a exclusão real. Para diretrizes gerais de cryptocoding, consulte [Clean memory of secret data](https://github.com/veorq/cryptocoding#clean-memory-of-secret-data/ "The Cryptocoding Guidelines by @veorq: Clean memory of secret data").
 
-Note: given the ease of memory dumping, never share the same key among accounts and/or devices, other than public keys used for signature verification or encryption.
+Nota: dada a facilidade de dumping de memória, nunca compartilhe a mesma chave entre contas e/ou dispositivos, exceto chaves públicas usadas para verificação de assinatura ou criptografia.
 
-### Protecting Keys in Transport
+### Protegendo Chaves em Transporte
 
-When keys need to be transported from one device to another, or from the app to a backend, make sure that proper key protection is in place, by means of a transport keypair or another mechanism. Often, keys are shared with obfuscation methods which can be easily reversed. Instead, make sure asymmetric cryptography or wrapping keys are used. For example, a symmetric key can be encrypted with the public key from an asymmetric key pair.
+Quando as chaves precisam ser transportadas de um dispositivo para outro, ou do aplicativo para um backend, certifique-se de que a proteção adequada da chave esteja em vigor, por meio de um par de chaves de transporte ou outro mecanismo. Muitas vezes, as chaves são compartilhadas com métodos de ofuscação que podem ser facilmente revertidos. Em vez disso, certifique-se de que a criptografia assimétrica ou chaves de encapsulamento sejam usadas. Por exemplo, uma chave simétrica pode ser criptografada com a chave pública de um par de chaves assimétricas.
 
-## Cryptographic APIs on Android and iOS
+## APIs Criptográficas no Android e iOS
 
-While same basic cryptographic principles apply independent of the particular OS, each operating system offers its own implementation and APIs. Platform-specific cryptographic APIs for data storage are covered in greater detail in the "[Data Storage on Android](0x05d-Testing-Data-Storage.md)" and "[Testing Data Storage on iOS](0x06d-Testing-Data-Storage.md)" chapters. Encryption of network traffic, especially Transport Layer Security (TLS), is covered in the "[Android Network APIs](0x05g-Testing-Network-Communication.md)" chapter.
+Embora os mesmos princípios criptográficos básicos se apliquem independentemente do sistema operacional específico, cada sistema operacional oferece sua própria implementação e APIs. As APIs criptográficas específicas da plataforma para armazenamento de dados são abordadas em maiores detalhes nos capítulos "[Armazenamento de Dados no Android](0x05d-Testing-Data-Storage.md)" e "[Testando Armazenamento de Dados no iOS](0x06d-Testing-Data-Storage.md)". A criptografia do tráfego de rede, especialmente Transport Layer Security (TLS), é abordada no capítulo "[APIs de Rede Android](0x05g-Testing-Network-Communication.md)".
 
-## Cryptographic Policy
+## Política Criptográfica
 
-In larger organizations, or when high-risk applications are created, it can often be a good practice to have a cryptographic policy, based on frameworks such as [NIST Recommendation for Key Management](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf "NIST 800-57 Rev5"). When basic errors are found in the application of cryptography, it can be a good starting point of setting up a lessons learned / cryptographic key management policy.
+Em organizações maiores, ou quando aplicativos de alto risco são criados, muitas vezes pode ser uma boa prática ter uma política criptográfica, baseada em frameworks como [NIST Recommendation for Key Management](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf "NIST 800-57 Rev5"). Quando erros básicos são encontrados na aplicação da criptografia, pode ser um bom ponto de partida para configurar uma política de lições aprendidas / gerenciamento de chaves criptográficas.
 
-## Cryptography Regulations
+## Regulamentações de Criptografia
 
-When you upload the app to the App Store or Google Play, your application is typically stored on a US server. If your app contains cryptography and is distributed to any other country, it is considered a cryptography export. It means that you need to follow US export regulations for cryptography. Also, some countries have import regulations for cryptography.
+Quando você faz upload do aplicativo para a App Store ou Google Play, seu aplicativo é normalmente armazenado em um servidor dos EUA. Se o seu aplicativo contiver criptografia e for distribuído para qualquer outro país, é considerado uma exportação de criptografia. Isso significa que você precisa seguir as regulamentações de exportação de criptografia dos EUA. Além disso, alguns países têm regulamentações de importação para criptografia.
 
-Learn more:
+Saiba mais:
 
 - [Complying with Encryption Export Regulations (Apple)](https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations "Complying with Encryption Export Regulations")
 - [Export compliance overview (Apple)](https://help.apple.com/app-store-connect/#/dev88f5c7bf9 "Export compliance overview")

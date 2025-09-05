@@ -3,10 +3,10 @@ masvs_category: MASVS-STORAGE
 platform: ios
 ---
 
-# iOS Data Storage
+# Armazenamento de Dados iOS
 
-## Overview
+## Visão Geral
 
-The protection of sensitive data, such as authentication tokens and private information, is key for mobile security. In this chapter, you'll learn about the iOS APIs for local data storage, and best practices for using them.
+A proteção de dados sensíveis, como tokens de autenticação e informações privadas, é fundamental para a segurança móvel. Neste capítulo, você aprenderá sobre as APIs iOS para armazenamento local de dados e as melhores práticas para usá-las.
 
-As little sensitive data as possible should be saved in permanent local storage. However, in most practical scenarios, at least some user data must be stored. Fortunately, iOS offers secure storage APIs, which allow developers to use the cryptographic hardware available on every iOS device. If these APIs are used correctly, sensitive data and files can be secured via hardware-backed 256-bit AES encryption.
+O mínimo possível de dados sensíveis deve ser salvo no armazenamento local permanente. No entanto, na maioria dos cenários práticos, pelo menos alguns dados do usuário devem ser armazenados. Felizmente, o iOS oferece APIs de armazenamento seguro, que permitem aos desenvolvedores usar o hardware criptográfico disponível em todos os dispositivos iOS. Se essas APIs forem usadas corretamente, dados e arquivos sensíveis podem ser protegidos via criptografia AES de 256 bits com suporte de hardware.

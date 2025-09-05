@@ -3,6 +3,6 @@ masvs_category: MASVS-PLATFORM
 platform: ios
 ---
 
-# iOS Platform APIs
+# APIs da Plataforma iOS
 
-## Overview
+## Visão Geral

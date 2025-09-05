@@ -1,6 +1,6 @@
 # Leitura Sugerida
 
-## Segurança de Apps Móveis
+## Segurança de Aplicativos Móveis
 
 ### Android
 

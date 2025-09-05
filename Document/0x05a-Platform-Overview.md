@@ -1,99 +1,100 @@
-# Android Platform Overview
 
-This chapter introduces the Android platform from an architecture point of view. The following five key areas are discussed:
+# Visão Geral da Plataforma Android
 
-1. Android architecture
-2. Android security: defense-in-depth approach
-3. Android application structure
-4. Android application publishing
-5. Android application attack surface
+Este capítulo apresenta a plataforma Android do ponto de vista da arquitetura. As cinco áreas principais a seguir são discutidas:
 
-Visit the official [Android developer documentation website](https://developer.android.com/index.html "Android Developer Guide") for more details about the Android platform.
+1. Arquitetura Android
+2. Segurança Android: abordagem de defesa em profundidade
+3. Estrutura de aplicativos Android
+4. Publicação de aplicativos Android
+5. Superfície de ataque de aplicativos Android
 
-## Android Architecture
+Visite o site oficial da [documentação do desenvolvedor Android](https://developer.android.com/index.html "Guia do Desenvolvedor Android") para mais detalhes sobre a plataforma Android.
 
-[Android](https://en.wikipedia.org/wiki/Android_(operating_system) "Android (Operating System)") is a Linux-based open source platform developed by the [Open Handset Alliance](https://www.openhandsetalliance.com/) (a consortium lead by Google), which serves as a mobile operating system (OS). Today the platform is the foundation for a wide variety of modern technology, such as mobile phones, tablets, wearable tech, TVs, and other smart devices. Typical Android builds ship with a range of pre-installed ("stock") apps and support installation of third-party apps through the Google Play store and other marketplaces.
+## Arquitetura Android
 
-Android's software stack is composed of several different layers. Each layer defines interfaces and offers specific services.
+[Android](https://en.wikipedia.org/wiki/Android_(operating_system) "Android (Sistema Operacional)") é uma plataforma open source baseada em Linux desenvolvida pela [Open Handset Alliance](https://www.openhandsetalliance.com/) (um consórcio liderado pelo Google), que serve como um sistema operacional (SO) móvel. Hoje a plataforma é a base para uma ampla variedade de tecnologias modernas, como telefones móveis, tablets, tecnologia vestível, TVs e outros dispositivos inteligentes. Builds típicas do Android são enviadas com uma variedade de aplicativos pré-instalados ("stock") e suportam a instalação de aplicativos de terceiros através da Google Play store e outros marketplaces.
+
+A pilha de software do Android é composta por várias camadas diferentes. Cada camada define interfaces e oferece serviços específicos.
 
 <img src="Images/Chapters/0x05a/android_software_stack.png" width="400px" />
 
-**Kernel:** At the lowest level, Android is based on a [variation of the Linux Kernel](https://source.android.com/devices/architecture/kernel) containing some significant additions, including [Low Memory Killer](https://source.android.com/devices/tech/perf/lmkd), wake locks, the [Binder IPC](https://source.android.com/devices/architecture/hidl/binder-ipc) driver, etc. For the purpose of the MASTG, we'll focus on the user-mode part of the OS, where Android significantly differs from a typical Linux distribution. The two most important components for us are the managed runtime used by applications (ART/Dalvik) and [Bionic](https://en.wikipedia.org/wiki/Bionic_(software) "Android (Bionic)"), Android's version of glibc, the GNU C library.
+**Kernel:** No nível mais baixo, o Android é baseado em uma [variação do Kernel Linux](https://source.android.com/devices/architecture/kernel) contendo algumas adições significativas, incluindo [Low Memory Killer](https://source.android.com/devices/tech/perf/lmkd), wake locks, o driver [Binder IPC](https://source.android.com/devices/architecture/hidl/binder-ipc), etc. Para o propósito do MASTG, focaremos na parte do SO em modo de usuário, onde o Android difere significativamente de uma distribuição Linux típica. Os dois componentes mais importantes para nós são o runtime gerenciado usado por aplicativos (ART/Dalvik) e [Bionic](https://en.wikipedia.org/wiki/Bionic_(software) "Android (Bionic)"), a versão do Android da glibc, a biblioteca GNU C.
 
-**HAL:** On top of the kernel, the Hardware Abstraction Layer (HAL) defines a standard interface for interacting with built-in hardware components. Several HAL implementations are packaged into shared library modules that the Android system calls when required. This is the basis for allowing applications to interact with the device's hardware. For example, it allows a stock phone application to use a device's microphone and speaker.
+**HAL:** No topo do kernel, a Camada de Abstração de Hardware (HAL) define uma interface padrão para interagir com componentes de hardware integrados. Várias implementações HAL são empacotadas em módulos de biblioteca compartilhada que o sistema Android chama quando necessário. Esta é a base para permitir que aplicativos interajam com o hardware do dispositivo. Por exemplo, permite que um aplicativo de telefone stock use o microfone e alto-falante do dispositivo.
 
-**Runtime Environment:** Android apps are written in Java and Kotlin and then compiled to [Dalvik bytecode](https://source.android.com/devices/tech/dalvik/dalvik-bytecode) which can be then executed using a runtime that interprets the bytecode instructions and executes them on the target device. For Android, this is the [Android Runtime (ART)](https://source.android.com/devices/tech/dalvik/configure#how_art_works). This is similar to the [JVM (Java Virtual Machine)](https://en.wikipedia.org/wiki/Java_virtual_machine) for Java applications, or the Mono Runtime for .NET applications.
+**Ambiente de Runtime:** Aplicativos Android são escritos em Java e Kotlin e então compilados para [bytecode Dalvik](https://source.android.com/devices/tech/dalvik/dalvik-bytecode) que pode então ser executado usando um runtime que interpreta as instruções do bytecode e as executa no dispositivo de destino. Para o Android, este é o [Android Runtime (ART)](https://source.android.com/devices/tech/dalvik/configure#how_art_works). Isto é semelhante à [JVM (Java Virtual Machine)](https://en.wikipedia.org/wiki/Java_virtual_machine) para aplicativos Java, ou o Mono Runtime para aplicativos .NET.
 
-Dalvik bytecode is an optimized version of Java bytecode. It is created by first compiling the Java or Kotlin code to Java bytecode, using the javac and kotlinc compilers respectively, producing .class files. Finally, the Java bytecode is converted to Dalvik bytecode using the d8 tool. Dalvik bytecode is packed within APK and AAB files in the form of .dex files and is used by a managed runtime on Android to execute it on the device.
+O bytecode Dalvik é uma versão otimizada do bytecode Java. Ele é criado primeiro compilando o código Java ou Kotlin para bytecode Java, usando os compiladores javac e kotlinc respectivamente, produzindo arquivos .class. Finalmente, o bytecode Java é convertido para bytecode Dalvik usando a ferramenta d8. O bytecode Dalvik é empacotado dentro de arquivos APK e AAB na forma de arquivos .dex e é usado por um runtime gerenciado no Android para executá-lo no dispositivo.
 
 <img src="Images/Chapters/0x05a/java_vs_dalvik.png" width="400px" />
 
-Before Android 5.0 (API level 21), Android executed bytecode on the Dalvik Virtual Machine (DVM), where it was translated into machine code at execution time, a process known as _just-in-time_ (JIT) compilation. This enables the runtime to benefit from the speed of compiled code while maintaining the flexibility of code interpretation.
+Antes do Android 5.0 (API level 21), o Android executava bytecode na Máquina Virtual Dalvik (DVM), onde era traduzido para código de máquina no momento da execução, um processo conhecido como compilação _just-in-time_ (JIT). Isso permite que o runtime se beneficie da velocidade do código compilado enquanto mantém a flexibilidade da interpretação de código.
 
-Since Android 5.0 (API level 21), Android executes bytecode on the Android Runtime (ART) which is the successor of the DVM. ART provides improved performance as well as context information in app native crash reports, by including both Java and native stack information. It uses the same Dalvik bytecode input to maintain backward compatibility. However, ART executes the Dalvik bytecode differently, using a hybrid combination of _ahead-of-time_ (AOT), _just-in-time_ (JIT) and profile-guided compilation.
+Desde o Android 5.0 (API level 21), o Android executa bytecode no Android Runtime (ART) que é o sucessor do DVM. O ART fornece desempenho melhorado, bem como informações de contexto em relatórios de crash nativo de aplicativos, incluindo informações de stack Java e nativo. Ele usa a mesma entrada de bytecode Dalvik para manter compatibilidade com versões anteriores. No entanto, o ART executa o bytecode Dalvik de forma diferente, usando uma combinação híbrida de compilação _ahead-of-time_ (AOT), _just-in-time_ (JIT) e guiada por perfil.
 
-- **AOT** pre-compiles Dalvik bytecode into native code, and the generated code will be saved on disk with the .oat extension (ELF binary). The dex2oat tool can be used to perform the compilation and can be found at /system/bin/dex2oat on Android devices. AOT compilation is executed during the installation of the app. This makes the application start faster, as no compilation is needed anymore. However, this also means that the install time increases as compared to JIT compilation. Additionally, since applications are always optimized against the current version of the OS, this means that software updates will recompile all previously compiled applications, resulting in a significant increase in the system update time. Finally, AOT compilation will compile the entire application, even if certain parts are never used by the user.
-- **JIT** happens at runtime.
-- **Profile-guided compilation** is a hybrid approach that was introduced in Android 7 (API level 24) to combat the downsides of AOT. At first, the application will use JIT compilation, and Android keeps track of all the parts of the application that are frequently used. This information is stored in an application profile and when the device is idle, a compilation (dex2oat) daemon runs which AOT compiles the identified frequent code paths from the profile.
+- **AOT** pré-compila bytecode Dalvik em código nativo, e o código gerado será salvo em disco com a extensão .oat (binário ELF). A ferramenta dex2oat pode ser usada para realizar a compilação e pode ser encontrada em /system/bin/dex2oat em dispositivos Android. A compilação AOT é executada durante a instalação do aplicativo. Isso faz com que o aplicativo inicie mais rápido, pois nenhuma compilação é mais necessária. No entanto, isso também significa que o tempo de instalação aumenta em comparação com a compilação JIT. Além disso, como os aplicativos são sempre otimizados contra a versão atual do SO, isso significa que as atualizações de software recompilarão todos os aplicativos previamente compilados, resultando em um aumento significativo no tempo de atualização do sistema. Finalmente, a compilação AOT compilará o aplicativo inteiro, mesmo que certas partes nunca sejam usadas pelo usuário.
+- **JIT** acontece em tempo de execução.
+- **Compilação guiada por perfil** é uma abordagem híbrida que foi introduzida no Android 7 (API level 24) para combater as desvantagens do AOT. Primeiro, o aplicativo usará compilação JIT, e o Android mantém o controle de todas as partes do aplicativo que são frequentemente usadas. Esta informação é armazenada em um perfil de aplicativo e quando o dispositivo está ocioso, um daemon de compilação (dex2oat) é executado que compila AOT os caminhos de código frequentes identificados a partir do perfil.
 
 <img src="Images/Chapters/0x05a/java2oat.png" width="100%" />
 
-Source: <https://lief-project.github.io/doc/latest/tutorials/10_android_formats.html>
+Fonte: <https://lief-project.github.io/doc/latest/tutorials/10_android_formats.html>
 
-**Sandboxing:** Android apps don't have direct access to hardware resources, and each app runs in its own virtual machine or sandbox. This enables the OS to have precise control over resources and memory access on the device. For instance, a crashing app doesn't affect other apps running on the same device. Android controls the maximum number of system resources allocated to apps, preventing any one app from monopolizing too many resources. At the same time, this sandbox design can be considered as one of the many principles in Android's global defense-in-depth strategy. A malicious third-party application, with low privileges, shouldn't be able to escape its own runtime and read the memory of a victim application on the same device. In the following section we take a closer look at the different defense layers in the Android operating system. Learn more in the section ["Software Isolation"](#software-isolation).
+**Sandboxing:** Aplicativos Android não têm acesso direto a recursos de hardware, e cada aplicativo é executado em sua própria máquina virtual ou sandbox. Isso permite que o SO tenha controle preciso sobre recursos e acesso à memória no dispositivo. Por exemplo, um aplicativo em crash não afeta outros aplicativos em execução no mesmo dispositivo. O Android controla o número máximo de recursos do sistema alocados para aplicativos, impedindo que qualquer aplicativo monopolize muitos recursos. Ao mesmo tempo, este design de sandbox pode ser considerado como um dos muitos princípios na estratégia global de defesa em profundidade do Android. Um aplicativo de terceiros malicioso, com baixos privilégios, não deve ser capaz de escapar de seu próprio runtime e ler a memória de um aplicativo vítima no mesmo dispositivo. Na seção seguinte, damos uma olhada mais de perto nas diferentes camadas de defesa no sistema operacional Android. Saiba mais na seção ["Isolamento de Software"](#isolamento-de-software).
 
-You can find more detailed information in the Google Source article ["Android Runtime (ART)"](https://source.android.com/devices/tech/dalvik/configure#how_art_works), the [book "Android Internals" by Jonathan Levin](http://newandroidbook.com/) and the [blog post "Android 101" by @_qaz_qaz](https://secrary.com/android-reversing/android101/).
+Você pode encontrar informações mais detalhadas no artigo do Google Source ["Android Runtime (ART)"](https://source.android.com/devices/tech/dalvik/configure#how_art_works), no [livro "Android Internals" de Jonathan Levin](http://newandroidbook.com/) e no [post do blog "Android 101" de @_qaz_qaz](https://secrary.com/android-reversing/android101/).
 
-## Android Security: Defense-in-Depth Approach
+## Segurança Android: Abordagem de Defesa em Profundidade
 
-The Android architecture implements different security layers that, together, enable a defense-in-depth approach. This means that the confidentiality, integrity or availability of sensitive user-data or applications doesn't hinge on one single security measure. This section brings an overview of the different layers of defense that the Android system provides. The security strategy can be roughly categorized into four distinct domains, each focusing on protecting against certain attack models.
+A arquitetura Android implementa diferentes camadas de segurança que, juntas, permitem uma abordagem de defesa em profundidade. Isso significa que a confidencialidade, integridade ou disponibilidade de dados sensíveis do usuário ou aplicativos não depende de uma única medida de segurança. Esta seção traz uma visão geral das diferentes camadas de defesa que o sistema Android fornece. A estratégia de segurança pode ser grosseiramente categorizada em quatro domínios distintos, cada um focando em proteger contra certos modelos de ataque.
 
-- System-wide security
-- Software isolation
-- Network security
-- Anti-exploitation
+- Segurança em todo o sistema
+- Isolamento de software
+- Segurança de rede
+- Anti-exploração
 
-### System-wide security
+### Segurança em todo o sistema
 
-#### Device encryption
+#### Criptografia de dispositivo
 
-Android supports device encryption from Android 2.3.4 (API level 10) and it has undergone some big changes since then. Google imposed that all devices running Android 6.0 (API level 23) or higher had to support storage encryption, although some low-end devices were exempt because it would significantly impact their performance.
+O Android suporta criptografia de dispositivo desde o Android 2.3.4 (API level 10) e passou por algumas grandes mudanças desde então. O Google impôs que todos os dispositivos executando Android 6.0 (API level 23) ou superior deveriam suportar criptografia de armazenamento, embora alguns dispositivos de baixo custo tenham sido isentos porque impactaria significativamente seu desempenho.
 
-- [Full-Disk Encryption (FDE)](https://source.android.com/security/encryption/full-disk "Full-Disk Encryption"): Android 5.0 (API level 21) and above support full-disk encryption. This encryption uses a single key protected by the user's device password to encrypt and decrypt the user data partition. This kind of encryption is now considered deprecated and file-based encryption should be used whenever possible. Full-disk encryption has drawbacks, such as not being able to receive calls or not having operative alarms after a reboot if the user does not enter the password to unlock.
+- [Criptografia de Disco Completo (FDE)](https://source.android.com/security/encryption/full-disk "Criptografia de Disco Completo"): Android 5.0 (API level 21) e superior suportam criptografia de disco completo. Esta criptografia usa uma única chave protegida pela senha do dispositivo do usuário para criptografar e descriptografar a partição de dados do usuário. Este tipo de criptografia é agora considerado obsoleto e a criptografia baseada em arquivo deve ser usada sempre que possível. A criptografia de disco completo tem desvantagens, como não poder receber chamadas ou não ter alarmes operacionais após uma reinicialização se o usuário não inserir a senha para desbloquear.
 
-- [File-Based Encryption (FBE)](https://source.android.com/security/encryption/file-based "File-Based Encryption"): Android 7.0 (API level 24) supports file-based encryption. File-based encryption allows different files to be encrypted with different keys so they can be deciphered independently. Devices that support this type of encryption support Direct Boot as well. Direct Boot enables the device to have access to features such as alarms or accessibility services even if the user didn't unlock the device.
+- [Criptografia Baseada em Arquivo (FBE)](https://source.android.com/security/encryption/file-based "Criptografia Baseada em Arquivo"): Android 7.0 (API level 24) suporta criptografia baseada em arquivo. A criptografia baseada em arquivo permite que diferentes arquivos sejam criptografados com chaves diferentes para que possam ser decifrados independentemente. Dispositivos que suportam este tipo de criptografia também suportam Direct Boot. O Direct Boot permite que o dispositivo tenha acesso a recursos como alarmes ou serviços de acessibilidade mesmo se o usuário não tiver desbloqueado o dispositivo.
 
-> Note: you might hear of [Adiantum](https://github.com/google/adiantum "Adiantum"), which is an encryption method designed for devices running Android 9 (API level 28) and higher whose CPUs lack AES instructions. **Adiantum is only relevant for ROM developers or device vendors**, Android does not provide an API for developers to use Adiantum from applications. As recommended by Google, Adiantum should not be used when shipping ARM-based devices with ARMv8 Cryptography Extensions or x86-based devices with AES-NI. AES is faster on those platforms.
+> Nota: você pode ouvir falar de [Adiantum](https://github.com/google/adiantum "Adiantum"), que é um método de criptografia projetado para dispositivos executando Android 9 (API level 28) e superior cujas CPUs carecem de instruções AES. **Adiantum é relevante apenas para desenvolvedores de ROM ou fornecedores de dispositivos**, o Android não fornece uma API para desenvolvedores usarem Adiantum a partir de aplicativos. Como recomendado pelo Google, Adiantum não deve ser usado ao enviar dispositivos baseados em ARM com ARMv8 Cryptography Extensions ou dispositivos baseados em x86 com AES-NI. AES é mais rápido nessas plataformas.
 >
->Further information is available in the [Android documentation](https://source.android.com/security/encryption/adiantum "Adiantum").
+> Mais informações estão disponíveis na [documentação do Android](https://source.android.com/security/encryption/adiantum "Adiantum").
 
-#### Trusted Execution Environment (TEE)
+#### Ambiente de Execução Confiável (TEE)
 
-In order for the Android system to perform encryption it needs a way to securely generate, import and store cryptographic keys. We are essentially shifting the problem of keeping sensitive data secure towards keeping a cryptographic key secure. If the attacker can dump or guess the cryptographic key, the sensitive encrypted data can be retrieved.
+Para que o sistema Android execute criptografia, ele precisa de uma maneira de gerar, importar e armazenar chaves criptográficas com segurança. Estamos essencialmente deslocando o problema de manter dados sensíveis seguros para manter uma chave criptográfica segura. Se o invasor puder despejar ou adivinhar a chave criptográfica, os dados sensíveis criptografados podem ser recuperados.
 
-Android offers a trusted execution environment in dedicated hardware to solve the problem of securely generating and protecting cryptographic keys. This means that a dedicated hardware component in the Android system is responsible for handling cryptographic key material. Three main modules are responsible for this:
+O Android oferece um ambiente de execução confiável em hardware dedicado para resolver o problema de gerar e proteger chaves criptográficas com segurança. Isso significa que um componente de hardware dedicado no sistema Android é responsável por lidar com material de chave criptográfica. Três módulos principais são responsáveis por isso:
 
-- [Hardware-backed KeyStore](https://source.android.com/security/keystore): This module offers cryptographic services to the Android OS and third-party apps. It enables apps to perform cryptographic sensitive operations in an TEE without exposing the cryptographic key material.
+- [KeyStore com suporte de hardware](https://source.android.com/security/keystore): Este módulo oferece serviços criptográficos para o SO Android e aplicativos de terceiros. Ele permite que aplicativos realizem operações criptográficas sensíveis em um TEE sem expor o material da chave criptográfica.
 
-- [StrongBox](https://developer.android.com/training/articles/keystore#HardwareSecurityModule): In Android 9 (Pie), StrongBox was introduced, another approach to implement a hardware-backed KeyStore. While previous to Android 9 Pie, a hardware-backed KeyStore would be any TEE implementation that lies outside of the Android OS kernel. StrongBox is an actual complete separate hardware chip that is added to the device on which the KeyStore is implemented and is clearly defined in the Android documentation. You can check programmatically whether a key resides in StrongBox and if it does, you can be sure that it is protected by a hardware security module that has its own CPU, secure storage, and True Random Number Generator (TRNG). All the sensitive cryptographic operations happen on this chip, in the secure boundaries of StrongBox.
+- [StrongBox](https://developer.android.com/training/articles/keystore#HardwareSecurityModule): No Android 9 (Pie), o StrongBox foi introduzido, outra abordagem para implementar um KeyStore com suporte de hardware. Enquanto antes do Android 9 Pie, um KeyStore com suporte de hardware seria qualquer implementação TEE que fica fora do kernel do SO Android. O StrongBox é um chip de hardware separado completo que é adicionado ao dispositivo no qual o KeyStore é implementado e é claramente definido na documentação do Android. Você pode verificar programaticamente se uma chave reside no StrongBox e se reside, você pode ter certeza de que ela é protegida por um módulo de segurança de hardware que tem sua própria CPU, armazenamento seguro e Gerador de Números Aleatórios Verdadeiro (TRNG). Todas as operações criptográficas sensíveis acontecem neste chip, nos limites seguros do StrongBox.
 
-- [GateKeeper](https://source.android.com/security/authentication/gatekeeper): The GateKeeper module enables device pattern and password authentication. The security sensitive operations during the authentication process happen inside the TEE that is available on the device. GateKeeper consists of three main components, (1) `gatekeeperd` which is the service that exposes GateKeeper, (2) GateKeeper HAL, which is the hardware interface and (3) the TEE implementation which is the actual software that implements the GateKeeper functionality in the TEE.
+- [GateKeeper](https://source.android.com/security/authentication/gatekeeper): O módulo GateKeeper permite autenticação de padrão e senha do dispositivo. As operações sensíveis de segurança durante o processo de autenticação acontecem dentro do TEE que está disponível no dispositivo. O GateKeeper consiste em três componentes principais, (1) `gatekeeperd` que é o serviço que expõe o GateKeeper, (2) GateKeeper HAL, que é a interface de hardware e (3) a implementação TEE que é o software real que implementa a funcionalidade GateKeeper no TEE.
 
-#### Verified Boot
+#### Inicialização Verificada
 
-We need to have a way to ensure that code that is being executed on Android devices comes from a trusted source and that its integrity is not compromised. In order to achieve this, Android introduced the concept of verified boot. The goal of verified boot is to establish a trust relationship between the hardware and the actual code that executes on this hardware. During the verified boot sequence, a full chain of trust is established starting from the hardware-protected Root-of-Trust (RoT) up until the final system that is running, passing through and verifying all the required boot phases. When the Android system is finally booted you can rest assured that the system is not tampered with. You have cryptographic proof that the code which is running is the one that is intended by the OEM and not one that has been maliciously or accidentally altered.
+Precisamos ter uma maneira de garantir que o código que está sendo executado em dispositivos Android venha de uma fonte confiável e que sua integridade não esteja comprometida. Para alcançar isso, o Android introduziu o conceito de inicialização verificada. O objetivo da inicialização verificada é estabelecer uma relação de confiança entre o hardware e o código real que executa neste hardware. Durante a sequência de inicialização verificada, uma cadeia completa de confiança é estabelecida começando da Raiz de Confiança (RoT) protegida por hardware até o sistema final que está sendo executado, passando por e verificando todas as fases de inicialização necessárias. Quando o sistema Android é finalmente inicializado, você pode ter certeza de que o sistema não foi adulterado. Você tem prova criptográfica de que o código que está sendo executado é aquele pretendido pelo OEM e não um que foi alterado maliciosamente ou acidentalmente.
 
-Further information is available in the [Android documentation](https://source.android.com/security/verifiedboot).
+Mais informações estão disponíveis na [documentação do Android](https://source.android.com/security/verifiedboot).
 
-### Software Isolation
+### Isolamento de Software
 
-#### Android Users and Groups
+#### Usuários e Grupos Android
 
-Even though the Android operating system is based on Linux, it doesn't implement user accounts in the same way other Unix-like systems do. In Android, the multi-user support of the Linux kernel is used to sandbox apps: with a few exceptions, each app runs as though under a separate Linux user, effectively isolated from other apps and the rest of the operating system.
+Embora o sistema operacional Android seja baseado em Linux, ele não implementa contas de usuário da mesma maneira que outros sistemas do tipo Unix. No Android, o suporte multi-usuário do kernel Linux é usado para sandbox de aplicativos: com algumas exceções, cada aplicativo é executado como se estivesse sob um usuário Linux separado, efetivamente isolado de outros aplicativos e do resto do sistema operacional.
 
-The file [android_filesystem_config.h](https://android.googlesource.com/platform/system/core/+/master/libcutils/include/private/android_filesystem_config.h) includes a list of the predefined users and groups system processes are assigned to. UIDs (userIDs) for other applications are added as the latter are installed.
+O arquivo [android_filesystem_config.h](https://android.googlesource.com/platform/system/core/+/master/libcutils/include/private/android_filesystem_config.h) inclui uma lista dos usuários e grupos predefinidos aos quais os processos do sistema são atribuídos. UIDs (userIDs) para outros aplicativos são adicionados conforme estes são instalados.
 
-For example, Android 9.0 (API level 28) defines the following system users:
+Por exemplo, o Android 9.0 (API level 28) define os seguintes usuários do sistema:
 
 ```c
     #define AID_ROOT             0  /* traditional unix root user */
@@ -108,84 +109,86 @@ For example, Android 9.0 (API level 28) defines the following system users:
 
 #### SELinux
 
-Security-Enhanced Linux (SELinux) uses a Mandatory Access Control (MAC) system to further lock down which processes should have access to which resources. Each resource is given a label in the form of `user:role:type:mls_level` which defines which users are able to execute which types of actions on it. For example, one process may only be able to read a file, while another process may be able to edit or delete the file. This way, by working on a least-privilege principle, vulnerable processes are more difficult to exploit via privilege escalation or lateral movement.
+Security-Enhanced Linux (SELinux) usa um sistema de Controle de Acesso Mandatório (MAC) para bloquear ainda mais quais processos devem ter acesso a quais recursos. Cada recurso recebe um rótulo na forma de `user:role:type:mls_level` que define quais usuários são capazes de executar quais tipos de ações nele. Por exemplo, um processo pode apenas ser capaz de ler um arquivo, enquanto outro processo pode ser capaz de editar ou excluir o arquivo. Desta forma, trabalhando em um princípio de menor privilégio, processos vulneráveis são mais difíceis de explorar
 
-Further information is available on the [Android documentation](https://source.android.com/security/selinux "Security-Enhanced Linux in Android").
+através de escalação de privilégios ou movimento lateral.
 
-#### Permissions
+Mais informações estão disponíveis na [documentação do Android](https://source.android.com/security/selinux "Security-Enhanced Linux no Android").
 
-Android implements an extensive permissions system that is used as an access control mechanism. It ensures controlled access to sensitive user data and device resources. Android categorizes permissions into different [types](https://developer.android.com/guide/topics/permissions/overview#types) offering various protection levels.
+#### Permissões
 
-> Prior to Android 6.0 (API level 23), all permissions an app requested were granted at installation (Install-time permissions). From API level 23 onwards, the user must approve some permissions requests during runtime (Runtime permissions).
+O Android implementa um sistema extensivo de permissões que é usado como um mecanismo de controle de acesso. Ele garante acesso controlado a dados sensíveis do usuário e recursos do dispositivo. O Android categoriza permissões em diferentes [tipos](https://developer.android.com/guide/topics/permissions/overview#types) oferecendo vários níveis de proteção.
 
-Further information is available in the [Android documentation](https://developer.android.com/guide/topics/permissions/overview) including several [considerations](https://developer.android.com/training/permissions/evaluating) and [best practices](https://developer.android.com/training/permissions/usage-notes).
+> Antes do Android 6.0 (API level 23), todas as permissões que um aplicativo solicitava eram concedidas na instalação (Permissões de tempo de instalação). A partir do API level 23 em diante, o usuário deve aprovar algumas solicitações de permissões durante o tempo de execução (Permissões de tempo de execução).
 
-To learn how to test app permissions refer to the [Testing App Permissions](0x05h-Testing-Platform-Interaction.md#app-permissions) section in the "Android Platform APIs" chapter.
+Mais informações estão disponíveis na [documentação do Android](https://developer.android.com/guide/topics/permissions/overview) incluindo várias [considerações](https://developer.android.com/training/permissions/evaluating) e [melhores práticas](https://developer.android.com/training/permissions/usage-notes).
 
-### Network security
+Para aprender como testar permissões de aplicativos, consulte a seção [Testando Permissões de Aplicativo](0x05h-Testing-Platform-Interaction.md#app-permissions) no capítulo "APIs da Plataforma Android".
 
-#### TLS by Default
+### Segurança de rede
 
-By default, since Android 9 (API level 28), all network activity is treated as being executed in a hostile environment. This means that the Android system will only allow apps to communicate over a network channel that is established using the Transport Layer Security (TLS) protocol. This protocol effectively encrypts all network traffic and creates a secure channel to a server. It may be the case that you would want to use clear traffic connections for legacy reasons. This can be achieved by adapting the `res/xml/network_security_config.xml` file in the application.
+#### TLS por Padrão
 
-Further information is available in the [Android documentation](https://developer.android.com/training/articles/security-config.html).
+Por padrão, desde o Android 9 (API level 28), toda atividade de rede é tratada como sendo executada em um ambiente hostil. Isso significa que o sistema Android permitirá apenas que aplicativos se comuniquem por um canal de rede que é estabelecido usando o protocolo Transport Layer Security (TLS). Este protocolo efetivamente criptografa todo o tráfego de rede e cria um canal seguro para um servidor. Pode ser o caso de você querer usar conexões de tráfego claro por razões de legado. Isso pode ser alcançado adaptando o arquivo `res/xml/network_security_config.xml` no aplicativo.
 
-#### DNS over TLS
+Mais informações estão disponíveis na [documentação do Android](https://developer.android.com/training/articles/security-config.html).
 
-System-wide DNS over TLS support has been introduced since Android 9 (API level 28). It allows you to perform queries to DNS servers using the TLS protocol. A secure channel is established with the DNS server through which the DNS query is sent. This assures that no sensitive data is exposed during a DNS lookup.
+#### DNS sobre TLS
 
-Further information is available on the [Android Developers blog](https://android-developers.googleblog.com/2018/04/dns-over-tls-support-in-android-p.html).
+Suporte system-wide para DNS sobre TLS foi introduzido desde o Android 9 (API level 28). Ele permite que você execute consultas para servidores DNS usando o protocolo TLS. Um canal seguro é estabelecido com o servidor DNS através do qual a consulta DNS é enviada. Isso garante que nenhum dado sensível seja exposto durante uma pesquisa DNS.
 
-### Anti-exploitation
+Mais informações estão disponíveis no [blog Android Developers](https://android-developers.googleblog.com/2018/04/dns-over-tls-support-in-android-p.html).
 
-#### ASLR, KASLR, PIE and DEP
+### Anti-exploração
 
-Address Space Layout Randomization (ASLR), which has been part of Android since Android 4.1 (API level 15), is a standard protection against buffer-overflow attacks, which makes sure that both the application and the OS are loaded to random memory addresses making it difficult to get the correct address for a specific memory region or library. In Android 8.0 (API level 26), this protection was also implemented for the kernel (KASLR). ASLR protection is only possible if the application can be loaded at a random place in memory, which is indicated by the Position Independent Executable (PIE) flag of the application. Since Android 5.0 (API level 21), support for non-PIE enabled native libraries was dropped. Finally, Data Execution Prevention (DEP) prevents code execution on the stack and heap, which is also used to combat buffer-overflow exploits.
+#### ASLR, KASLR, PIE e DEP
 
-Further information is available on the [Android Developers blog](https://android-developers.googleblog.com/2016/07/protecting-android-with-more-linux.html "Protecting Android with more Linux kernel defenses").
+Address Space Layout Randomization (ASLR), que faz parte do Android desde o Android 4.1 (API level 15), é uma proteção padrão contra ataques de buffer overflow, que garante que tanto o aplicativo quanto o SO sejam carregados para endereços de memória aleatórios, tornando difícil obter o endereço correto para uma região de memória ou biblioteca específica. No Android 8.0 (API level 26), esta proteção também foi implementada para o kernel (KASLR). A proteção ASLR só é possível se o aplicativo pode ser carregado em um lugar aleatório na memória, o que é indicado pelo flag Position Independent Executable (PIE) do aplicativo. Desde o Android 5.0 (API level 21), o suporte para bibliotecas nativas não habilitadas para PIE foi removido. Finalmente, Data Execution Prevention (DEP) previne a execução de código na stack e heap, que também é usado para combater exploits de buffer overflow.
 
-#### SECCOMP Filter
+Mais informações estão disponíveis no [blog Android Developers](https://android-developers.googleblog.com/2016/07/protecting-android-with-more-linux.html "Protegendo Android com mais defesas do kernel Linux").
 
-Android applications can contain native code written in C or C++. These compiled binaries can communicate both with the Android Runtime through Java Native Interface (JNI) bindings, and with the OS through system calls. Some system calls are either not implemented, or are not supposed to be called by normal applications. As these system calls communicate directly with the kernel, they are a prime target for exploit developers. With Android 8 (API level 26), Android has introduced the support for Secure Computing (SECCOMP) filters for all Zygote based processes (i.e. user applications). These filters restrict the available syscalls to those exposed through bionic.
+#### Filtro SECCOMP
 
-Further information is available on the [Android Developers blog](https://android-developers.googleblog.com/2017/07/seccomp-filter-in-android-o.html "Seccomp filter in Android O").
+Aplicativos Android podem conter código nativo escrito em C ou C++. Esses binários compilados podem se comunicar tanto com o Android Runtime através de bindings Java Native Interface (JNI), quanto com o SO através de system calls. Alguns system calls não são implementados, ou não devem ser chamados por aplicativos normais. Como esses system calls se comunicam diretamente com o kernel, eles são um alvo principal para desenvolvedores de exploits. Com o Android 8 (API level 26), o Android introduziu o suporte para filtros Secure Computing (SECCOMP) para todos os processos baseados em Zygote (ou seja, aplicativos de usuário). Esses filtros restringem os syscalls disponíveis àqueles expostos através do bionic.
 
-## Android Application Structure
+Mais informações estão disponíveis no [blog Android Developers](https://android-developers.googleblog.com/2017/07/seccomp-filter-in-android-o.html "Filtro Seccomp no Android O").
 
-### Communication with the Operating System
+## Estrutura de Aplicativos Android
 
-Android apps interact with system services via the Android Framework, an abstraction layer that offers high-level Java APIs. The majority of these services are invoked via normal Java method calls and are translated to IPC calls to system services that are running in the background. Examples of system services include:
+### Comunicação com o Sistema Operacional
 
-- Connectivity (Wi-Fi, Bluetooth, NFC, etc.)
-- Files
-- Cameras
-- Geolocation (GPS)
-- Microphone
+Aplicativos Android interagem com serviços do sistema através do Android Framework, uma camada de abstração que oferece APIs Java de alto nível. A maioria desses serviços é invocada via chamadas de método Java normais e são traduzidas para chamadas IPC para serviços do sistema que estão sendo executados em segundo plano. Exemplos de serviços do sistema incluem:
 
-The framework also offers common security functions, such as cryptography.
+- Conectividade (Wi-Fi, Bluetooth, NFC, etc.)
+- Arquivos
+- Câmeras
+- Geolocalização (GPS)
+- Microfone
 
-The API specifications change with every new Android release. Critical bug fixes and security patches are usually applied to earlier versions as well.
+O framework também oferece funções de segurança comuns, como criptografia.
 
-Noteworthy [API versions](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels "What is API level?"). See @MASTG-BEST-0010 for more information about security and privacy features introduced in different Android versions.
+As especificações da API mudam com cada nova versão do Android. Correções críticas de bugs e patches de segurança são geralmente aplicados a versões anteriores também.
 
-Android development releases follow a unique structure. They are organized into families and given alphabetical codenames inspired by tasty treats. You can find them all [here](https://source.android.com/docs/setup/about/build-numbers "Codenames, tags, and build numbers").
+[Versões de API](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels "O que é nível de API?") notáveis. Veja @MASTG-BEST-0010 para mais informações sobre recursos de segurança e privacidade introduzidos em diferentes versões do Android.
 
-### The App Sandbox
+Lançamentos de desenvolvimento do Android seguem uma estrutura única. Eles são organizados em famílias e recebem codinomes alfabéticos inspirados em guloseimas saborosas. Você pode encontrá-los todos [aqui](https://source.android.com/docs/setup/about/build-numbers "Codenames, tags e números de build").
 
-Apps are executed in the Android Application Sandbox, which separates the app data and code execution from other apps on the device. As mentioned before, this separation adds a first layer of defense.
+### O Sandbox do Aplicativo
 
-Installation of a new app creates a new directory named after the app package, which results in the following path: `/data/data/[package-name]`. This directory holds the app's data. Linux directory permissions are set such that the directory can be read from and written to only with the app's unique UID.
+Aplicativos são executados no Android Application Sandbox, que separa os dados do aplicativo e a execução de código de outros aplicativos no dispositivo. Como mencionado antes, esta separação adiciona uma primeira camada de defesa.
+
+A instalação de um novo aplicativo cria um novo diretório nomeado após o pacote do aplicativo, o que resulta no seguinte caminho: `/data/data/[nome-do-pacote]`. Este diretório mantém os dados do aplicativo. Permissões de diretório Linux são definidas de forma que o diretório possa ser lido e escrito apenas com o UID único do aplicativo.
 
 <img src="Images/Chapters/0x05a/Selection_003.png" width="400px" />
 
-We can confirm this by looking at the file system permissions in the `/data/data` folder. For example, we can see that Google Chrome and Calendar are assigned one directory each and run under different user accounts:
+Podemos confirmar isso olhando as permissões do sistema de arquivos na pasta `/data/data`. Por exemplo, podemos ver que o Google Chrome e o Calendar são atribuídos um diretório cada e são executados sob diferentes contas de usuário:
 
 ```bash
 drwx------  4 u0_a97              u0_a97              4096 2017-01-18 14:27 com.android.calendar
 drwx------  6 u0_a120             u0_a120             4096 2017-01-19 12:54 com.android.chrome
 ```
 
-Developers who want their apps to share a common sandbox can sidestep sandboxing. When two apps are signed with the same certificate and explicitly share the same user ID (having the _sharedUserId_ in their _AndroidManifest.xml_ files), each can access the other's data directory. See the following example to achieve this in the NFC app:
+Desenvolvedores que querem que seus aplicativos compartilhem um sandbox comum podem contornar o sandboxing. Quando dois aplicativos são assinados com o mesmo certificado e explicitamente compartilham o mesmo ID de usuário (tendo o _sharedUserId_ em seus arquivos _AndroidManifest.xml_), cada um pode acessar o diretório de dados do outro. Veja o seguinte exemplo para alcançar isso no aplicativo NFC:
 
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -193,11 +196,11 @@ Developers who want their apps to share a common sandbox can sidestep sandboxing
   android:sharedUserId="android.uid.nfc">
 ```
 
-#### Linux User Management
+#### Gerenciamento de Usuários Linux
 
-Android leverages Linux user management to isolate apps. This approach is different from user management usage in traditional Linux environments, where multiple apps are often run by the same user. Android creates a unique UID for each Android app and runs the app in a separate process. Consequently, each app can access its own resources only. This protection is enforced by the Linux kernel.
+O Android aproveita o gerenciamento de usuários Linux para isolar aplicativos. Esta abordagem é diferente do uso de gerenciamento de usuários em ambientes Linux tradicionais, onde múltiplos aplicativos são frequentemente executados pelo mesmo usuário. O Android cria um UID único para cada aplicativo Android e executa o aplicativo em um processo separado. Consequentemente, cada aplicativo pode acessar apenas seus próprios recursos. Esta proteção é aplicada pelo kernel Linux.
 
-Generally, apps are assigned UIDs in the range of 10000 and 99999. Android apps receive a user name based on their UID. For example, the app with UID 10188 receives the user name `u0_a188`. If the permissions an app requested are granted, the corresponding group ID is added to the app's process. For example, the user ID of the app below is 10188. It belongs to the group ID 3003 (inet). That group is related to android.permission.INTERNET permission. The output of the `id` command is shown below.
+Geralmente, aplicativos recebem UIDs na faixa de 10000 e 99999. Aplicativos Android recebem um nome de usuário baseado em seu UID. Por exemplo, o aplicativo com UID 10188 recebe o nome de usuário `u0_a188`. Se as permissões que um aplicativo solicitou são concedidas, o ID do grupo correspondente é adicionado ao processo do aplicativo. Por exemplo, o ID do usuário do aplicativo abaixo é 10188. Ele pertence ao ID do grupo 3003 (inet). Esse grupo está relacionado à permissão android.permission.INTERNET. A saída do comando `id` é mostrada abaixo.
 
 ```bash
 $ id
@@ -205,7 +208,7 @@ uid=10188(u0_a188) gid=10188(u0_a188) groups=10188(u0_a188),3003(inet),
 9997(everybody),50188(all_a188) context=u:r:untrusted_app:s0:c512,c768
 ```
 
-The relationship between group IDs and permissions is defined in the following file:
+A relação entre IDs de grupo e permissões é definida no seguinte arquivo:
 
 [platform.xml](https://android.googlesource.com/platform/frameworks/base/+/master/data/etc/platform.xml)
 
@@ -226,29 +229,29 @@ The relationship between group IDs and permissions is defined in the following f
 
 #### Zygote
 
-The process `Zygote` starts up during [Android initialization](https://github.com/dogriffiths/HeadFirstAndroid/wiki/How-Android-Apps-are-Built-and-Run "How Android Apps are run"). Zygote is a system service for launching apps. The Zygote process is a "base" process that contains all the core libraries the app needs. Upon launch, Zygote opens the socket `/dev/socket/zygote` and listens for connections from local clients. When it receives a connection, it forks a new process, which then loads and executes the app-specific code.
+O processo `Zygote` inicia durante a [inicialização do Android](https://github.com/dogriffiths/HeadFirstAndroid/wiki/How-Android-Apps-are-Built-and-Run "Como Aplicativos Android são Construídos e Executados"). Zygote é um serviço do sistema para lançar aplicativos. O processo Zygote é um processo "base" que contém todas as bibliotecas principais que o aplicativo precisa. Ao ser iniciado, o Zygote abre o socket `/dev/socket/zygote` e escuta por conexões de clientes locais. Quando recebe uma conexão, ele faz fork de um novo processo, que então carrega e executa o código específico do aplicativo.
 
-#### App Lifecycle
+#### Ciclo de Vida do Aplicativo
 
-In Android, the lifetime of an app process is controlled by the operating system. A new Linux process is created when an app component is started and the same app doesn't yet have any other components running. Android may kill this process when the latter is no longer necessary or when reclaiming memory is necessary to run more important apps. The decision to kill a process is primarily related to the state of the user's interaction with the process. In general, processes can be in one of four states.
+No Android, o tempo de vida de um processo de aplicativo é controlado pelo sistema operacional. Um novo processo Linux é criado quando um componente do aplicativo é iniciado e o mesmo aplicativo ainda não tem nenhum outro componente em execução. O Android pode matar este processo quando o último não for mais necessário ou quando a recuperação de memória for necessária para executar aplicativos mais importantes. A decisão de matar um processo está primariamente relacionada ao estado da interação do usuário com o processo. Em geral, processos podem estar em um de quatro estados.
 
-- A foreground process (e.g., an activity running at the top of the screen or a running BroadcastReceiver)
-- A visible process is a process that the user is aware of, so killing it would have a noticeable negative impact on user experience. One example is running an activity that's visible to the user on-screen but not in the foreground.
+- Um processo em primeiro plano (por exemplo, uma atividade em execução no topo da tela ou um BroadcastReceiver em execução)
+- Um processo visível é um processo do qual o usuário está ciente, então matá-lo teria um impacto negativo perceptível na experiência do usuário. Um exemplo é executar uma atividade que é visível para o usuário na tela, mas não em primeiro plano.
 
-- A service process is a process hosting a service that has been started with the `startService` method. Though these processes aren't directly visible to the user, they are generally things that the user cares about (such as background network data upload or download), so the system will always keep such processes running unless there's insufficient memory to retain all foreground and visible processes.
-- A cached process is a process that's not currently needed, so the system is free to kill it when memory is needed.
-Apps must implement callback methods that react to a number of events; for example, the `onCreate` handler is called when the app process is first created. Other callback methods include `onLowMemory`, `onTrimMemory` and `onConfigurationChanged`.
+- Um processo de serviço é um processo que hospeda um serviço que foi iniciado com o método `startService`. Embora esses processos não sejam diretamente visíveis para o usuário, eles são geralmente coisas com as quais o usuário se importa (como upload ou download de dados de rede em segundo plano), então o sistema sempre manterá tais processos em execução, a menos que haja memória insuficiente para reter todos os processos em primeiro plano e visíveis.
+- Um processo em cache é um processo que não é atualmente necessário, então o sistema é livre para matá-lo quando a memória for necessária.
+Aplicativos devem implementar métodos de callback que reagem a uma série de eventos; por exemplo, o handler `onCreate` é chamado quando o processo do aplicativo é primeiro criado. Outros métodos de callback incluem `onLowMemory`, `onTrimMemory` e `onConfigurationChanged`.
 
-### App Bundles
+### Pacotes de Aplicativos
 
-Android applications can be shipped in two forms: the Android Package Kit (APK) file or an [Android App Bundle](https://developer.android.com/guide/app-bundle "Android App Bundle") (.aab). Android App Bundles provide all the resources necessary for an app, but defer the generation of the APK and its signing to Google Play. App Bundles are signed binaries which contain the code of the app in several modules. The base module contains the core of the application. The base module can be extended with various modules which contain new enrichments/functionalities for the app as further explained on the [developer documentation for app bundle](https://developer.android.com/guide/app-bundle "Documentation on App Bundle").
-If you have an Android App Bundle, you can best use the [bundletool](https://developer.android.com/studio/command-line/bundletool "bundletool") command line tool from Google to build unsigned APKs in order to use the existing tooling on the APK. You can create an APK from an AAB file by running the following command:
+Aplicativos Android podem ser enviados em duas formas: o arquivo Android Package Kit (APK) ou um [Android App Bundle](https://developer.android.com/guide/app-bundle "Android App Bundle") (.aab). Android App Bundles fornecem todos os recursos necessários para um aplicativo, mas adiam a geração do APK e sua assinatura para o Google Play. App Bundles são binários assinados que contêm o código do aplicativo em vários módulos. O módulo base contém o núcleo do aplicativo. O módulo base pode ser estendido com vários módulos que contêm novos enriquecimentos/funcionalidades para o aplicativo, conforme explicado mais detalhadamente na [documentação do desenvolvedor para app bundle](https://developer.android.com/guide/app-bundle "Documentação sobre App Bundle").
+Se você tem um Android App Bundle, pode melhor usar a ferramenta de linha de comando [bundletool](https://developer.android.com/studio/command-line/bundletool "bundletool") do Google para construir APKs não assinados a fim de usar as ferramentas existentes no APK. Você pode criar um APK a partir de um arquivo AAB executando o seguinte comando:
 
 ```bash
 bundletool build-apks --bundle=/MyApp/my_app.aab --output=/MyApp/my_app.apks
 ```
 
-If you want to create signed APKs ready for deployment to a test device, use:
+Se você quiser criar APKs assinados prontos para implantação em um dispositivo de teste, use:
 
 ```bash
 $ bundletool build-apks --bundle=/MyApp/my_app.aab --output=/MyApp/my_app.apks
@@ -258,31 +261,33 @@ $ bundletool build-apks --bundle=/MyApp/my_app.aab --output=/MyApp/my_app.apks
 --key-pass=file:/MyApp/key.pwd
 ```
 
-We recommend that you test both the APK with and without the additional modules, so that it becomes clear whether the additional modules introduce and/or fix security issues for the base module.
+Recomendamos que você teste tanto o APK com quanto sem os módulos adicionais, para que fique claro se os módulos adicionais introduzem e/ou corrigem problemas de segurança para o módulo base.
 
 ### Android Manifest
 
-Every Android app contains an `AndroidManifest.xml` file in the root of the APK, stored in binary XML format. This file defines the app's structure and key properties used by the Android operating system during installation and runtime.
+Cada aplicativo Android contém um arquivo `AndroidManifest.xml` na raiz do APK, armazenado em formato binário XML. Este arquivo define a estrutura do aplicativo e as propriedades-chave usadas pelo sistema operacional Android durante a instalação e tempo de execução.
 
-Security-relevant elements include:
+Elementos relevantes para segurança incluem:
 
-- **Permissions:** Declares required permissions using `<uses-permission>` such as access to the internet, camera, storage, location, or contacts. These define the app's access boundaries and should follow the principle of least privilege. Custom permissions can be defined using `<permission>` and should include a proper `protectionLevel` such as `signature` or `dangerous` to avoid being misused by other apps.
-- **Components:** The manifest lists all [app components](#app-components) declared in the app serving as entry points. They can be exposed to other apps (via intent filters or the `exported` attribute) so they are critical to determine how an attacker might interact with the app. The main component types are:
-    - **Activities:** define user interface screens.
-    - **Services:** run background tasks.
-    - **Broadcast Receivers:** handle external messages.
-    - **Content Providers:** expose structured data.
-- **Deep Links:** [Deep links](0x05h-Testing-Platform-Interaction.md#deep-links) are configured via intent filters with the `VIEW` action, `BROWSABLE` category, and a `data` element specifying a URI pattern. These can expose activities to web or app links and must be verified carefully to avoid injection or spoofing risks. Adding `android:autoVerify="true"` enables App Links, which restrict handling of verified links to the declared app, reducing the risk of link hijacking.
-- **Uses Cleartext Traffic:** The `android:usesCleartextTraffic` attribute controls whether the app allows non-encrypted HTTP traffic. From Android 9 (API 28) onward, cleartext traffic is disabled by default unless explicitly allowed. This attribute can also be overridden by the `networkSecurityConfig`.
-- **Network Security Config:** An optional XML file defined via `android:networkSecurityConfig`, available since Android 7.0 (API level 24), that provides granular control over [network security behavior](0x05g-Testing-Network-Communication.md#android-network-security-configuration). It allows specifying trusted certificate authorities, per-domain TLS requirements, and cleartext traffic exceptions, overriding global settings defined in `android:usesCleartextTraffic`.
-- **Backup Behavior:** The `android:allowBackup` attribute allows or prevents app data from being [backed up](0x05d-Testing-Data-Storage.md#backups).
-- **Task Affinities and Launch Modes:** These settings influence how activities are grouped and launched. Misconfigurations can allow task hijacking or phishing-style attacks if an attacker's app mimics legitimate components.
+- **Permissões:** Declara permissões necessárias usando `<uses-permission>` como acesso à internet, câmera, armazenamento, localização ou contatos. Estes definem os limites de acesso do aplicativo e devem seguir o princípio do menor privilégio. Permissões personalizadas podem ser definidas usando `<permission>` e devem incluir um `protectionLevel` adequado, como `signature` ou `dangerous` para evitar serem mal utilizadas por outros aplicativos.
+- **Componentes:** O manifesto lista todos os [componentes do aplicativo](#componentes-do-aplicativo) declarados no aplicativo servindo como pontos de entrada. Eles podem ser expostos a outros aplicativos (via filtros de intent ou o atributo `exported`) então são críticos para determinar como um invasor pode interagir com o aplicativo. Os principais tipos de componentes são:
+    - **Activities:** definem telas de interface do usuário.
+    - **Services:** executam tarefas em segundo plano.
+    - **Broadcast Receivers:** lidam com mensagens externas.
+    - **Content Providers:** expõem dados estruturados.
+- **Deep Links:** [Deep links](0x05h-Testing-Platform-Interaction.md#deep-links) são configurados via filtros de intent com a ação `VIEW`, categoria `BROWSABLE` e um elemento `data` especificando um padrão URI. Estes podem expor atividades para links web ou de aplicativos e devem ser verificados cuidadosamente para evitar riscos de injeção ou spoofing. Adicionar `android:autoVerify="true"` habilita App Links, que restringe o tratamento de links verificados ao aplicativo declarado, reduzindo o risco de sequestro de link.
+- **Usa Tráfego em Texto Claro:** O atributo `android:usesCleartextTraffic` controla se o aplicativo permite tráfego HTTP não criptografado. A partir do Android 9 (API 28) em diante, o tráfego em texto claro
 
-The full list of available manifest options can be found in the official [Android Manifest file documentation](https://developer.android.com/guide/topics/manifest/manifest-intro.html "Android Developer Guide for Manifest").
+é desabilitado por padrão, a menos que explicitamente permitido. Este atributo também pode ser substituído pelo `networkSecurityConfig`.
+- **Configuração de Segurança de Rede:** Um arquivo XML opcional definido via `android:networkSecurityConfig`, disponível desde o Android 7.0 (API level 24), que fornece controle granular sobre o [comportamento de segurança de rede](0x05g-Testing-Network-Communication.md#android-network-security-configuration). Ele permite especificar autoridades certificadoras confiáveis, requisitos TLS por domínio e exceções de tráfego em texto claro, substituindo configurações globais definidas em `android:usesCleartextTraffic`.
+- **Comportamento de Backup:** O atributo `android:allowBackup` permite ou impede que dados do aplicativo sejam [backupados](0x05d-Testing-Data-Storage.md#backups).
+- **Afinidades de Tarefa e Modos de Inicialização:** Essas configurações influenciam como as atividades são agrupadas e iniciadas. Configurações incorretas podem permitir sequestro de tarefa ou ataques de estilo phishing se o aplicativo de um invasor imitar componentes legítimos.
 
-At build time, the manifest is merged with those from all included libraries and dependencies. The final merged manifest may include additional permissions, components, or settings not explicitly declared by the developer. Security reviews must analyze the merged output to understand the app's real exposure.
+A lista completa de opções de manifesto disponíveis pode ser encontrada na [documentação oficial do arquivo Android Manifest](https://developer.android.com/guide/topics/manifest/manifest-intro.html "Guia do Desenvolvedor Android para Manifest").
 
-Here is an example of a manifest file as defined by a developer. It declares several permissions, allows backup, and defines the app's main activity:
+No tempo de build, o manifesto é mesclado com aqueles de todas as bibliotecas e dependências incluídas. O manifesto mesclado final pode incluir permissões, componentes ou configurações adicionais não declaradas explicitamente pelo desenvolvedor. Revisões de segurança devem analisar a saída mesclada para entender a exposição real do aplicativo.
+
+Aqui está um exemplo de um arquivo de manifesto conforme definido por um desenvolvedor. Ele declara várias permissões, permite backup e define a atividade principal do aplicativo:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -320,7 +325,7 @@ Here is an example of a manifest file as defined by a developer. It declares sev
 </manifest>
 ```
 
-If you were to obtain the AndroidManifest.xml file from an APK (@MASTG-TECH-0117), you would see that it includes additional elements such as the `package` attribute, which defines the app's unique identifier, the `<uses-sdk>` element that specifies the `android:minSdkVersion` and `android:targetSdkVersion`, new activities, providers and receivers and other attributes such as `android:debuggable="true"` which indicates that the app is in debug mode.
+Se você obtivesse o arquivo AndroidManifest.xml de um APK (@MASTG-TECH-0117), você veria que ele inclui elementos adicionais, como o atributo `package`, que define o identificador único do aplicativo, o elemento `<uses-sdk>` que especifica o `android:minSdkVersion` e `android:targetSdkVersion`, novas atividades, providers e receivers e outros atributos como `android:debuggable="true"` que indica que o aplicativo está em modo de depuração.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -394,32 +399,32 @@ If you were to obtain the AndroidManifest.xml file from an APK (@MASTG-TECH-0117
 </manifest>
 ```
 
-### App Components
+### Componentes do Aplicativo
 
-Android apps are made of several high-level components. The main components are:
+Aplicativos Android são feitos de vários componentes de alto nível. Os principais componentes são:
 
 - Activities
 - Fragments
 - Intents
 - Broadcast receivers
-- Content providers and services
+- Content providers e services
 
-All these elements are provided by the Android operating system, in the form of predefined classes available through APIs.
+Todos esses elementos são fornecidos pelo sistema operacional Android, na forma de classes predefinidas disponíveis através de APIs.
 
 #### Activities
 
-Activities make up the visible part of any app. There is one activity per screen, so an app with three different screens implements three different activities. Activities are declared by extending the Activity class. They contain all user interface elements: fragments, views, and layouts.
+Activities compõem a parte visível de qualquer aplicativo. Há uma atividade por tela, então um aplicativo com três telas diferentes implementa três atividades diferentes. Activities são declaradas estendendo a classe Activity. Elas contêm todos os elementos de interface do usuário: fragments, views e layouts.
 
-Each activity needs to be declared in the Android Manifest with the following syntax:
+Cada atividade precisa ser declarada no Android Manifest com a seguinte sintaxe:
 
 ```xml
 <activity android:name="ActivityName">
 </activity>
 ```
 
-Activities not declared in the manifest can't be displayed, and attempting to launch them will raise an exception.
+Activities não declaradas no manifesto não podem ser exibidas, e tentar lançá-las levantará uma exceção.
 
-Like apps, activities have their own life cycle and need to monitor system changes to handle them. Activities can be in the following states: active, paused, stopped, and inactive. These states are managed by the Android operating system. Accordingly, activities can implement the following event managers:
+Como aplicativos, atividades têm seu próprio ciclo de vida e precisam monitorar mudanças do sistema para lidar com elas. Activities podem estar nos seguintes estados: ativa, pausada, parada e inativa. Esses estados são gerenciados pelo sistema operacional Android. Consequentemente, atividades podem implementar os seguintes gerenciadores de eventos:
 
 - onCreate
 - onSaveInstanceState
@@ -431,19 +436,19 @@ Like apps, activities have their own life cycle and need to monitor system chang
 - onRestart
 - onDestroy
 
-An app may not explicitly implement all event managers, in which case default actions are taken. Typically, at least the `onCreate` manager is overridden by the app developers. This is how most user interface components are declared and initialized. `onDestroy` may be overridden when resources (like network connections or connections to databases) must be explicitly released or specific actions must occur when the app shuts down.
+Um aplicativo pode não implementar explicitamente todos os gerenciadores de eventos, caso em que ações padrão são tomadas. Tipicamente, pelo menos o gerenciador `onCreate` é sobrescrito pelos desenvolvedores do aplicativo. É assim que a maioria dos componentes de interface do usuário são declarados e inicializados. `onDestroy` pode ser sobrescrito quando recursos (como conexões de rede ou conexões com bancos de dados) devem ser explicitamente liberados ou ações específicas devem ocorrer quando o aplicativo é encerrado.
 
 #### Fragments
 
-A fragment represents a behavior or a portion of the user interface within the activity. Fragments were introduced Android with the version Honeycomb 3.0 (API level 11).
+Um fragment representa um comportamento ou uma porção da interface do usuário dentro da atividade. Fragments foram introduzidos no Android com a versão Honeycomb 3.0 (API level 11).
 
-Fragments are meant to encapsulate parts of the interface to facilitate re-usability and adaptation to different screen sizes. Fragments are autonomous entities in that they include all their required components (they have their own layout, buttons, etc.). However, they must be integrated with activities to be useful: fragments can't exist on their own. They have their own life cycle, which is tied to the life cycle of the Activities that implement them.
+Fragments são destinados a encapsular partes da interface para facilitar a reutilização e adaptação a diferentes tamanhos de tela. Fragments são entidades autônomas no sentido de que incluem todos os seus componentes necessários (eles têm seu próprio layout, botões, etc.). No entanto, eles devem ser integrados com atividades para serem úteis: fragments não podem existir por conta própria. Eles têm seu próprio ciclo de vida, que está vinculado ao ciclo de vida das Activities que os implementam.
 
-Because fragments have their own life cycle, the Fragment class contains event managers that can be redefined and extended. These event managers included onAttach, onCreate, onStart, onDestroy and onDetach. Several others exist; the reader should refer to the [Android Fragment specification](https://developer.android.com/guide/components/fragments "Fragment Class") for more details.
+Como fragments têm seu próprio ciclo de vida, a classe Fragment contém gerenciadores de eventos que podem ser redefinidos e estendidos. Esses gerenciadores de eventos incluem onAttach, onCreate, onStart, onDestroy e onDetach. Vários outros existem; o leitor deve se referir à [especificação Android Fragment](https://developer.android.com/guide/components/fragments "Classe Fragment") para mais detalhes.
 
-Fragments can be easily implemented by extending the Fragment class provided by Android:
+Fragments podem ser facilmente implementados estendendo a classe Fragment fornecida pelo Android:
 
-Example in Java:
+Exemplo em Java:
 
 ```java
 public class MyFragment extends Fragment {
@@ -451,7 +456,7 @@ public class MyFragment extends Fragment {
 }
 ```
 
-Example in Kotlin:
+Exemplo em Kotlin:
 
 ```kotlin
 class MyFragment : Fragment() {
@@ -459,62 +464,64 @@ class MyFragment : Fragment() {
 }
 ```
 
-Fragments don't need to be declared in manifest files because they depend on activities.
+Fragments não precisam ser declarados em arquivos de manifesto porque dependem de atividades.
 
-To manage its fragments, an activity can use a Fragment Manager (FragmentManager class). This class makes it easy to find, add, remove, and replace associated fragments.
+Para gerenciar seus fragments, uma atividade pode usar um Gerenciador de Fragment (classe FragmentManager). Esta classe facilita encontrar, adicionar, remover e substituir fragments associados.
 
-Fragment Managers can be created via the following:
+Gerenciadores de Fragment podem ser criados via o seguinte:
 
-Example in Java:
+Exemplo em Java:
 
 ```java
 FragmentManager fm = getFragmentManager();
 ```
 
-Example in Kotlin:
+Exemplo em Kotlin:
 
 ```kotlin
 var fm = fragmentManager
 ```
 
-Fragments don't necessarily have a user interface; they can be a convenient and efficient way to manage background operations pertaining to the app's user interface. A fragment may be declared persistent so that if the system preserves its state even if its Activity is destroyed.
+Fragments não necessariamente têm uma interface de usuário; eles podem ser uma maneira conveniente e eficiente de gerenciar operações em segundo plano pertinentes à interface do usuário do aplicativo. Um fragment pode ser declarado persistente para que o sistema preserve seu estado mesmo se sua Activity for destruída.
 
 #### Content Providers
 
-Android uses SQLite to store data permanently: as with Linux, data is stored in files. SQLite is a light, efficient, open source relational data storage technology that does not require much processing power, which makes it ideal for mobile use. An entire API with specific classes (Cursor, ContentValues, SQLiteOpenHelper, ContentProvider, ContentResolver, etc.) is available.
-SQLite is not run as a separate process; it is part of the app.
-By default, a database belonging to a given app is accessible to this app only. However, content providers offer a great mechanism for abstracting data sources (including databases and flat files); they also provide a standard and efficient mechanism to share data between apps, including native apps. To be accessible to other apps, a content provider needs to be explicitly declared in the manifest file of the app that will share it. As long as content providers aren't declared, they won't be exported and can only be called by the app that creates them.
+O Android usa SQLite para armazenar dados permanentemente: como no Linux, os dados são armazenados em arquivos. SQLite é uma tecnologia de armazenamento de dados relacional leve, eficiente e de código aberto que não requer muito poder de processamento, o que a torna ideal para uso móvel. Uma API inteira com classes específicas (Cursor, ContentValues, SQLiteOpenHelper, ContentProvider, ContentResolver, etc.) está disponível.
+SQLite não é executado como um processo separado; é parte do aplicativo.
+Por padrão, um banco de dados pertencente a um determinado aplicativo é acessível apenas a este aplicativo. No entanto, content providers oferecem um grande mecanismo para abstrair fontes de dados (incluindo bancos de dados e arquivos planos); eles também fornecem um mecanismo padrão e eficiente para compartilhar dados entre aplicativos, incluindo aplicativos nativos. Para ser acessível a outros aplicativos, um content provider precisa ser explicitamente declarado no arquivo de manifesto do aplicativo que o compartilhará. Desde que content providers não sejam declarados, eles não serão exportados e só poderão ser chamados pelo aplicativo que os cria.
 
-Content providers are implemented through a URI addressing scheme: they all use the content:// model. Regardless of the type of sources (SQLite database, flat file, etc.), the addressing scheme is always the same, thereby abstracting the sources and offering the developer a unique scheme. Content providers offer all regular database operations: create, read, update, delete. That means that any app with proper rights in its manifest file can manipulate the data from other apps.
+Content providers são implementados através de um esquema de endereçamento URI: todos usam o modelo content://. Independentemente do tipo de fontes (banco de dados SQLite, arquivo plano, etc.), o esquema de endereçamento é sempre o mesmo, abstraindo assim as fontes e oferecendo ao desenvolvedor um esquema único. Content providers oferecem todas as operações regulares de banco de dados: criar, ler, atualizar, excluir. Isso significa que qualquer aplicativo com direitos adequados em seu arquivo de manifesto pode manipular os dados de outros aplicativos.
 
 #### Services
 
-Services are Android OS components (based on the Service class) that perform tasks in the background (data processing, starting intents, and notifications, etc.) without presenting a user interface. Services are meant to run processes long-term. Their system priorities are lower than those of active apps and higher than those of inactive apps. Therefore, they are less likely to be killed when the system needs resources, and they can be configured to automatically restart when enough resources become available. This makes services a great candidate for running background tasks. Please note that Services, like Activities, are executed in the main app thread. A service does not create its own thread and does not run in a separate process unless you specify otherwise.
+Services são componentes do SO Android (baseados na classe Service) que executam tarefas em segundo plano (processamento de dados, iniciando intents e notificações, etc.) sem apresentar uma interface de usuário. Services são destinados a executar processos de longo prazo. Suas prioridades do sistema são menores que
 
-### Inter-Process Communication
+aquelas de aplicativos ativos e maiores que aquelas de aplicativos inativos. Portanto, é menos provável que sejam mortos quando o sistema precisa de recursos, e podem ser configurados para reiniciar automaticamente quando recursos suficientes se tornarem disponíveis. Isso torna os services um ótimo candidato para executar tarefas em segundo plano. Observe que Services, como Activities, são executados na thread principal do aplicativo. Um service não cria sua própria thread e não é executado em um processo separado, a menos que você especifique o contrário.
 
-As we've already learned, every Android process has its own sandboxed address space. Inter-process communication facilities allow apps to exchange signals and data securely. Instead of relying on the default Linux IPC facilities, Android's IPC is based on Binder, a custom implementation of OpenBinder. Most Android system services and all high-level IPC services depend on Binder.
+### Comunicação Inter-Processo
 
-The term _Binder_ stands for a lot of different things, including:
+Como já aprendemos, todo processo Android tem seu próprio espaço de endereço sandboxado. Instalações de comunicação inter-processo permitem que aplicativos troquem sinais e dados com segurança. Em vez de depender das instalações IPC padrão do Linux, o IPC do Android é baseado no Binder, uma implementação personalizada do OpenBinder. A maioria dos serviços do sistema Android e todos os serviços IPC de alto nível dependem do Binder.
 
-- Binder Driver: the kernel-level driver
-- Binder Protocol: low-level ioctl-based protocol used to communicate with the binder driver
-- IBinder Interface: a well-defined behavior that Binder objects implement
-- Binder object: generic implementation of the IBinder interface
-- Binder service: implementation of the Binder object; for example, location service, and sensor service
-- Binder client: an object using the Binder service
+O termo _Binder_ significa muitas coisas diferentes, incluindo:
 
-The Binder framework includes a client-server communication model. To use IPC, apps call IPC methods in proxy objects. The proxy objects transparently _marshall_ the call parameters into a _parcel_ and send a transaction to the Binder server, which is implemented as a character driver (/dev/binder). The server holds a thread pool for handling incoming requests and delivers messages to the destination object. From the perspective of the client app, all of this seems like a regular method call, all the heavy lifting is done by the Binder framework.
+- Binder Driver: o driver em nível de kernel
+- Binder Protocol: protocolo baseado em ioctl de baixo nível usado para se comunicar com o driver binder
+- Interface IBinder: um comportamento bem definido que objetos Binder implementam
+- Objeto Binder: implementação genérica da interface IBinder
+- Serviço Binder: implementação do objeto Binder; por exemplo, serviço de localização e serviço de sensor
+- Cliente Binder: um objeto usando o serviço Binder
+
+O framework Binder inclui um modelo de comunicação cliente-servidor. Para usar IPC, aplicativos chamam métodos IPC em objetos proxy. Os objetos proxy transparentemente _empacotam_ os parâmetros de chamada em um _parcel_ e enviam uma transação para o servidor Binder, que é implementado como um driver de caractere (/dev/binder). O servidor mantém um pool de threads para lidar com solicitações de entrada e entrega mensagens para o objeto de destino. Da perspectiva do aplicativo cliente, tudo isso parece uma chamada de método regular, todo o trabalho pesado é feito pelo framework Binder.
 
 <img src="Images/Chapters/0x05a/binder.jpg" width="400px" />
 
-- _Binder Overview - Image source: [Android Binder by Thorsten Schreiber](https://1library.net/document/z33dd47z-android-android-interprocess-communication-thorsten-schreiber-somorovsky-bussmeyer.html "Android Binder")_
+- _Visão Geral do Binder - Fonte da imagem: [Android Binder por Thorsten Schreiber](https://1library.net/document/z33dd47z-android-android-interprocess-communication-thorsten-schreiber-somorovsky-bussmeyer.html "Android Binder")_
 
-Services that allow other applications to bind to them are called _bound services_. These services must provide an IBinder interface to clients. Developers use the Android Interface Descriptor Language (AIDL) to write interfaces for remote services.
+Serviços que permitem que outros aplicativos se liguem a eles são chamados _serviços vinculados_. Esses serviços devem fornecer uma interface IBinder para clientes. Desenvolvedores usam a Android Interface Descriptor Language (AIDL) para escrever interfaces para serviços remotos.
 
-ServiceManager is a system daemon that manages the registration and lookup of system services. It maintains a list of name/Binder pairs for all registered services. Services are added with `addService` and retrieved by name with the static `getService` method in `android.os.ServiceManager`:
+ServiceManager é um daemon do sistema que gerencia o registro e a pesquisa de serviços do sistema. Ele mantém uma lista de pares nome/Binder para todos os serviços registrados. Serviços são adicionados com `addService` e recuperados por nome com o método estático `getService` em `android.os.ServiceManager`:
 
-Example in Java:
+Exemplo em Java:
 
 ```java
 public static IBinder getService(String name) {
@@ -532,7 +539,7 @@ public static IBinder getService(String name) {
     }
 ```
 
-Example in Kotlin:
+Exemplo em Kotlin:
 
 ```kotlin
 companion object {
@@ -549,7 +556,7 @@ companion object {
     }
 ```
 
-You can query the list of system services with the `service list` command.
+Você pode consultar a lista de serviços do sistema com o comando `service list`.
 
 ```bash
 $ adb shell service list
@@ -562,63 +569,63 @@ Found 99 services:
 
 #### Intents
 
-_Intent messaging_ is an asynchronous communication framework built on top of Binder. This framework allows both point-to-point and publish-subscribe messaging. An _Intent_ is a messaging object that can be used to request an action from another app component. Although intents facilitate inter-component communication in several ways, there are three fundamental use cases:
+_Mensagens de intent_ são um framework de comunicação assíncrona construído sobre o Binder. Este framework permite tanto mensagens ponto-a-ponto quanto publicação-assinatura. Um _Intent_ é um objeto de mensagem que pode ser usado para solicitar uma ação de outro componente do aplicativo. Embora intents facilitem a comunicação inter-componente de várias maneiras, há três casos de uso fundamentais:
 
-- Starting an activity
-    - An activity represents a single screen in an app. You can start a new instance of an activity by passing an intent to `startActivity`. The intent describes the activity and carries necessary data.
-- Starting a service
-    - A Service is a component that performs operations in the background, without a user interface. With Android 5.0 (API level 21) and later, you can start a service with JobScheduler.
-- Delivering a broadcast
-    - A broadcast is a message that any app can receive. The system delivers broadcasts for system events, including system boot and charging initialization. You can deliver a broadcast to other apps by passing an intent to `sendBroadcast` or `sendOrderedBroadcast`.
+- Iniciando uma atividade
+    - Uma atividade representa uma única tela em um aplicativo. Você pode iniciar uma nova instância de uma atividade passando um intent para `startActivity`. O intent descreve a atividade e carrega dados necessários.
+- Iniciando um serviço
+    - Um Service é um componente que executa operações em segundo plano, sem uma interface de usuário. Com Android 5.0 (API level 21) e posterior, você pode iniciar um serviço com JobScheduler.
+- Entregando um broadcast
+    - Um broadcast é uma mensagem que qualquer aplicativo pode receber. O sistema entrega broadcasts para eventos do sistema, incluindo inicialização do sistema e inicialização de carregamento. Você pode entregar um broadcast para outros aplicativos passando um intent para `sendBroadcast` ou `sendOrderedBroadcast`.
 
-There are two types of intents. Explicit intents name the component that will be started (the fully qualified class name). For instance:
+Há dois tipos de intents. Intents explícitos nomeiam o componente que será iniciado (o nome de classe totalmente qualificado). Por exemplo:
 
-Example in Java:
+Exemplo em Java:
 
 ```java
 Intent intent = new Intent(this, myActivity.myClass);
 ```
 
-Example in Kotlin:
+Exemplo em Kotlin:
 
 ```kotlin
 var intent = Intent(this, myActivity.myClass)
 ```
 
-Implicit intents are sent to the OS to perform a given action on a given set of data (The URL of the OWASP website in our example below). It is up to the system to decide which app or class will perform the corresponding service. For instance:
+Intents implícitos são enviados para o SO para executar uma determinada ação em um determinado conjunto de dados (A URL do site OWASP em nosso exemplo abaixo). Cabe ao sistema decidir qual aplicativo ou classe executará o serviço correspondente. Por exemplo:
 
-Example in Java:
+Exemplo em Java:
 
 ```java
 Intent intent = new Intent(Intent.MY_ACTION, Uri.parse("https://www.owasp.org"));
 ```
 
-Example in Kotlin:
+Exemplo em Kotlin:
 
 ```kotlin
 var intent = Intent(Intent.MY_ACTION, Uri.parse("https://www.owasp.org"))
 ```
 
-An _intent filter_ is an expression in Android Manifest files that specifies the type of intents the component would like to receive. For instance, by declaring an intent filter for an activity, you make it possible for other apps to directly start your activity with a certain kind of intent. Likewise, your activity can only be started with an explicit intent if you don't declare any intent filters for it.
+Um _filtro de intent_ é uma expressão em arquivos Android Manifest que especifica o tipo de intents que o componente gostaria de receber. Por exemplo, declarando um filtro de intent para uma atividade, você torna possível que outros aplicativos iniciem diretamente sua atividade com um certo tipo de intent. Da mesma forma, sua atividade só pode ser iniciada com um intent explícito se você não declarar nenhum filtro de intent para ela.
 
-Android uses intents to broadcast messages to apps (such as an incoming call or SMS) important power supply information (low battery, for example), and network changes (loss of connection, for instance). Extra data may be added to intents (through `putExtra`/`getExtras`).
+O Android usa intents para transmitir mensagens para aplicativos (como uma chamada recebida ou SMS), informações importantes de alimentação (bateria fraca, por exemplo) e mudanças de rede (perda de conexão, por exemplo). Dados extras podem ser adicionados a intents (através de `putExtra`/`getExtras`).
 
-Here is a short list of intents sent by the operating system. All constants are defined in the Intent class, and the whole list is in the official Android documentation:
+Aqui está uma pequena lista de intents enviados pelo sistema operacional. Todas as constantes são definidas na classe Intent, e a lista completa está na documentação oficial do Android:
 
 - ACTION_CAMERA_BUTTON
 - ACTION_MEDIA_EJECT
 - ACTION_NEW_OUTGOING_CALL
 - ACTION_TIMEZONE_CHANGED
 
-To improve security and privacy, a Local Broadcast Manager is used to send and receive intents within an app without having them sent to the rest of the operating system. This is very useful for ensuring that sensitive and private data don't leave the app perimeter (geolocation data for instance).
+Para melhorar a segurança e privacidade, um Local Broadcast Manager é usado para enviar e receber intents dentro de um aplicativo sem tê-los enviados para o resto do sistema operacional. Isso é muito útil para garantir que dados sensíveis e privados não saiam do perímetro do aplicativo (dados de geolocalização, por exemplo).
 
 #### Broadcast Receivers
 
-Broadcast Receivers are components that allow apps to receive notifications from other apps and from the system itself. With them, apps can react to events (internal, initiated by other apps, or initiated by the operating system). They are generally used to update user interfaces, start services, update content, and create user notifications.
+Broadcast Receivers são componentes que permitem que aplicativos recebam notificações de outros aplicativos e do próprio sistema. Com eles, aplicativos podem reagir a eventos (internos, iniciados por outros aplicativos ou iniciados pelo sistema operacional). Eles são geralmente usados para atualizar interfaces do usuário, iniciar serviços, atualizar conteúdo e criar notificações de usuário.
 
-There are two ways to make a Broadcast Receiver known to the system. One way is to declare it in the Android Manifest file. The manifest should specify an association between the Broadcast Receiver and an intent filter to indicate the actions the receiver is meant to listen for.
+Há duas maneiras de tornar um Broadcast Receiver conhecido para o sistema. Uma maneira é declará-lo no arquivo Android Manifest. O manifesto deve especificar uma associação entre o Broadcast Receiver e um filtro de intent para indicar as ações que o receiver deve escutar.
 
-An example Broadcast Receiver declaration with an intent filter in a manifest:
+Uma declaração de exemplo de Broadcast Receiver com um filtro de intent em um manifesto:
 
 ```xml
 <receiver android:name=".MyReceiver" >
@@ -628,13 +635,13 @@ An example Broadcast Receiver declaration with an intent filter in a manifest:
 </receiver>
 ```
 
-Please note that in this example, the Broadcast Receiver does not include the [`android:exported`](https://developer.android.com/guide/topics/manifest/receiver-element "receiver element") attribute. As at least one filter was defined, the default value will be set to "true". In absence of any filters, it will be set to "false".
+Observe que neste exemplo, o Broadcast Receiver não inclui o atributo [`android:exported`](https://developer.android.com/guide/topics/manifest/receiver-element "elemento receiver"). Como pelo menos um filtro foi definido, o valor padrão será definido como "true". Na ausência de quaisquer filtros, será definido como "false".
 
-The other way is to create the receiver dynamically in code. The receiver can then register with the method [`Context.registerReceiver`](https://developer.android.com/reference/android/content/Context.html#registerReceiver%28android.content.BroadcastReceiver,%2520android.content.IntentFilter%29 "Context.registerReceiver").
+A outra maneira é criar o receiver dinamicamente em código. O receiver pode então se registrar com o método [`Context.registerReceiver`](https://developer.android.com/reference/android/content/Context.html#registerReceiver%28android.content.BroadcastReceiver,%2520android.content.IntentFilter%29 "Context.registerReceiver").
 
-An example of registering a Broadcast Receiver dynamically:
+Um exemplo de registro de um Broadcast Receiver dinamicamente:
 
-Example in Java:
+Exemplo em Java:
 
 ```java
 // Define a broadcast receiver
@@ -653,7 +660,7 @@ registerReceiver(myReceiver, intentFilter);
 unregisterReceiver(myReceiver);
 ```
 
-Example in Kotlin:
+Exemplo em Kotlin:
 
 ```kotlin
 // Define a broadcast receiver
@@ -671,111 +678,114 @@ registerReceiver(myReceiver, intentFilter)
 unregisterReceiver(myReceiver)
 ```
 
-Note that the system starts an app with the registered receiver automatically when a relevant intent is raised.
+Note que o sistema inicia um aplicativo com o receiver registrado automaticamente quando um intent relevante é levantado.
 
-According to [Broadcasts Overview](https://developer.android.com/guide/components/broadcasts "Broadcasts Overview"), a broadcast is considered "implicit" if it does not target an app specifically. After receiving an implicit broadcast, Android will list all apps that have registered a given action in their filters. If more than one app has registered for the same action, Android will prompt the user to select from the list of available apps.
+De acordo com [Visão Geral de Broadcasts](https://developer.android.com/guide/components/broadcasts "Visão Geral de Broadcasts"), um broadcast é considerado "implícito" se não t
 
-An interesting feature of Broadcast Receivers is that they can be prioritized; this way, an intent will be delivered to all authorized receivers according to their priority. A priority can be assigned to an intent filter in the manifest via the `android:priority` attribute as well as programmatically via the [`IntentFilter.setPriority`](https://developer.android.com/reference/android/content/IntentFilter#setPriority%28int%29 "IntentFilter.setPriority") method. However, note that receivers with the same priority will be [run in an arbitrary order](https://developer.android.com/guide/components/broadcasts.html#sending-broadcasts "Sending Broadcasts").
+como alvo um aplicativo especificamente. Depois de receber um broadcast implícito, o Android listará todos os aplicativos que registraram uma determinada ação em seus filtros. Se mais de um aplicativo tiver registrado para a mesma ação, o Android solicitará que o usuário selecione na lista de aplicativos disponíveis.
 
-If your app is not supposed to send broadcasts across apps, use a Local Broadcast Manager ([`LocalBroadcastManager`](https://developer.android.com/reference/androidx/localbroadcastmanager/content/LocalBroadcastManager.html "LocalBroadcastManager")). They can be used to make sure intents are received from the internal app only, and any intent from any other app will be discarded. This is very useful for improving security and the efficiency of the app, as no interprocess communication is involved. However, please note that the `LocalBroadcastManager` class is [deprecated](https://developer.android.com/reference/androidx/localbroadcastmanager/content/LocalBroadcastManager.html "LocalBroadcastManager") and Google recommends using alternatives such as [`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData.html "LiveData").
+Uma característica interessante dos Broadcast Receivers é que eles podem ser priorizados; desta forma, um intent será entregue a todos os receivers autorizados de acordo com sua prioridade. Uma prioridade pode ser atribuída a um filtro de intent no manifesto através do atributo `android:priority`, bem como programaticamente via o método [`IntentFilter.setPriority`](https://developer.android.com/reference/android/content/IntentFilter#setPriority%28int%29 "IntentFilter.setPriority"). No entanto, observe que receivers com a mesma prioridade serão [executados em uma ordem arbitrária](https://developer.android.com/guide/components/broadcasts.html#sending-broadcasts "Enviando Broadcasts").
 
-For more security considerations regarding Broadcast Receiver, see [Security Considerations and Best Practices](https://developer.android.com/guide/components/broadcasts.html#security-and-best-practices "Security Considerations and Best Practices").
+Se seu aplicativo não deve enviar broadcasts entre aplicativos, use um Local Broadcast Manager ([`LocalBroadcastManager`](https://developer.android.com/reference/androidx/localbroadcastmanager/content/LocalBroadcastManager.html "LocalBroadcastManager")). Eles podem ser usados para garantir que intents sejam recebidos apenas do aplicativo interno, e qualquer intent de qualquer outro aplicativo será descartado. Isso é muito útil para melhorar a segurança e a eficiência do aplicativo, pois nenhuma comunicação interprocesso está envolvida. No entanto, observe que a classe `LocalBroadcastManager` está [obsoleta](https://developer.android.com/reference/androidx/localbroadcastmanager/content/LocalBroadcastManager.html "LocalBroadcastManager") e o Google recomenda usar alternativas como [`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData.html "LiveData").
 
-#### Implicit Broadcast Receiver Limitation
+Para mais considerações de segurança sobre Broadcast Receiver, consulte [Considerações de Segurança e Melhores Práticas](https://developer.android.com/guide/components/broadcasts.html#security-and-best-practices "Considerações de Segurança e Melhores Práticas").
 
-According to [Background Optimizations](https://developer.android.com/topic/performance/background-optimization "Background Optimizations"), apps targeting Android 7.0 (API level 24) or higher no longer receive `CONNECTIVITY_ACTION` broadcast unless they register their Broadcast Receivers with `Context.registerReceiver()`. The system does not send `ACTION_NEW_PICTURE` and `ACTION_NEW_VIDEO` broadcasts as well.
+#### Limitação de Broadcast Receiver Implícito
 
-According to [Background Execution Limits](https://developer.android.com/about/versions/oreo/background.html#broadcasts "Background Execution Limits"), apps that target Android 8.0 (API level 26) or higher can no longer register Broadcast Receivers for implicit broadcasts in their manifest, except for those listed in [Implicit Broadcast Exceptions](https://developer.android.com/guide/components/broadcast-exceptions "Implicit Broadcast Exceptions"). The Broadcast Receivers created at runtime by calling `Context.registerReceiver` are not affected by this limitation.
+De acordo com [Otimizações em Segundo Plano](https://developer.android.com/topic/performance/background-optimization "Otimizações em Segundo Plano"), aplicativos direcionando Android 7.0 (API level 24) ou superior não recebem mais broadcast `CONNECTIVITY_ACTION`, a menos que registrem seus Broadcast Receivers com `Context.registerReceiver()`. O sistema também não envia broadcasts `ACTION_NEW_PICTURE` e `ACTION_NEW_VIDEO`.
 
-According to [Changes to System Broadcasts](https://developer.android.com/guide/components/broadcasts#changes-system-broadcasts "Changes to System Broadcasts"), beginning with Android 9 (API level 28), the `NETWORK_STATE_CHANGED_ACTION` broadcast doesn't receive information about the user's location or personally identifiable data.
+De acordo com [Limites de Execução em Segundo Plano](https://developer.android.com/about/versions/oreo/background.html#broadcasts "Limites de Execução em Segundo Plano"), aplicativos que direcionam Android 8.0 (API level 26) ou superior não podem mais registrar Broadcast Receivers para broadcasts implícitos em seu manifesto, exceto para aqueles listados em [Exceções de Broadcast Implícito](https://developer.android.com/guide/components/broadcast-exceptions "Exceções de Broadcast Implícito"). Os Broadcast Receivers criados em tempo de execução chamando `Context.registerReceiver` não são afetados por esta limitação.
 
-## Android Application Publishing
+De acordo com [Mudanças em Broadcasts do Sistema](https://developer.android.com/guide/components/broadcasts#changes-system-broadcasts "Mudanças em Broadcasts do Sistema"), começando com Android 9 (API level 28), o broadcast `NETWORK_STATE_CHANGED_ACTION` não recebe informações sobre a localização do usuário ou dados pessoalmente identificáveis.
 
-Once an app has been successfully developed, the next step is to publish and share it with others. However, apps can't simply be added to a store and shared, they must be first signed. The cryptographic signature serves as a verifiable mark placed by the developer of the app. It identifies the app's author and ensures that the app has not been modified since its initial distribution.
+## Publicação de Aplicativos Android
 
-### Signing Process
+Uma vez que um aplicativo foi desenvolvido com sucesso, o próximo passo é publicá-lo e compartilhá-lo com outros. No entanto, aplicativos não podem simplesmente ser adicionados a uma loja e compartilhados, eles devem primeiro ser assinados. A assinatura criptográfica serve como uma marca verificável colocada pelo desenvolvedor do aplicativo. Ela identifica o autor do aplicativo e garante que o aplicativo não foi modificado desde sua distribuição inicial.
 
-During development, apps are signed with an automatically generated certificate. This certificate is inherently insecure and is for debugging only. Most stores don't accept this kind of certificate for publishing; therefore, a certificate with more secure features must be created.
-When an application is installed on the Android device, the Package Manager ensures that it has been signed with the certificate included in the corresponding APK. If the certificate's public key matches the key used to sign any other APK on the device, the new APK may share a UID with the pre-existing APK. This facilitates interactions between applications from a single vendor. Alternatively, specifying security permissions for the Signature protection level is possible; this will restrict access to applications that have been signed with the same key.
+### Processo de Assinatura
 
-### APK Signing Schemes
+Durante o desenvolvimento, aplicativos são assinados com um certificado gerado automaticamente. Este certificado é inerentemente inseguro e é apenas para depuração. A maioria das lojas não aceita este tipo de certificado para publicação; portanto, um certificado com recursos mais seguros deve ser criado.
+Quando um aplicativo é instalado no dispositivo Android, o Gerenciador de Pacotes garante que ele foi assinado com o certificado incluído no APK correspondente. Se a chave pública do certificado corresponder à chave usada para assinar qualquer outro APK no dispositivo, o novo APK pode compartilhar um UID com o APK pré-existente. Isso facilita interações entre aplicativos de um único fornecedor. Alternativamente, especificar permissões de segurança para o nível de proteção Signature é possível; isso restringirá o acesso a aplicativos que foram assinados com a mesma chave.
 
-Android supports multiple application signing schemes:
+### Esquemas de Assinatura APK
 
-- **Below Android 7.0 (API level 24)**: applications can only use the JAR signing (v1) scheme which does not protect all parts of the APK. This scheme is considered insecure.
-- **Android 7.0 (API level 24) and above**: applications can use the **v2 signature scheme**, which signs the APK as a whole, providing stronger protection compared to the older v1 (JAR) signing method.
-- **Android 9 (API level 28) and above**: It's recommended to use both the **v2 and v3 signature schemes**. The v3 scheme supports **key rotation**, enabling developers to replace keys in the event of a compromise without invalidating old signatures.
-- **Android 11 (API level 30) and above**: applications can optionally include the **v4 signature scheme** to enable faster incremental updates.
+O Android suporta múltiplos esquemas de assinatura de aplicativos:
 
-For backwards compatibility, an APK can be signed with multiple signature schemes in order to make the app run on both newer and older SDK versions. For example, [older platforms ignore v2 signatures and verify v1 signatures only](https://source.android.com/security/apksigning/).
+- **Abaixo do Android 7.0 (API level 24)**: aplicativos podem usar apenas o esquema de assinatura JAR (v1) que não protege todas as partes do APK. Este esquema é considerado inseguro.
+- **Android 7.0 (API level 24) e acima**: aplicativos podem usar o **esquema de assinatura v2**, que assina o APK como um todo, fornecendo proteção mais forte comparada ao método de assinatura v1 (JAR) mais antigo.
+- **Android 9 (API level 28) e acima**: É recomendado usar tanto o **esquema de assinatura v2 quanto v3**. O esquema v3 suporta **rotação de chaves**, permitindo que desenvolvedores substituam chaves no evento de um comprometimento sem invalidar assinaturas antigas.
+- **Android 11 (API level 30) e acima**: aplicativos podem opcionalmente incluir o **esquema de assinatura v4** para permitir atualizações incrementais mais rápidas.
 
-#### JAR Signing (v1 Scheme)
+Para compatibilidade com versões anteriores, um APK pode ser assinado com múltiplos esquemas de assinatura para fazer o aplicativo executar em versões SDK mais novas e mais antigas. Por exemplo, [plataformas mais antigas ignoram assinaturas v2 e verificam apenas assinaturas v1](https://source.android.com/security/apksigning/).
 
-The original version of app signing implements the signed APK as a standard signed JAR, which must contain all the entries in `META-INF/MANIFEST.MF`. All files must be signed with a common certificate. This scheme does not protect some parts of the APK, such as ZIP metadata. The drawback of this scheme is that the APK verifier needs to process untrusted data structures before applying the signature, and the verifier discards data the data structures don't cover. Also, the APK verifier must decompress all compressed files, which takes considerable time and memory.
+#### Assinatura JAR (Esquema v1)
 
-This signature scheme is considered insecure, it is for example affected by the **Janus vulnerability (CVE-2017-13156)**, which can allow malicious actors to modify APK files without invalidating the v1 signature. As such, **v1 should never be relied on for devices running Android 7.0 and above**.
+A versão original de assinatura de aplicativo implementa o APK assinado como um JAR assinado padrão, que deve conter todas as entradas em `META-INF/MANIFEST.MF`. Todos os arquivos devem ser assinados com um certificado comum. Este esquema não protege algumas partes do APK, como metadados ZIP. A desvantagem deste esquema é que o verificador APK precisa processar estruturas de dados não confiáveis antes de aplicar a assinatura, e o verificador descarta as estruturas de dados que não cobrem. Além disso, o verificador APK deve descomprimir todos os arquivos comprimidos, o que leva tempo e memória consideráveis.
 
-#### APK Signature Scheme (v2 Scheme)
+Este esquema de assinatura é considerado inseguro, ele é afetado, por exemplo, pela **vulnerabilidade Janus (CVE-2017-13156)**, que pode permitir que atores maliciosos modifiquem arquivos APK sem invalidar a assinatura v1. Como tal, **v1 nunca deve ser confiado para dispositivos executando Android 7.0 e acima**.
 
-With the APK signature scheme, the complete APK is hashed and signed, and an APK Signing Block is created and inserted into the APK. During validation, the v2 scheme checks the signatures of the entire APK file. This form of APK verification is faster and offers more comprehensive protection against modification. You can see the [APK signature verification process for v2 Scheme](https://source.android.com/security/apksigning/v2#verification "APK Signature verification process") below.
+#### Esquema de Assinatura APK (Esquema v2)
+
+Com o esquema de assinatura APK, o APK completo é hasheado e assinado, e um Bloco de Assinatura APK é criado e inserido no APK. Durante a validação, o esquema v2 verifica as assinaturas de todo o arquivo APK. Esta forma de verificação APK é mais rápida e oferece proteção mais abrangente contra modificação. Você pode ver o [processo de verificação de assinatura APK para o Esquema v2](https://source.android.com/security/apksigning/v2#verification "Processo de verificação de assinatura APK") abaixo.
 
 <img src="Images/Chapters/0x05a/apk-validation-process.png" width="400px" />
 
-#### APK Signature Scheme (v3 Scheme)
+#### Esquema de Assinatura APK (Esquema v3)
 
-The v3 APK Signing Block format is the same as v2. V3 adds information about the supported SDK versions and a proof-of-rotation struct to the APK signing block. In Android 9 (API level 28) and higher, APKs can be verified according to APK Signature Scheme v3, v2 or v1 scheme. Older platforms ignore v3 signatures and try to verify v2 then v1 signature.
+O formato de Bloco de Assinatura APK v3 é o mesmo do v2. V3 adiciona informações sobre as versões SDK suportadas e uma estrutura de prova de rotação ao bloco de assinatura APK. No Android 9 (API level 28) e superior, APKs podem ser verificados de acordo com o Esquema de Assinatura APK v3, v2 ou v1. Plataformas mais antigas ignoram assinaturas v3 e tentam verificar a assinatura v2 e depois v1.
 
-The proof-of-rotation attribute in the signed-data of the signing block consists of a singly-linked list, with each node containing a signing certificate used to sign previous versions of the app. To make backward compatibility work, the old signing certificates sign the new set of certificates, thus providing each new key with evidence that it should be as trusted as the older key(s).
-It is no longer possible to sign APKs independently, because the proof-of-rotation structure must have the old signing certificates signing the new set of certificates, rather than signing them one-by-one. You can see the [APK signature v3 scheme verification process](https://source.android.com/security/apksigning/v3 "APK Signature v3 scheme verification process") below.
+O atributo de prova de rotação nos dados assinados do bloco de assinatura consiste em uma lista vinculada individualmente, com cada nó contendo um certificado de assinatura usado para assinar versões anteriores do aplicativo. Para fazer a compatibilidade com versões anteriores funcionar, os certificados de assinatura antigos assinam o novo conjunto de certificados, fornecendo assim a cada nova chave evidência de que deve ser tão confiável quanto a(s) chave(s) mais antiga(s).
+Não é mais possível assinar APKs independentemente, porque a estrutura de prova de rotação deve ter os certificados de assinatura antigos assinando o novo conjunto de certificados, em vez de assiná-los um por um. Você pode ver o [processo de verificação do esquema de assinatura APK v3](https://source.android.com/security/apksigning/v3 "Processo de verificação do esquema de assinatura APK v3") abaixo.
 
 <img src="Images/Chapters/0x05a/apk-validation-process-v3-scheme.png" width="400px" />
 
-#### APK Signature Scheme (v4 Scheme)
+#### Esquema de Assinatura APK (Esquema v4)
 
-The APK Signature Scheme v4 was introduced along with Android 11 (API level 30) and requires all devices launched with Android 11 and up to have [fs-verity](https://www.kernel.org/doc/html/latest/filesystems/fsverity.html) enabled by default. fs-verity is a Linux kernel feature that is primarily used for file authentication (detection of malicious modifications) due to its extremely efficient file hash calculation. Read requests only will succeed if the content verifies against trusted digital certificates that were loaded to the kernel keyring during boot time.
+O Esquema de Assinatura APK v4 foi introduzido junto com o Android 11 (API level 30) e requer que todos os dispositivos lançados com Android 11 e superior tenham [fs-verity](https://www.kernel.org/doc/html/latest/filesystems/fsverity.html) habilitado por padrão. fs-verity é um recurso do kernel Linux que é usado principalmente para autenticação de arquivo (detecção de modificações maliciosas) devido ao seu cálculo de hash de arquivo extremamente eficiente. Solicitações de leitura só terão sucesso se o conteúdo verificar contra certificados digitais confiáveis que foram carregados para o keyring do kernel durante o tempo de inicialização.
 
-The v4 signature requires a complementary v2 or v3 signature and in contrast to previous signature schemes, the v4 signature is stored in a separate file `<apk name>.apk.idsig`. Remember to specify it using the `--v4-signature-file` flag when verifying a v4-signed APK with `apksigner verify`.
+A assinatura v4 requer uma assinatura complementar v2 ou v3 e, em contraste com esquemas de assinatura anteriores, a assinatura v4 é armazenada em um arquivo separado `<apk name>.apk.idsig`. Lembre-se de especificá-lo usando o flag `--v4-signature-file` ao verificar um APK assinado v4 com `apksigner verify`.
 
-You can find more detailed information in the [Android developer documentation](https://source.android.com/security/apksigning/v4).
+Você pode encontrar informações mais detalhadas na [documentação do desenvolvedor Android](https://source.android.com/security/apksigning/v4).
 
-#### Creating Your Certificate
+#### Criando Seu Certificado
 
-Android uses public/private certificates to sign Android apps (.apk files). Certificates are bundles of information; in terms of security, keys are the most important part of that bundle. Public certificates contain users' public keys, and private certificates contain users' private keys. Public and private certificates are linked. Certificates are unique and can't be re-generated. Note that if a certificate is lost, it cannot be recovered, so updating any apps signed with that certificate becomes impossible.
-App creators can either reuse an existing private/public key pair that is in an available KeyStore or generate a new pair.
-In the Android SDK, a new key pair is generated with the `keytool` command. The following command creates a RSA key pair with a key length of 2048 bits and an expiry time of 7300 days = 20 years. The generated key pair is stored in the file 'myKeyStore.jks', which is in the current directory:
+O Android usa certificados públicos/privados para assinar aplicativos Android (arquivos .apk). Certificados são pacotes de informações; em termos de segurança, as chaves são a parte mais importante desse pacote. Certificados públicos contêm chaves públicas dos usuários, e certificados privados contêm chaves privadas dos usuários. Certificados públicos e privados estão vinculados. Certificados são únicos e não podem ser re-gerados. Note que se um certificado for perdido, ele não pode ser recuperado, então atualizar quaisquer aplicativos assinados com aquele certificado se torna impossível.
+Criadores de aplicativos podem reutilizar um par de chaves pública/privada existente que está em um KeyStore disponível ou gerar um novo par.
+No Android SDK, um novo par de chaves é gerado com o comando `keytool`. O seguinte comando cria um par de chaves RSA com um comprimento de chave de 2048 bits e um tempo de expiração de 7300 dias = 20 anos. O par de chaves gerado é armazenado no arquivo 'myKeyStore.jks', que está no diretório atual:
 
 ```bash
 keytool -genkey -alias myDomain -keyalg RSA -keysize 2048 -validity 7300 -keystore myKeyStore.jks -storepass myStrongPassword
 ```
 
-Safely storing your secret key and making sure it remains secret during its entire life cycle is of paramount importance. Anyone who gains access to the key will be able to publish updates to your apps with content that you don't control (thereby adding insecure features or accessing shared content with signature-based permissions). The trust that a user places in an app and its developers is based totally on such certificates; certificate protection and secure management are therefore vital for reputation and customer retention, and secret keys must never be shared with other individuals. Keys are stored in a binary file that can be protected with a password; such files are referred to as _KeyStores_. KeyStore passwords should be strong and known only to the key creator. For this reason, keys are usually stored on a dedicated build machine that developers have limited access to.
-An Android certificate must have a validity period that's longer than that of the associated app (including updated versions of the app). For example, Google Play will require certificates to remain valid until Oct 22nd, 2033 at least.
+Armazenar com segurança sua chave secreta e garantir que ela permaneça secreta durante todo o seu ciclo de vida é de suma importância. Qualquer pessoa que ganhar acesso à chave será capaz de publicar atualizações para seus aplicativos com conteúdo que você não controla (adicionando assim recursos inseguros ou acessando conteúdo compartilhado com permissões baseadas em assinatura). A confiança que um usuário deposita em um aplicativo e seus desenvolvedores é baseada totalmente em tais certificados; proteção de certificado e gerenciamento seguro são, portanto, vitais para reputação e retenção de clientes, e chaves secretas nunca devem ser compartilhadas com outras pessoas. As chaves são armazenadas em um arquivo binário que pode ser protegido com uma senha; tais arquivos são referidos como _KeyStores_. Senhas do KeyStore devem ser fortes e conhecidas apenas pelo criador da chave. Por esta razão, as chaves são geralmente armazenadas em uma máquina de build dedicada à qual os desenvolvedores têm acesso limitado.
+Um certificado Android deve ter um período de validade que seja mais longo que o do aplicativo associado (incluindo versões atualizadas do aplicativo). Por exemplo, o Google Play exigirá que os certificados permaneçam válidos até pelo menos 22 de outubro de 2033.
 
-#### Signing an Application
+#### Assinando um Aplicativo
 
-The goal of the signing process is to associate the app file (.apk) with the developer's public key. To achieve this, the developer calculates a hash of the APK file and encrypts it with their own private key. Third parties can then verify the app's authenticity (e.g., the fact that the app really comes from the user who claims to be the originator) by decrypting the encrypted hash with the author's public key and verifying that it matches the actual hash of the APK file.
+O objetivo do processo de assinatura é associar o arquivo do aplicativo (.apk) com a chave pública do desenvolvedor. Para alcançar isso, o desenvolvedor calcula um hash do arquivo APK e o criptografa com sua própria chave privada. Terceiros podem então verificar a autenticidade do aplicativo (por exemplo, o fato de que o aplicativo realmente vem do usuário que afirma ser o originador) descriptografando o hash criptografado com a chave pública do autor e verificando que ele corresponde ao hash real do arquivo APK.
 
-Many Integrated Development Environments (IDE) integrate the app signing process to make it easier for the user. Be aware that some IDEs store private keys in clear text in configuration files; double-check this in case others are able to access such files and remove the information if necessary.
-Apps can be signed from the command line with the 'apksigner' tool provided by the Android SDK (API level 24 and higher). It is located at `[SDK-Path]/build-tools/[version]`. For API 24.0.2 and below, you can use 'jarsigner', which is part of the Java JDK. Details about the whole process can be found in official Android documentation; however, an example is given below to illustrate the point.
+Muitos Ambientes de Desenvolvimento Integrado (IDE) integram o processo de assinatura de aplicativo para torná-lo mais fácil para o usuário. Esteja ciente de que alguns IDEs armazenam chaves privadas em texto claro em arquivos de configuração; verifique isso novamente no caso de outros serem capazes de acessar tais arquivos e remova as informações se necessário.
+Aplicativos podem ser assinados a partir da linha de comando com a ferramenta 'apksigner' fornecida pelo Android SDK (API level 24 e superior). Ela está localizada em `[SDK-Path]/build-tools/[version]`. Para API 24.0.2 e abaixo, você pode usar 'jarsigner', que faz parte do Java JDK. Detalhes sobre todo o processo podem ser encontrados na documentação oficial do Android; no entanto, um exemplo é dado abaixo para ilustrar o ponto.
 
 ```bash
 apksigner sign --out mySignedApp.apk --ks myKeyStore.jks myUnsignedApp.apk
 ```
 
-In this example, an unsigned app ('myUnsignedApp.apk') will be signed with a private key from the developer KeyStore 'myKeyStore.jks' (located in the current directory). The app will become a signed app called 'mySignedApp.apk' and will be ready to release to stores.
+Neste exemplo, um aplicativo não assinado ('myUnsignedApp.apk') será assinado com uma chave privada do KeyStore do desenvolvedor 'myKeyStore.jks' (localizado no diretório atual). O aplicativo se tornará um aplicativo assinado chamado 'mySignedApp.apk' e estará pronto para lançar para lojas.
 
 ##### Zipalign
 
-The `zipalign` tool should always be used to align the APK file before distribution. This tool aligns all uncompressed data (such as images, raw files, and 4-byte boundaries) within the APK, which helps improve memory management during app runtime.
+A ferramenta `zipalign` deve sempre ser usada para alinhar o arquivo APK antes da distribuição. Esta ferramenta alinha todos os dados não comprimidos (como imagens, arquivos brutos e limites de 4 bytes) dentro do APK, o que ajuda a melhorar o gerenciamento de memória durante o tempo de execução do aplicativo.
 
-> Zipalign must be used before the APK file is signed with apksigner.
+> Zipalign deve ser usado antes que o arquivo APK seja assinado com apksigner.
 
-### Publishing Process
+### Processo de Publicação
 
-Distributing apps from anywhere (your own site, any store, etc.) is possible because the Android ecosystem is open. However, Google Play is the most well-known, trusted, and popular store, and Google itself provides it. Amazon Appstore is the trusted default store for Kindle devices. If users want to install third-party apps from a non-trusted source, they must explicitly allow this with their device security settings.
+Distribuir aplicativos de qualquer lugar (seu próprio site, qualquer loja, etc.) é possível porque o ecossistema Android é aberto. No entanto, o Google Play é a loja mais conhecida, confiável e popular, e o próprio Google a fornece. A Amazon Appstore é a loja padrão confiável para dispositivos Kindle. Se os usuários quiserem instalar aplicativos de terceiros de uma fonte não confiável, eles devem explicitamente permitir isso com suas configurações de segurança do dispositivo.
 
-Apps can be installed on an Android device from a variety of sources: locally via USB, via Google's official app store (Google Play Store) or from alternative stores.
+Aplicativos podem ser instalados em um dispositivo Android a partir de uma variedade de fontes: localmente via USB,
+via a loja oficial de aplicativos do Google (Google Play Store) ou de lojas alternativas.
 
-Whereas other vendors may review and approve apps before they are actually published, Google will simply scan for known malware signatures; this minimizes the time between the beginning of the publishing process and public app availability.
+Enquanto outros fornecedores podem revisar e aprovar aplicativos antes que sejam realmente publicados, o Google simplesmente escaneará em busca de assinaturas de malware conhecidas; isso minimiza o tempo entre o início do processo de publicação e a disponibilidade pública do aplicativo.
 
-Publishing an app is quite straightforward; the main operation is making the signed APK file downloadable. On Google Play, publishing starts with account creation and is followed by app delivery through a dedicated interface. Details are available at [the official Android documentation](https://play.google.com/console/about/guides/releasewithconfidence/ "Review the checklists to plan your launch").
+Publicar um aplicativo é bastante direto; a operação principal é tornar o arquivo APK assinado disponível para download. No Google Play, a publicação começa com a criação de conta e é seguida pela entrega do aplicativo através de uma interface dedicada. Detalhes estão disponíveis na [documentação oficial do Android](https://play.google.com/console/about/guides/releasewithconfidence/ "Revise as listas de verificação para planejar seu lançamento").

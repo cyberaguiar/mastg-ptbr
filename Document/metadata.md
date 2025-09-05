@@ -1,29 +1,29 @@
 ---
-# This is the main metadata file.
-# Variables below can be overwritten by the local metadata
-# file (e.g. Document-fr/metadata.md)
+# Este é o arquivo principal de metadados.
+# As variáveis abaixo podem ser sobrescritas pelo arquivo de metadados local
+# (por exemplo, Document-fr/metadata.md)
 
-# Custom Template variables (cover, first page, etc.)
-version: 'SNAPSHOT' # this will overridden at build time
-languagetext: ''
+# Variáveis de Template Personalizado (capa, primeira página, etc.)
+version: 'SNAPSHOT' # isso será sobrescrito no tempo de build
+languagetext: 'Português do Brasil'
 
 mainfont: 'DejaVu Sans'
 sansfont: 'DejaVu Sans'
 monofont: 'DejaVu Sans Mono'
 
-# General variables
+# Variáveis Gerais
 toc: true
 toc-depth: 2
 # numbersections: true
 # secnumdepth: 2
 linkcolor: blue
 
-# Language variables
-lang: 'en'
+# Variáveis de Idioma
+lang: 'pt-BR'
 
-# Latex variables
+# Variáveis Latex
 
-# Eisvogel Latex variables
+# Variáveis Latex Eisvogel
 # https://github.com/Wandmalfarbe/pandoc-latex-template#custom-template-variables
 code-block-font-size: '\tiny'
 

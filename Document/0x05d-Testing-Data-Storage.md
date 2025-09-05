@@ -3,36 +3,36 @@ masvs_category: MASVS-STORAGE
 platform: android
 ---
 
-# Android Data Storage
+# Armazenamento de Dados Android
 
-## Overview
+## Visão Geral
 
-This chapter discusses the importance of securing sensitive data, like authentication tokens and private information, vital for mobile security. We'll look at Android's APIs for local data storage and share best practices.
+Este capítulo discute a importância de proteger dados sensíveis, como tokens de autenticação e informações privadas, vitais para a segurança móvel. Veremos as APIs do Android para armazenamento local de dados e compartilharemos melhores práticas.
 
-While it's preferable to limit sensitive data on local storage, or avoid it at all whenever possible, practical use cases often necessitate user data storage. For example, to improve user experience, apps cache authentication tokens locally, circumventing the need for complex password entry at each app start. Apps may also need to store personally identifiable information (PII) and other sensitive data.
+Embora seja preferível limitar dados sensíveis no armazenamento local, ou evitá-los sempre que possível, casos de uso práticos frequentemente necessitam do armazenamento de dados do usuário. Por exemplo, para melhorar a experiência do usuário, aplicativos armazenam em cache tokens de autenticação localmente, contornando a necessidade de entrada de senha complexa em cada inicialização do aplicativo. Aplicativos também podem precisar armazenar informações pessoalmente identificáveis (PII) e outros dados sensíveis.
 
-Sensitive data can become vulnerable if improperly protected, potentially stored in various locations, including the device or an external SD card. It's important to identify the information processed by the mobile app and classify what counts as sensitive data. Check out the ["Identifying Sensitive Data"](0x04b-Mobile-App-Security-Testing.md#identifying-sensitive-data "Identifying Sensitive Data") section in the "Mobile App Security Testing" chapter for data classification details. Refer to [Security Tips for Storing Data](https://developer.android.com/training/articles/security-tips.html#StoringData "Security Tips for Storing Data") in the Android developer's guide for comprehensive insights.
+Dados sensíveis podem se tornar vulneráveis se impropriamente protegidos, potencialmente armazenados em vários locais, incluindo o dispositivo ou um cartão SD externo. É importante identificar as informações processadas pelo aplicativo móvel e classificar o que conta como dados sensíveis. Confira a seção ["Identificando Dados Sensíveis"](0x04b-Mobile-App-Security-Testing.md#identifying-sensitive-data "Identificando Dados Sensíveis") no capítulo "Teste de Segurança de Aplicativos Móveis" para detalhes de classificação de dados. Consulte [Dicas de Segurança para Armazenar Dados](https://developer.android.com/training/articles/security-tips.html#StoringData "Dicas de Segurança para Armazenar Dados") no guia do desenvolvedor Android para insights abrangentes.
 
-Sensitive information disclosure risks include potential information decryption, social engineering attacks (if PII is disclosed), account hijacking (if session information or an authentication token is disclosed), and app exploitation with a payment option.
+Riscos de divulgação de informações sensíveis incluem potencial descriptografia de informações, ataques de engenharia social (se PII for divulgada), sequestro de conta (se informações de sessão ou um token de autenticação forem divulgados) e exploração de aplicativo com uma opção de pagamento.
 
-In addition to data protection, validate and sanitize data from any storage source. This includes checking correct data types and implementing cryptographic controls, such as HMACs, for data integrity.
+Além da proteção de dados, valide e sane dados de qualquer fonte de armazenamento. Isso inclui verificar tipos de dados corretos e implementar controles criptográficos, como HMACs, para integridade de dados.
 
-Android offers various [data storage](https://developer.android.com/training/data-storage "Storing Data in Android") methods, tailored to users, developers, and applications. Common persistent storage techniques include:
+O Android oferece vários métodos de [armazenamento de dados](https://developer.android.com/training/data-storage "Armazenando Dados no Android"), adaptados a usuários, desenvolvedores e aplicações. Técnicas comuns de armazenamento persistente incluem:
 
 - Shared Preferences
-- SQLite Databases
-- Firebase Databases
-- Realm Databases
-- Internal Storage
-- External Storage
+- Bancos de Dados SQLite
+- Bancos de Dados Firebase
+- Bancos de Dados Realm
+- Armazenamento Interno
+- Armazenamento Externo
 - Keystore
 
-Additionally, other Android functions that can result in data storage and should be tested include:
+Além disso, outras funções do Android que podem resultar em armazenamento de dados e devem ser testadas incluem:
 
-- Logging Functions
-- Android Backups
-- Processes Memory
-- Keyboard Caches
+- Funções de Logging
+- Backups Android
+- Memória de Processos
+- Caches de Teclado
 - Screenshots
 
-Understanding each relevant data storage function is crucial for performing the appropriate test cases. This overview provides a brief outline of these data storage methods and points testers to further relevant documentation.
+Entender cada função relevante de armazenamento de dados é crucial para realizar os casos de teste apropriados. Esta visão geral fornece um breve esboço desses métodos de armazenamento de dados e direciona testadores para documentação relevante adicional.
