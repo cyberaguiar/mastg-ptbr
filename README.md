@@ -8,7 +8,7 @@
 [![Markdown Linter](https://github.com/OWASP/mastg/workflows/Markdown%20Linter/badge.svg)](https://github.com/OWASP/mastg/actions?query=workflow%3A%22Markdown+Linter%22)
 [![URL Checker](https://github.com/OWASP/mastg/workflows/URL%20Checker/badge.svg)](https://github.com/OWASP/mastg/actions?query=workflow%3A%22URL+Checker%22)
 
-The **OWASP Mobile Application Security Testing Guide (MASTG)** is a comprehensive manual for mobile app security testing and reverse engineering. It describes technical processes for verifying the [OWASP Mobile Security Weakness Enumeration (MASWE)](https://github.com/OWASP/maswe "MASWE") weaknesses, which are in alignment with the controls listed in the [OWASP Mobile Application Verification Standard (MASVS)](https://github.com/OWASP/masvs "MASVS").
+O **OWASP Mobile Application Security Testing Guide (MASTG)** é um manual abrangente para teste de segurança e engenharia reversa de aplicativos mobile. Ele descreve processos técnicos para verificar as fraquezas [OWASP Mobile Security Weakness Enumeration (MASWE)](https://github.com/OWASP/maswe "MASWE"), que estão alinhadas com os controles listados no [OWASP Mobile Application Verification Standard (MASVS)](https://github.com/OWASP/masvs "MASVS").
 
 > [OWASP MAS](https://mas.owasp.org): [OWASP MASVS](https://mas.owasp.org/MASVS) ➡ [OWASP MASWE](https://mas.owasp.org/MASWE) ➡ [OWASP MASTG](https://mas.owasp.org/MASTG)
 
@@ -22,17 +22,17 @@ The **OWASP Mobile Application Security Testing Guide (MASTG)** is a comprehensi
 
 <br>
 
-- 🌐 [Access the MASTG Web](https://mas.owasp.org/MASTG/)
-- ✅ [Get the latest Mobile App Security Checklists](https://github.com/OWASP/mastg/releases/latest)
-- ⚡ [Contribute!](https://mas.owasp.org/contributing)
-- 💥 [Play with our Crackmes](https://mas.owasp.org/crackmes)
-- 📞 [Contact Us](https://mas.owasp.org/contact)
+- 🌐 [Acesse o MASTG Web](https://mas.owasp.org/MASTG/)
+- ✅ [Baixe as últimas checklists de segurança para aplicativos mobile](https://github.com/OWASP/mastg/releases/latest)
+- ⚡ [Contribua!](https://mas.owasp.org/contributing)
+- 💥 [Brinque com nossos Crackmes](https://mas.owasp.org/crackmes)
+- 📞 [Fale Conosco](https://mas.owasp.org/contact)
 
 <br>
 
-## Trusted by
+## Confiado por
 
-The OWASP MASVS, MASWE and MASTG are trusted by the following platform providers and standardization, governmental and educational institutions. [Learn more](https://mas.owasp.org/MASTG/0x02b-MASVS-MASTG-Adoption/).
+OWASP MASVS, MASWE e MASTG são confiados pelos seguintes provedores de plataforma e instituições de padronização, governamentais e educacionais. [Saiba mais](https://mas.owasp.org/MASTG/0x02b-MASVS-MASTG-Adoption/).
 
 <a href="https://mas.owasp.org/MASTG/0x02b-MASVS-MASTG-Adoption/">
 <img src="Document/Images/Other/trusted-by-logos.png"/>
@@ -40,9 +40,9 @@ The OWASP MASVS, MASWE and MASTG are trusted by the following platform providers
 
 <br>
 
-## 🥇 MAS Advocates
+## 🥇 Defensores MAS
 
-MAS Advocates are industry adopters of the OWASP MASVS, MASWE and MASTG who have invested a significant and consistent amount of resources to push the project forward by providing consistent high-impact contributions and continuously spreading the word. [Learn more](https://mas.owasp.org/MASTG/0x02c-Acknowledgements).
+Os Defensores MAS são adotantes da indústria do OWASP MASVS, MASWE e MASTG que investiram uma quantidade significativa e consistente de recursos para impulsionar o projeto, fornecendo contribuições de alto impacto e divulgando continuamente a iniciativa. [Saiba mais](https://mas.owasp.org/MASTG/0x02c-Acknowledgements).
 
 <br>
 

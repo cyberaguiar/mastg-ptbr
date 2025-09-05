@@ -1,19 +1,19 @@
-# Foreword
+# Prefácio
 
-Welcome to the OWASP Mobile Application Security Testing Guide. Feel free to explore the existing content, but do note that it may change at any time. New APIs and best practices are introduced in iOS and Android with every major (and minor) release and also vulnerabilities are found every day.
+Bem-vindo ao OWASP Mobile Application Security Testing Guide. Fique à vontade para explorar o conteúdo existente, mas tenha em mente que ele pode mudar a qualquer momento. Novas APIs e boas práticas são introduzidas no iOS e no Android a cada lançamento principal (e secundário) e vulnerabilidades também são descobertas todos os dias.
 
-If you have feedback or suggestions, or want to contribute, create an issue on GitHub or ping us on Slack. See the README for instructions:
+Se você tiver feedback ou sugestões, ou quiser contribuir, abra uma issue no GitHub ou converse conosco no Slack. Consulte o README para obter instruções:
 
 <https://www.github.com/OWASP/mastg/>
 
-**squirrel (noun plural): Any arboreal sciurine rodent of the genus Sciurus, such as S. vulgaris (red squirrel) or S. carolinensis (grey squirrel), having a bushy tail and feeding on nuts, seeds, etc.**
+**squirrel (substantivo, plural): Qualquer roedor arborícola da família Sciurus, como S. vulgaris (esquilo vermelho) ou S. carolinensis (esquilo cinza), com cauda espessa e que se alimenta de nozes, sementes etc.**
 
-On a beautiful summer day, a group of ~7 young men, a woman, and approximately three squirrels met in a Woburn Forest villa during the OWASP Security Summit 2017. So far, nothing unusual. But little did you know, within the next five days, they would redefine not only mobile application security, but the very fundamentals of book writing itself (ironically, the event took place near Bletchley Park, once the residence and work place of the great Alan Turing).
+Em um belo dia de verão, um grupo de cerca de sete homens, uma mulher e aproximadamente três esquilos se reuniram em uma vila em Woburn Forest durante o OWASP Security Summit 2017. Até aqui, nada de incomum. Mas, nos cinco dias seguintes, eles redefiniriam não apenas a segurança de aplicações móveis, como também os próprios fundamentos da escrita de livros (ironicamente, o evento ocorreu perto de Bletchley Park, antigo lar e local de trabalho do grande Alan Turing).
 
-Or maybe that's going too far. But at least, they produced a proof-of-concept for an unusual security book. The Mobile Application Security Testing Guide (MASTG) is an open, agile, crowd-sourced effort, made of the contributions of dozens of authors and reviewers from all over the world.
+Talvez isso seja ir longe demais. Mas, pelo menos, eles produziram um proof-of-concept para um livro de segurança incomum. O Mobile Application Security Testing Guide (MASTG) é um esforço aberto, ágil e colaborativo, composto pelas contribuições de dezenas de autores e revisores de todo o mundo.
 
-Because this isn't a normal security book, the introduction doesn't list impressive facts and data proving importance of mobile devices in this day and age. It also doesn't explain how mobile application security is broken, and why a book like this was sorely needed, and the authors don't thank their beloved ones without whom the book wouldn't have been possible.
+Como este não é um livro de segurança comum, a introdução não lista fatos impressionantes e dados que comprovem a importância dos dispositivos móveis atualmente. Ela também não explica como a segurança de aplicações móveis está quebrada ou por que um livro como este era tão necessário, e os autores não agradecem aos seus entes queridos sem os quais o livro não teria sido possível.
 
-We do have a message to our readers however! The first rule of the OWASP Mobile Application Security Testing Guide is: Don't just follow the OWASP Mobile Application Security Testing Guide. True excellence at mobile application security requires a deep understanding of mobile operating systems, coding, network security, cryptography, and a whole lot of other things, many of which we can only touch on briefly in this book. Don't stop at security testing. Write your own apps, compile your own kernels, dissect mobile malware, learn how things tick. And as you keep learning new things, consider contributing to the MASTG yourself! Or, as they say: "Do a pull request".
+Ainda assim, temos um recado aos nossos leitores! A primeira regra do OWASP Mobile Application Security Testing Guide é: não siga apenas o OWASP Mobile Application Security Testing Guide. A verdadeira excelência em segurança de aplicações móveis requer um entendimento profundo de sistemas operacionais móveis, codificação, segurança de rede, criptografia e muitas outras coisas, muitas das quais só podemos abordar brevemente neste livro. Não pare nos testes de segurança. Escreva seus próprios apps, compile seus próprios kernels, disseque malwares móveis, descubra como as coisas funcionam. E, à medida que aprender coisas novas, considere contribuir você mesmo com o MASTG! Ou, como se diz: "Faça um pull request".
 
 <img src="Images/summit-team.jpg" width="100%" />

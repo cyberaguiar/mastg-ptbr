@@ -1,52 +1,52 @@
-# Frontispiece
+# Frontispício
 
 <img src="Images/owasp_mas_header.png" width="100%" />
 
-## About the OWASP MASTG
+## Sobre o OWASP MASTG
 
-The [OWASP Mobile Application Security Testing Guide (MASTG)](https://mas.owasp.org/MASTG/), which is part of the [OWASP Mobile Application Security (MAS)](https://mas.owasp.org/) flagship project, is a comprehensive manual covering the processes, techniques, and tools used during mobile application security analysis, as well as an exhaustive set of test cases for verifying the requirements listed in the [OWASP Mobile Application Security Verification Standard (MASVS)](https://mas.owasp.org/MASVS/), providing a baseline for complete and consistent security tests.
+O [OWASP Mobile Application Security Testing Guide (MASTG)](https://mas.owasp.org/MASTG/), parte do projeto principal [OWASP Mobile Application Security (MAS)](https://mas.owasp.org/), é um manual abrangente que cobre os processos, técnicas e ferramentas utilizados durante a análise de segurança de aplicações móveis, além de um conjunto exaustivo de casos de teste para verificar os requisitos listados no [OWASP Mobile Application Security Verification Standard (MASVS)](https://mas.owasp.org/MASVS/), fornecendo uma base para testes de segurança completos e consistentes.
 
-The OWASP MASVS and MASTG are trusted by the following platform providers and standardization, governmental and educational institutions. [Learn more](0x02b-MASVS-MASTG-Adoption.md).
+O OWASP MASVS e o MASTG são confiados pelos seguintes provedores de plataforma e instituições de padronização, governamentais e educacionais. [Saiba mais](0x02b-MASVS-MASTG-Adoption.md).
 
 <a href="/MASTG/0x02b-MASVS-MASTG-Adoption">
 <img src="Images/Other/trusted-by-logos.png"/>
 </a>
 
-## Authors
+## Autores
 
 <!-- markdownlint-disable search-replace -->
 
 ### Bernhard Mueller
 
-Bernhard is a cyber security specialist with a talent for hacking systems of all kinds. During more than a decade in the industry, he has published many zero-day exploits for software such as MS SQL Server, Adobe Flash Player, IBM Director, Cisco VOIP, and ModSecurity. If you can name it, he has probably broken it at least once. BlackHat USA commended his pioneering work in mobile security with a Pwnie Award for Best Research.
+Bernhard é um especialista em segurança cibernética com talento para invadir sistemas de todos os tipos. Ao longo de mais de uma década na indústria, publicou muitos exploits de zero-day para softwares como MS SQL Server, Adobe Flash Player, IBM Director, Cisco VOIP e ModSecurity. Se você citar algo, provavelmente ele já quebrou pelo menos uma vez. A BlackHat USA reconheceu seu trabalho pioneiro em segurança móvel com um Pwnie Award de Melhor Pesquisa.
 
 ### Sven Schleier
 
-Sven is an experienced web and mobile penetration tester and assessed everything from historic Flash applications to progressive mobile apps. He is also a security engineer that supported many projects end-to-end during the SDLC to "build security in". He was speaking at local and international meetups and conferences and is conducting hands-on workshops about web application and mobile app security.
+Sven é um testador de penetração web e mobile experiente e avaliou desde antigas aplicações em Flash até apps móveis progressivos. Ele também é um engenheiro de segurança que apoiou muitos projetos de ponta a ponta durante o SDLC para "inserir segurança". Ele palestra em meetups e conferências locais e internacionais e conduz workshops práticos sobre segurança de aplicações web e apps móveis.
 
 ### Jeroen Willemsen
 
-Jeroen is a principal security architect with a passion for mobile security and risk management. He has supported companies as a security coach, a security engineer and as a full-stack developer, which makes him a jack of all trades. He loves explaining technical subjects: from security issues to programming challenges.
+Jeroen é um arquiteto de segurança principal com paixão por segurança mobile e gerenciamento de riscos. Ele apoiou empresas como coach de segurança, engenheiro de segurança e desenvolvedor full-stack, o que o torna um profissional versátil. Adora explicar assuntos técnicos: de problemas de segurança a desafios de programação.
 
 ### Carlos Holguera
 
-Carlos is a mobile security research engineer who has gained many years of hands-on experience in the field of security testing for mobile apps and embedded systems such as automotive control units and IoT devices. He is passionate about reverse engineering and dynamic instrumentation of mobile apps and is continuously learning and sharing his knowledge.
+Carlos é um engenheiro de pesquisa em segurança mobile que acumulou muitos anos de experiência prática em testes de segurança para apps móveis e sistemas embarcados, como unidades de controle automotivo e dispositivos IoT. Ele é apaixonado por engenharia reversa e instrumentação dinâmica de apps móveis e está continuamente aprendendo e compartilhando seu conhecimento.
 
-## Co-Authors
+## Coautores
 
-Co-authors have consistently contributed quality content and have at least 2,000 additions logged in the GitHub repository.
+Coautores contribuíram consistentemente com conteúdo de qualidade e têm pelo menos 2.000 adições registradas no repositório GitHub.
 
 ### Romuald Szkudlarek
 
-Romuald is a passionate cyber security & privacy professional with over 15 years of experience in the web, mobile, IoT and cloud domains. During his career, he has been dedicating his spare time to a variety of projects with the goal of advancing the sectors of software and security. He is teaching regularly at various institutions. He holds CISSP, CCSP, CSSLP, and CEH credentials.
+Romuald é um profissional apaixonado por segurança cibernética e privacidade, com mais de 15 anos de experiência nas áreas web, mobile, IoT e cloud. Ao longo da carreira, dedicou seu tempo livre a diversos projetos com o objetivo de avançar os setores de software e segurança. Ele leciona regularmente em várias instituições e possui as certificações CISSP, CCSP, CSSLP e CEH.
 
 ### Jeroen Beckers
 
-Jeroen is a mobile security lead responsible for quality assurance on mobile security projects and for R&D on all things mobile. Although he started his career as a programmer, he found that it was more fun to take things apart than to put things together, and the switch to security was quickly made. Ever since his master's thesis on Android security, Jeroen has been interested in mobile devices and their (in)security. He loves sharing his knowledge with other people, as is demonstrated by his many talks & trainings at colleges, universities, clients and conferences.
+Jeroen é líder de segurança mobile responsável pela garantia de qualidade em projetos de segurança mobile e por P&D em tudo que envolve mobilidade. Embora tenha iniciado a carreira como programador, achou mais divertido desmontar as coisas do que montá-las, e a mudança para segurança foi rápida. Desde sua dissertação de mestrado sobre segurança Android, Jeroen tem interesse em dispositivos móveis e suas (in)seguranças. Ele adora compartilhar seu conhecimento, o que é demonstrado por suas muitas palestras e treinamentos em faculdades, universidades, clientes e conferências.
 
 ### Vikas Gupta
 
-Vikas is an experienced cyber security researcher, with expertise in mobile security. In his career he has worked to secure applications for various industries including fintech, banks and governments. He enjoys reverse engineering, especially obfuscated native code and cryptography. He holds masters in security and mobile computing, and an OSCP certification. He is always open to share his knowledge and exchange ideas.
+Vikas é um pesquisador experiente em segurança cibernética, com especialidade em segurança mobile. Ao longo da carreira, trabalhou para proteger aplicações de vários setores, incluindo fintechs, bancos e governos. Ele gosta de engenharia reversa, especialmente de código nativo ofuscado e criptografia. Possui mestrado em segurança e computação móvel, além da certificação OSCP. Está sempre aberto para compartilhar conhecimento e trocar ideias.
 
 <!-- markdownlint-disable search-replace -->
 
@@ -54,22 +54,22 @@ Vikas is an experienced cyber security researcher, with expertise in mobile secu
 
 ## Changelog
 
-All our Changelogs are available online at the OWASP MASTG GitHub repository, see the Releases page:
+Todos os nossos changelogs estão disponíveis online no repositório GitHub do OWASP MASTG, veja a página de Releases:
 
 <https://github.com/OWASP/mastg/releases>
 
 ## Disclaimer
 
-Please consult the laws in your country before executing any tests against mobile apps by utilizing the MASTG materials. Refrain from violating the laws with anything described in the MASTG.
+Consulte as leis do seu país antes de executar qualquer teste contra apps móveis utilizando os materiais do MASTG. Evite violar as leis com qualquer coisa descrita no MASTG.
 
-Our [Code of Conduct](https://github.com/OWASP/mastg/blob/master/.github/CODE_OF_CONDUCT.md) has further details.
+Nosso [Código de Conduta](https://github.com/OWASP/mastg/blob/master/.github/CODE_OF_CONDUCT.md) traz mais detalhes.
 
-OWASP thanks the many authors, reviewers, and editors for their hard work in developing this guide. If you have any comments or suggestions, please connect with us: <https://mas.owasp.org/contact>
+A OWASP agradece aos muitos autores, revisores e editores pelo trabalho árduo no desenvolvimento deste guia. Se você tiver comentários ou sugestões, conecte-se conosco: <https://mas.owasp.org/contact>
 
-If you find any inconsistencies or typos please open an issue in the OWASP MASTG Github Repo: <https://github.com/OWASP/mastg>
+Se encontrar qualquer inconsistência ou erro de digitação, abra uma issue no repositório OWASP MASTG no GitHub: <https://github.com/OWASP/mastg>
 
-## Copyright and License
+## Copyright e Licença
 
-Copyright © The OWASP Foundation. This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/ "Creative Commons Attribution-ShareAlike 4.0 International License"). For any reuse or distribution, you must make clear to others the license terms of this work.
+Copyright © The OWASP Foundation. Este trabalho está licenciado sob a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/ "Creative Commons Attribution-ShareAlike 4.0 International License"). Para qualquer reutilização ou distribuição, você deve deixar claro para os outros os termos da licença deste trabalho.
 
 <img src="Images/CC-license.png" width="150px" />
